@@ -1,5 +1,7 @@
 # NextPhish
 
+![NextPhish](thumb.png)
+
 NextPhish is an open-source phishing simulation engine built with Next.js. It lets companies run internal phishing campaigns against their own employees to assess security awareness, replacing legacy tools like GoPhish.
 
 ## Why NextPhish?

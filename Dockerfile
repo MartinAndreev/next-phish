@@ -15,7 +15,7 @@ COPY . .
 
 COPY .dev/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 3000
+EXPOSE 3000 3001
 
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
@@ -31,6 +31,6 @@ RUN pnpm build && pnpm build:worker
 
 COPY .dev/docker/supervisord.prod.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 3000
+EXPOSE 3000 3001
 
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

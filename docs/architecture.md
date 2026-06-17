@@ -11,6 +11,7 @@
 - **DI:** TypeDI (constructor-based injection)
 - **Serialization:** class-transformer (`@Expose`/`@Exclude` + groups)
 - **Queue:** BullMQ + Redis (background jobs)
+- **Static Server:** Hono (lightweight companion for public/redirect pages)
 - **UI:** Tailwind CSS v4 + PrimeReact
 - **Lint:** ESLint (next config)
 
@@ -32,6 +33,9 @@ next-phish/
 │   └── schema.prisma             # Database models
 │
 ├── src/
+│   ├── static-server/
+│   │   └── index.ts              # Hono entry (port STATIC_SERVER_PORT)
+│   │
 │   ├── server/
 │   │   ├── db.ts                 # PrismaClient singleton
 │   │   ├── auth.ts               # BetterAuth instance + config
@@ -64,6 +68,9 @@ next-phish/
 │   └── lib/                      # Shared client/server utilities
 │
 ├── public/
+├── .dev/docker/
+│   ├── supervisord.conf         # Dev: runs next dev + static + worker
+│   └── supervisord.prod.conf    # Prod: runs next start + static + worker
 ├── docs/
 │   └── architecture.md
 ├── AGENTS.md
@@ -104,6 +111,12 @@ next-phish/
 - Transformers define DTO classes with `@Expose()` / `@Exclude()`.
 - `@SerializeOptions({ groups: ['admin', 'self'] })` controls visibility per context.
 - Repositories return raw Prisma objects; transformers map them to DTOs before procedure output.
+
+### Static Server: Hono
+- Runs on `STATIC_SERVER_PORT` (default `3001`), managed by supervisord alongside Next.js.
+- All routes resolve at `/` — looks up the request path in the `Page` Prisma model and returns the stored HTML.
+- Health check endpoint at `/health`.
+- Keeps public/phishing landing pages off the Next.js server, prevents session/CSRF leaks.
 
 ### Frontend: PrimeReact + Atomic Design
 - PrimeReact components are wrapped in `src/components/ui/` for theme consistency.

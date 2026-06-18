@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@layer theme, base, utilities;
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/preflight" layer(base);
+@source "../node_modules/primereact/**/*.{js,mjs,cjs,jsx,tsx}";
+@import "tailwindcss/utilities" layer(utilities);
+@import "primeicons/primeicons.css" layer(primeicons);
 
 @theme {
   --color-brand-cyan: #15e5d4;
@@ -45,4 +50,44 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.auth-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: "";
+  background-image: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--color-brand-indigo) 12%,
+    transparent 24%
+  );
+  width: 200%;
+  height: 200%;
+  transition: all 0.1s linear;
+  animation: 3s linear infinite rotBGimg;
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  transform: translate(50%, 50%);
+  aspect-ratio: 1 / 1;
+}
+
+.auth-card:has(:focus-within)::before,
+.auth-card[data-preview-border-light="true"]::before {
+  opacity: 1;
+  animation: border-spin 3s linear infinite;
+}
+
+@keyframes border-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

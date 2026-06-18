@@ -9,9 +9,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next-phish/database": "workspace:*",
     "ejs": "^3",
     "nodemailer": "^6",
-    "typedi": "^0.10"
+    "typedi": "^0.10",
+    "zod": "^3"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",

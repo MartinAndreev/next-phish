@@ -22,5 +22,15 @@ export interface IEmailService {
 import { Token } from "typedi";
 
 export const EMAIL_SERVICE_TOKEN = new Token<IEmailService>("email-service");
-export const emailProviderToken = (type: EmailProviderType) =>
-  new Token<IEmailProvider>(`email-provider-${type}`);
+
+const providerTokenCache = new Map<EmailProviderType, Token<IEmailProvider>>();
+export const emailProviderToken = (
+  type: EmailProviderType,
+): Token<IEmailProvider> => {
+  let token = providerTokenCache.get(type);
+  if (!token) {
+    token = new Token<IEmailProvider>(`email-provider-${type}`);
+    providerTokenCache.set(type, token);
+  }
+  return token;
+};

@@ -37,8 +37,10 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
       - DB_HOST=postgres
       - REDIS_HOST=redis
+      - SMTP_HOST=fakesmtp
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules
@@ -47,6 +49,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fakesmtp:
+        condition: service_started
 
   static-server:
     build:
@@ -56,7 +60,9 @@ services:
     ports:
       - "3001:3001"
     environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
       - DB_HOST=postgres
+      - REDIS_HOST=redis
       - STATIC_SERVER_PORT=3001
     volumes:
       - .:/app
@@ -71,8 +77,10 @@ services:
       dockerfile: apps/worker/Dockerfile
       target: dev
     environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}
       - DB_HOST=postgres
       - REDIS_HOST=redis
+      - SMTP_HOST=fakesmtp
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules
@@ -81,6 +89,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fakesmtp:
+        condition: service_started
+
+  fakesmtp:
+    image: haravich/fake-smtp-server
+    ports:
+      - "1025:1025"
+      - "1080:1080"
 
 volumes:
   postgres-data:

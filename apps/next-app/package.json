@@ -14,13 +14,20 @@
     "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
     "@next-phish/shared": "workspace:*",
+    "@tanstack/react-query": "^5.101.0",
+    "@trpc/next": "^11.13.0",
+    "@trpc/react-query": "^11.13.0",
+    "@trpc/server": "^11.13.0",
     "better-auth": "^1.6.19",
-    "next": "16.2.9",
+    "formik": "^2.4.9",
+    "next": "^16.2.9",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.8",
     "react": "^19",
     "react-dom": "^19",
-    "tailwind-merge": "^3.6.0"
+    "superjson": "^2.2.6",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

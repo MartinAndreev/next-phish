@@ -1,0 +1,74 @@
+"use client";
+
+import { useState } from "react";
+import { Formik } from "formik";
+import { authClient } from "@/src/lib/auth-client";
+import { loginSchema, magicLinkSchema } from "@next-phish/shared";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { LoginPresentation } from "./presentation";
+
+interface LoginValues {
+  email: string;
+  password: string;
+}
+
+export function LoginContainer() {
+  const [useMagicLink, setUseMagicLink] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  async function handleSubmit(values: LoginValues) {
+    setError("");
+    setSuccess("");
+
+    try {
+      if (useMagicLink) {
+        const { error: err } = await authClient.signIn.magicLink({
+          email: values.email,
+        });
+        if (err) {
+          setError(err.message || err.code || "Something went wrong");
+          return;
+        }
+        setSuccess("Magic link sent! Check your email.");
+      } else {
+        const { error: err } = await authClient.signIn.email({
+          email: values.email,
+          password: values.password,
+        });
+        if (err) {
+          setError(err.message || err.code || "Invalid credentials");
+          return;
+        }
+      }
+    } catch {
+      setError("An unexpected error occurred");
+    }
+  }
+
+  const toggleMagicLink = () => {
+    setUseMagicLink((prev) => !prev);
+    setError("");
+    setSuccess("");
+  };
+
+  return (
+    <Formik<LoginValues>
+      initialValues={{ email: "", password: "" }}
+      validate={toFormikValidation(
+        useMagicLink ? magicLinkSchema : loginSchema,
+      )}
+      onSubmit={handleSubmit}
+    >
+      {({ isSubmitting }) => (
+        <LoginPresentation
+          useMagicLink={useMagicLink}
+          onToggleMagicLink={toggleMagicLink}
+          error={error}
+          success={success}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </Formik>
+  );
+}

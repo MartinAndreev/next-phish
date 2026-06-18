@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -20,6 +21,8 @@ model User {
   sessions  Session[]
   accounts  Account[]
   twoFactor TwoFactor?
+
+  @@map("user")
 }
 
 model Session {
@@ -33,6 +36,8 @@ model Session {
   updatedAt DateTime @updatedAt
 
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@map("session")
 }
 
 model Account {
@@ -51,6 +56,8 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@map("account")
 }
 
 model Verification {
@@ -60,6 +67,8 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@map("verification")
 }
 
 model TwoFactor {
@@ -70,6 +79,8 @@ model TwoFactor {
   verified    Boolean @default(false)
 
   user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@map("two_factor")
 }
 
 model Page {
@@ -80,4 +91,6 @@ model Page {
   enabled      Boolean  @default(true)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
+
+  @@map("page")
 }

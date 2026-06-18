@@ -1,2 +1,2 @@
-// Shared types, Zod schemas, enums, and utilities
-// Import from @next-phish/shared across all apps
+export { loginSchema, magicLinkSchema, setupSchema } from "./schemas";
+export type { LoginInput, SetupInput } from "./schemas";

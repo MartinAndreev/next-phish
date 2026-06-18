@@ -1,0 +1,4 @@
+
+> @next-phish/next-app@0.1.0 typecheck /home/marto/Projects/next-phish/apps/next-app
+> tsc --noEmit
+

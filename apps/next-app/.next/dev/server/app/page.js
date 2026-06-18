@@ -1,0 +1,31 @@
+var R = require("../chunks/ssr/[turbopack]_runtime.js")("server/app/page.js");
+R.c("server/chunks/ssr/node_modules__pnpm_0euconi._.js");
+R.c("server/chunks/ssr/[root-of-the-server]__1d8nlw6._.js");
+R.c("server/chunks/ssr/1ikz_next_dist_esm_server_1b5y1qu._.js");
+R.c("server/chunks/ssr/1ikz_next_dist_esm_lib_1fykr7m._.js");
+R.c("server/chunks/ssr/1ikz_next_dist_esm_0ftun52._.js");
+R.c("server/chunks/ssr/1ikz_next_dist_compiled_1_61ig2._.js");
+R.c(
+  "server/chunks/ssr/1ikz_next_dist_server_route-modules_app-page_0isb1t0._.js",
+);
+R.c("server/chunks/ssr/[externals]__12if52y._.js");
+R.c("server/chunks/ssr/[root-of-the-server]__20cs-ri._.js");
+R.c("server/chunks/ssr/1ikz_next_dist_client_components_13q4nj2._.js");
+R.c(
+  "server/chunks/ssr/1ikz_next_dist_client_components_builtin_forbidden_1ozde2-.js",
+);
+R.c(
+  "server/chunks/ssr/1ikz_next_dist_client_components_builtin_unauthorized_1qc0d95.js",
+);
+R.c(
+  "server/chunks/ssr/1ikz_next_dist_client_components_builtin_global-error_18q3xfo.js",
+);
+R.c(
+  "server/chunks/ssr/apps_next-app__next-internal_server_app_page_actions_16-o46_.js",
+);
+R.m(
+  '[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { MODULE_0 => "[project]/apps/next-app/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_1 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/global-error.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/apps/next-app/app/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript)',
+);
+module.exports = R.m(
+  '[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/esm/build/templates/app-page.js?page=/page { MODULE_0 => "[project]/apps/next-app/app/layout.tsx [app-rsc] (ecmascript, Next.js Server Component)", MODULE_1 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/not-found.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_2 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/forbidden.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_3 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/unauthorized.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_4 => "[project]/node_modules/.pnpm/next@16.2.9_@babel+core@7.29.7_react-dom@19.2.7_react@19.2.7__react@19.2.7/node_modules/next/dist/client/components/builtin/global-error.js [app-rsc] (ecmascript, Next.js Server Component)", MODULE_5 => "[project]/apps/next-app/app/page.tsx [app-rsc] (ecmascript, Next.js Server Component)" } [app-rsc] (ecmascript)',
+).exports;

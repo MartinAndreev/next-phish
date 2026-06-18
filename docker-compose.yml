@@ -1,61 +1,24 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: dev
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: development
-      HOSTNAME: 0.0.0.0
-      DB_HOST: postgres
-      REDIS_HOST: redis
-      SMTP_HOST: fakesmtp
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:${DB_PORT:-5432}/${DB_NAME:-next_phish}?schema=public
-    volumes:
-      - .:/app
-      - app-node-modules:/app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "${APP_PORT:-80}:3000"
-      - "${STATIC_SERVER_PORT:-3001}:3001"
-    cpus: ${APP_CPU_LIMIT:-2.0}
-    mem_limit: ${APP_MEMORY_LIMIT:-3g}
-    mem_reservation: ${APP_MEMORY_RESERVATION:-1g}
-  fakesmtp:
-    image: haravich/fake-smtp-server
-    ports:
-      - "1025:1025"
-      - "1080:1080"
   postgres:
     image: postgres:16-alpine
-    env_file:
-      - .env
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-next_phish}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-next_phish}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-next_phish}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
@@ -64,9 +27,62 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
+
+  next-app:
+    build:
+      context: .
+      dockerfile: apps/next-app/Dockerfile
+      target: dev
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - .:/app
+      - app-node-modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  static-server:
+    build:
+      context: .
+      dockerfile: apps/static-server/Dockerfile
+      target: dev
+    ports:
+      - "3001:3001"
+    environment:
+      - DB_HOST=postgres
+      - STATIC_SERVER_PORT=3001
+    volumes:
+      - .:/app
+      - app-node-modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+      target: dev
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - .:/app
+      - app-node-modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
-  app-node-modules:
   postgres-data:
   redis-data:
+  app-node-modules:

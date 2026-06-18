@@ -1,29 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Container } from "@/src/server/container";
-import { MessageBus, GetUserCountQuery } from "@next-phish/backend";
-import { LoginContainer } from "@/src/components/organisms/login";
-import {
-  getAuthErrorMessage,
-  getAuthSuccessMessage,
-} from "@/src/lib/auth-errors";
+import { ResetPasswordContainer } from "@/src/components/organisms/reset-password";
+import { getAuthErrorMessage } from "@/src/lib/auth-errors";
 
-export default async function LoginPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { error: errorCode, message: messageCode } = await searchParams;
+  const { token, error: errorCode } = await searchParams;
+  const authToken = typeof token === "string" ? token : undefined;
   const authError = getAuthErrorMessage(
     typeof errorCode === "string" ? errorCode : undefined,
   );
-  const authSuccess = getAuthSuccessMessage(
-    typeof messageCode === "string" ? messageCode : undefined,
-  );
-
-  const bus = Container.get(MessageBus);
-  const handler = Container.get(GetUserCountQuery);
-  const count = await bus.query(handler, {});
 
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
@@ -43,27 +32,35 @@ export default async function LoginPage({
               priority
             />
             <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
-              Secure access
+              Password recovery
             </div>
             <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-[var(--brand-gradient)]" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
-              Welcome back
+              Set new password
             </h1>
             <p className="mt-2 text-sm leading-6 text-zinc-400">
-              Sign in to your account
+              Enter your new password below.
             </p>
           </div>
-          <LoginContainer authError={authError} authSuccess={authSuccess} />
-          {count === 0 && (
-            <p className="mt-6 text-center text-sm text-zinc-400">
-              Need the first admin account?{" "}
-              <Link
-                href="/setup"
-                className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
-              >
-                Start setup
-              </Link>
-            </p>
+          {authToken ? (
+            <ResetPasswordContainer token={authToken} />
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              {authError && (
+                <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                  {authError}
+                </p>
+              )}
+              <p className="text-sm text-zinc-400">
+                This link is invalid or has expired.{" "}
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+                >
+                  Request a new one
+                </Link>
+              </p>
+            </div>
           )}
         </div>
       </div>

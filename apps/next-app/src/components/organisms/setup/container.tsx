@@ -33,7 +33,7 @@ export function SetupContainer() {
       return;
     }
 
-    router.push("/login");
+    router.push("/login?message=check-email");
   }
 
   return (

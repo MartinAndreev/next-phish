@@ -24,3 +24,17 @@ export const setupSchema = z
   });
 
 export type SetupInput = z.infer<typeof setupSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, "At least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });

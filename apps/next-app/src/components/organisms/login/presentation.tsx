@@ -6,21 +6,19 @@ import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { FormMessage } from "@/src/components/atoms/form-message";
+import Link from "next/link";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-const errorClassName =
-  "rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200";
-
-const successClassName =
-  "rounded-lg border border-green-400/30 bg-green-500/10 px-3 py-2 text-sm text-green-200";
 
 interface LoginPresentationProps {
   useMagicLink: boolean;
   onToggleMagicLink: () => void;
   error: string;
   success: string;
+  authError?: string | null;
+  authSuccess?: string | null;
   isSubmitting: boolean;
 }
 
@@ -29,6 +27,8 @@ export function LoginPresentation({
   onToggleMagicLink,
   error,
   success,
+  authError,
+  authSuccess,
   isSubmitting,
 }: LoginPresentationProps) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -82,14 +82,26 @@ export function LoginPresentation({
               />
             )}
           </Field>
-          <p className="text-xs text-zinc-400">
-            Password visibility can be toggled from the eye icon.
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-zinc-400">
+              Password visibility can be toggled from the eye icon.
+            </p>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </div>
       )}
 
-      {error && <p className={errorClassName}>{error}</p>}
-      {success && <p className={successClassName}>{success}</p>}
+      {authSuccess && (
+        <FormMessage variant="success">{authSuccess}</FormMessage>
+      )}
+      {authError && <FormMessage variant="error">{authError}</FormMessage>}
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      {success && <FormMessage variant="success">{success}</FormMessage>}
 
       <Button
         type="submit"
@@ -114,4 +126,4 @@ export function LoginPresentation({
   );
 }
 
-export { inputClassName, errorClassName };
+export { inputClassName };

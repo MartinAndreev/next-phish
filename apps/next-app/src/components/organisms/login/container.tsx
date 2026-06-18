@@ -12,7 +12,15 @@ interface LoginValues {
   password: string;
 }
 
-export function LoginContainer() {
+interface LoginContainerProps {
+  authError?: string | null;
+  authSuccess?: string | null;
+}
+
+export function LoginContainer({
+  authError,
+  authSuccess,
+}: LoginContainerProps) {
   const [useMagicLink, setUseMagicLink] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -25,6 +33,8 @@ export function LoginContainer() {
       if (useMagicLink) {
         const { error: err } = await authClient.signIn.magicLink({
           email: values.email,
+          callbackURL: "/",
+          errorCallbackURL: "/login",
         });
         if (err) {
           setError(err.message || err.code || "Something went wrong");
@@ -66,6 +76,8 @@ export function LoginContainer() {
           onToggleMagicLink={toggleMagicLink}
           error={error}
           success={success}
+          authError={authError}
+          authSuccess={authSuccess}
           isSubmitting={isSubmitting}
         />
       )}

@@ -13,7 +13,17 @@ export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
   appName: "Next Phish",
   experimental: { joins: true },
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user: { email: to }, url }) => {
+      await email.send({
+        to,
+        subject: "Reset your password",
+        html: renderTemplate("password-reset", { url }),
+      });
+    },
+  },
   plugins: [
     magicLink({
       sendMagicLink: async ({ email: to, url }) => {
@@ -37,6 +47,10 @@ export const auth = betterAuth({
     }),
   ],
   emailVerification: {
+    sendOnSignIn: true,
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    callbackURL: "/login?message=email-verified",
     sendVerificationEmail: async ({ user: { email: to }, url }) => {
       await email.send({
         to,

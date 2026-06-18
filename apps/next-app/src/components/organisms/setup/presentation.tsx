@@ -6,12 +6,13 @@ import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import {
+  FormMessage,
+  errorClassName,
+} from "@/src/components/atoms/form-message";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
-
-const errorClassName =
-  "rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200";
 
 interface SetupPresentationProps {
   error: string;
@@ -160,7 +161,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
         </div>
       </div>
 
-      {error && <p className={errorClassName}>{error}</p>}
+      {error && <FormMessage variant="error">{error}</FormMessage>}
 
       <Button
         type="submit"

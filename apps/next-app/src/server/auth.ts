@@ -22,6 +22,16 @@ export const auth = betterAuth({
         defaultValue: "user",
         input: false,
       },
+      timezone: {
+        type: "string",
+        required: false,
+        defaultValue: "UTC",
+      },
+      language: {
+        type: "string",
+        required: false,
+        defaultValue: "en",
+      },
     },
   },
   emailAndPassword: {
@@ -59,6 +69,9 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({
+      allowPasswordless: true,
+      skipVerificationOnEnable: true,
+      issuer: "Next Phish",
       otpOptions: {
         sendOTP: async ({ user: { email: to }, otp }) => {
           await email.send({

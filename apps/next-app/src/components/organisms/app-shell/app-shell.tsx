@@ -50,9 +50,7 @@ export function AppShell({ user, hasOrg, children }: AppShellProps) {
         isMobile={isMobile}
       />
 
-      <main className={`flex-1 overflow-y-auto ${isMobile ? "pl-14" : ""}`}>
-        {children}
-      </main>
+      <main className={`flex-1 overflow-y-auto`}>{children}</main>
     </div>
   );
 }

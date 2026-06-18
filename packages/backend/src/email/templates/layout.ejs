@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #020B1D;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper {
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      background-color: #07142E;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .header {
+      padding: 32px 40px 20px;
+      background: linear-gradient(135deg, #15E5D4 0%, #29B8FF 35%, #3B8FFF 60%, #5C73FF 80%, #7B5CFF 100%);
+    }
+    .header h1 {
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .body {
+      padding: 32px 40px;
+      color: #e2e8f0;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .footer {
+      padding: 24px 40px;
+      background-color: #020B1D;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+    .footer a {
+      color: #29B8FF;
+      text-decoration: none;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 32px;
+      background-color: #29B8FF;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      margin: 16px 0;
+    }
+    .code {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #020B1D;
+      border: 1px solid #1C2945;
+      border-radius: 8px;
+      color: #15E5D4;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin: 16px 0;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1C2945;
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <h1>Next Phish</h1>
+      </div>
+      <div class="body">
+        <%- body %>
+      </div>
+      <div class="footer">
+        <p>&copy; Next Phish. All rights reserved.</p>
+        <p style="margin-top: 4px;">
+          <a href="<%= appUrl || '#' %>">Visit Next Phish</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

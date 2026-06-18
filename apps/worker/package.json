@@ -1,0 +1,23 @@
+{
+  "name": "@next-phish/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next-phish/database": "workspace:*",
+    "@next-phish/shared": "workspace:*",
+    "bullmq": "^5",
+    "ioredis": "^5"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "tsx": "^4",
+    "typescript": "^6"
+  }
+}

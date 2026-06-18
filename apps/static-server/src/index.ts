@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { db } from "@/src/server/db";
+import { db } from "@next-phish/database";
 
 const app = new Hono();
 
@@ -25,7 +25,6 @@ app.get("*", async (c) => {
 
 const port = Number(process.env.STATIC_SERVER_PORT) || 3001;
 
-// eslint-disable-next-line no-console
 console.log(`Hono server running on http://0.0.0.0:${port}`);
 
 serve({ fetch: app.fetch, port });

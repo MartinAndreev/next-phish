@@ -1,0 +1,69 @@
+import Image from "next/image";
+import Link from "next/link";
+import { ResetPasswordContainer } from "@/src/components/organisms/reset-password";
+import { getAuthErrorMessage } from "@/src/lib/auth-errors";
+
+export default async function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { token, error: errorCode } = await searchParams;
+  const authToken = typeof token === "string" ? token : undefined;
+  const authError = getAuthErrorMessage(
+    typeof errorCode === "string" ? errorCode : undefined,
+  );
+
+  return (
+    <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
+      <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(41,184,255,0.22),_transparent_65%)]" />
+      <div className="absolute -left-20 top-24 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="absolute -right-16 bottom-16 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
+
+      <div className="auth-card rounded-3xl">
+        <div className="min-w-[400px] md:min-w-[600px] m-[1px] auth-card__container w-full max-w-md rounded-3xl border border-white/10 bg-brand-dark p-8 shadow-[0_24px_80px_rgba(2,11,29,0.55)] backdrop-blur-xl sm:p-10">
+          <div className="mb-8 text-center">
+            <Image
+              src="/images/logo/logo-icon-only.png"
+              alt="NextPhish"
+              width={85}
+              height={85}
+              className="mx-auto mb-6"
+              priority
+            />
+            <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
+              Password recovery
+            </div>
+            <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-[var(--brand-gradient)]" />
+            <h1 className="text-3xl font-semibold tracking-tight text-white">
+              Set new password
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">
+              Enter your new password below.
+            </p>
+          </div>
+          {authToken ? (
+            <ResetPasswordContainer token={authToken} />
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              {authError && (
+                <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                  {authError}
+                </p>
+              )}
+              <p className="text-sm text-zinc-400">
+                This link is invalid or has expired.{" "}
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+                >
+                  Request a new one
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

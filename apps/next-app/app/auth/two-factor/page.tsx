@@ -1,15 +1,7 @@
 import Image from "next/image";
 import { TwoFactorContainer } from "@/src/components/organisms/two-factor";
 
-export default async function TwoFactorPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const { methods } = await searchParams;
-  const availableMethods =
-    typeof methods === "string" ? methods.split(",") : [];
-
+export default function TwoFactorPage() {
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
       <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(41,184,255,0.22),_transparent_65%)]" />
@@ -38,7 +30,7 @@ export default async function TwoFactorPage({
               Enter the verification code to continue
             </p>
           </div>
-          <TwoFactorContainer methods={availableMethods} />
+          <TwoFactorContainer />
         </div>
       </div>
     </div>

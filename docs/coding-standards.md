@@ -104,3 +104,48 @@ export default function Loading() {
 ```
 
 Every route that queries the database (layouts or pages) should have a corresponding `loading.tsx`.
+
+## Forms
+
+### Always use Formik + Zod
+
+All forms must use Formik for form state and Zod for validation. Do not use raw `useState` for form fields.
+
+- Define Zod schemas in `packages/shared/src/schemas/`
+- Use `toFormikValidation()` from `src/lib/to-formik-validation.ts` to convert Zod schemas for Formik's `validate` prop
+- Use Formik's `<Form>`, `<Field>`, `<ErrorMessage>` components
+
+```tsx
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { mySchema } from "@next-phish/shared";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
+
+<Formik
+  initialValues={{ email: "" }}
+  validate={toFormikValidation(mySchema)}
+  onSubmit={handleSubmit}
+>
+  {({ isSubmitting }) => (
+    <Form>
+      <Field name="email" />
+      <ErrorMessage name="email" component="p" />
+      <button type="submit" disabled={isSubmitting}>
+        Submit
+      </button>
+    </Form>
+  )}
+</Formik>;
+```
+
+### Presentation components are single functions
+
+Each `presentation.tsx` file must export one component. For multi-step forms or distinct views, split into separate files (e.g., `verify-otp-view.tsx`, `reset-password-view.tsx`) and import them into the presentation.
+
+```
+organisms/reset-password/
+├── container.tsx
+├── presentation.tsx        # single exported component, delegates to views
+├── verify-otp-view.tsx     # OTP verification form
+├── reset-password-view.tsx # new password form
+└── index.ts
+```

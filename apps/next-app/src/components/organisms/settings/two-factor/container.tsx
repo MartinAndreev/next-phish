@@ -22,10 +22,8 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
     setError,
     setupTotp,
     enableTotp,
-    enableOtp,
     confirmDisable,
     complete,
-    dismissDone,
     reset,
   } = useTwoFactorState();
 
@@ -56,19 +54,6 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
     complete("Authenticator app has been configured successfully.");
   }
 
-  async function handleEnableOtpWithPassword() {
-    setError("");
-    const { error: err } = await authClient.twoFactor.enable({ password });
-    if (err) {
-      setError(err.message || err.code || "Failed to enable 2FA");
-      return;
-    }
-
-    complete(
-      "Email verification has been enabled. You will receive codes via email when signing in.",
-    );
-  }
-
   async function handleDisable() {
     setError("");
     const { error: err } = await authClient.twoFactor.disable({ password });
@@ -93,12 +78,9 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
       onVerifyCodeChange={setVerifyCode}
       onEnableTotp={enableTotp}
       onEnableTotpWithPassword={handleEnableTotpWithPassword}
-      onEnableOtp={enableOtp}
-      onEnableOtpWithPassword={handleEnableOtpWithPassword}
       onVerify={handleVerify}
       onDisable={handleDisable}
       onConfirmDisable={confirmDisable}
-      onDone={dismissDone}
       onReset={reset}
     />
   );

@@ -4,7 +4,12 @@ import type { IEmailService } from "@next-phish/backend";
 
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { magicLink, twoFactor, organization } from "better-auth/plugins";
+import {
+  magicLink,
+  twoFactor,
+  organization,
+  emailOTP,
+} from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@next-phish/database";
 
@@ -37,13 +42,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPassword: async ({ user: { email: to }, url }) => {
-      await email.send({
-        to,
-        subject: "Reset your password",
-        html: renderTemplate("password-reset", { url }),
-      });
-    },
   },
   databaseHooks: {
     user: {
@@ -72,17 +70,18 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({
-      allowPasswordless: true,
       skipVerificationOnEnable: true,
       issuer: "Next Phish",
-      otpOptions: {
-        sendOTP: async ({ user: { email: to }, otp }) => {
+    }),
+    emailOTP({
+      async sendVerificationOTP({ email: to, otp, type }) {
+        if (type === "forget-password") {
           await email.send({
             to,
-            subject: "Your verification code",
+            subject: "Your password reset code",
             html: renderTemplate("otp", { otp }),
           });
-        },
+        }
       },
     }),
     organization({

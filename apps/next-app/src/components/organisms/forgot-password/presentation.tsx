@@ -46,7 +46,7 @@ export function ForgotPasswordPresentation({
         </Field>
         <p className="text-xs text-zinc-400 mt-2">
           Enter the email address linked to your account and we will send you a
-          link to reset your password.
+          verification code to reset your password.
         </p>
       </div>
 
@@ -55,7 +55,7 @@ export function ForgotPasswordPresentation({
 
       <Button
         type="submit"
-        label="Send reset link"
+        label="Send verification code"
         loading={isSubmitting}
         className="mt-2 w-full justify-center rounded-xl border-0 bg-[var(--brand-gradient)] px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
         disabled={isSubmitting}

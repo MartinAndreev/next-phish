@@ -42,6 +42,7 @@ export function BackupCodes({ codes }: BackupCodesProps) {
         ))}
       </div>
       <Button
+        size="small"
         label="Download backup codes"
         icon="pi pi-download"
         outlined

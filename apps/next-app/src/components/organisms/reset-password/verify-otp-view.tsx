@@ -60,6 +60,7 @@ export function VerifyOtpView({ email, error, onSubmit }: VerifyOtpViewProps) {
           {error && <FormMessage variant="error">{error}</FormMessage>}
 
           <Button
+            size="small"
             type="submit"
             label="Verify code"
             loading={isSubmitting}

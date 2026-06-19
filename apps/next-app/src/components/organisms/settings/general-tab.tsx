@@ -14,6 +14,7 @@ import {
   errorClassName,
 } from "@/src/components/atoms/form-message";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { selectSmall } from "@/src/components/ui/primereact-provider";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -86,6 +87,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
             <Field name="name">
               {({ field }: { field: FieldInputProps<string> }) => (
                 <InputText
+                  size="small"
                   id="name"
                   {...field}
                   className={inputClassName}
@@ -108,6 +110,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               Email
             </label>
             <InputText
+              size="small"
               id="email"
               value={user.email}
               disabled
@@ -126,7 +129,9 @@ export function GeneralTab({ user }: GeneralTabProps) {
               Timezone
             </label>
             <Dropdown
+              pt={selectSmall}
               id="timezone"
+              size={"small" as never}
               value={values.timezone}
               options={timezones.map((tz) => ({ label: tz, value: tz }))}
               onChange={(e) => setFieldValue("timezone", e.value)}
@@ -144,6 +149,8 @@ export function GeneralTab({ user }: GeneralTabProps) {
               Language
             </label>
             <Dropdown
+              pt={selectSmall}
+              size={"small" as never}
               id="language"
               value={values.language}
               options={SUPPORTED_LANGUAGES}
@@ -161,6 +168,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
           )}
 
           <Button
+            size="small"
             type="submit"
             label="Save changes"
             loading={isSubmitting}

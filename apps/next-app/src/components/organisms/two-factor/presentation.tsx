@@ -31,6 +31,7 @@ export function TwoFactorPresentation({
         />
       </div>
       <Button
+        size="small"
         label="Verify"
         onClick={onVerify}
         disabled={code.length < 6}

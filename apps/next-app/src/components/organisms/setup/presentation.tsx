@@ -42,6 +42,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
         <Field name="name">
           {({ field }: { field: FieldInputProps<string> }) => (
             <InputText
+              size="small"
               id="name"
               {...field}
               invalid={Boolean(
@@ -68,6 +69,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
             <InputText
+              size="small"
               id="email"
               {...field}
               type="email"
@@ -96,6 +98,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
           <Field name="password">
             {({ field }: { field: FieldInputProps<string> }) => (
               <Password
+                size={"small" as never}
                 id="password"
                 {...field}
                 feedback
@@ -164,6 +167,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
       {error && <FormMessage variant="error">{error}</FormMessage>}
 
       <Button
+        size="small"
         type="submit"
         label="Create account"
         loading={isSubmitting}

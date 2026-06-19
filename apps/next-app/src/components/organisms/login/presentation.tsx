@@ -45,6 +45,7 @@ export function LoginPresentation({
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
             <InputText
+              size="small"
               id="email"
               {...field}
               type="email"
@@ -71,6 +72,7 @@ export function LoginPresentation({
           <Field name="password">
             {({ field }: { field: FieldInputProps<string> }) => (
               <Password
+                size={"small" as never}
                 id="password"
                 {...field}
                 feedback={false}
@@ -104,6 +106,7 @@ export function LoginPresentation({
       {success && <FormMessage variant="success">{success}</FormMessage>}
 
       <Button
+        size="small"
         type="submit"
         label={useMagicLink ? "Send magic link" : "Sign in"}
         loading={isSubmitting}
@@ -112,6 +115,7 @@ export function LoginPresentation({
       />
 
       <Button
+        size="small"
         outlined
         type="button"
         onClick={onToggleMagicLink}

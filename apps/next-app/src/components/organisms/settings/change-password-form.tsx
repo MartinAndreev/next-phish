@@ -64,6 +64,7 @@ export function ChangePasswordForm() {
             <Field name="currentPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
                 <Password
+                  size={"small" as never}
                   id="currentPassword"
                   {...field}
                   toggleMask
@@ -97,6 +98,7 @@ export function ChangePasswordForm() {
               <Field name="newPassword">
                 {({ field }: { field: FieldInputProps<string> }) => (
                   <Password
+                    size={"small" as never}
                     id="newPassword"
                     {...field}
                     feedback
@@ -134,6 +136,7 @@ export function ChangePasswordForm() {
               <Field name="confirmPassword">
                 {({ field }: { field: FieldInputProps<string> }) => (
                   <Password
+                    size={"small" as never}
                     id="confirmPassword"
                     {...field}
                     toggleMask
@@ -165,6 +168,7 @@ export function ChangePasswordForm() {
           )}
 
           <Button
+            size="small"
             type="submit"
             label="Change password"
             loading={isSubmitting}

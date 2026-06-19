@@ -36,6 +36,7 @@ export function ForgotPasswordPresentation({
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
             <InputText
+              size="small"
               id="email"
               {...field}
               type="email"
@@ -54,6 +55,7 @@ export function ForgotPasswordPresentation({
       {success && <FormMessage variant="success">{success}</FormMessage>}
 
       <Button
+        size="small"
         type="submit"
         label="Send verification code"
         loading={isSubmitting}

@@ -47,6 +47,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
             <Field name="newPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
                 <Password
+                  size={"small" as never}
                   id="newPassword"
                   {...field}
                   feedback
@@ -84,6 +85,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
             <Field name="confirmPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
                 <Password
+                  size={"small" as never}
                   id="confirmPassword"
                   {...field}
                   toggleMask
@@ -109,6 +111,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
           {error && <FormMessage variant="error">{error}</FormMessage>}
 
           <Button
+            size="small"
             type="submit"
             label="Reset password"
             loading={isSubmitting}

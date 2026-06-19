@@ -22,6 +22,35 @@ function classNames(
     .join(" ");
 }
 
+export const selectSmall = {
+  root: {
+    className:
+      "bg-brand-dark border border-white/10 rounded-lg text-white/80 h-8",
+  },
+  filterInput: { className: "text-brand-dark text-xs py-1.5" },
+  input: { className: "text-white/80 text-xs py-1.5" },
+  panel: {
+    className: "bg-brand-dark border border-white/10 rounded-lg shadow-lg",
+  },
+  wrapper: { className: "bg-brand-dark" },
+  list: { className: "list-none p-1 m-0" },
+  item: {
+    className:
+      "text-zinc-100 cursor-pointer font-normal whitespace-nowrap px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-xs",
+  },
+};
+
+export const inputSmall = {
+  root: {
+    className:
+      "flex items-center justify-center h-8 w-8 shrink-0 rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors",
+  },
+  icon: { className: "text-xs" },
+};
+
+export const inputSmallClassName =
+  "w-full rounded-lg border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 text-xs py-1.5";
+
 const customTailwind = {
   ...Tailwind,
 
@@ -43,7 +72,7 @@ const customTailwind = {
     ...Tailwind.tooltip,
     root: {
       className:
-        "bg-zinc-800 text-zinc-100 text-xs px-2 py-1 rounded-md shadow-lg",
+        "absolute text-zinc-100 text-xs px-2 py-1 rounded-md shadow-lg",
     },
     arrow: { className: "border-zinc-800" },
   },

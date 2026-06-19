@@ -1,4 +1,4 @@
-export { initializeContainer, Container } from "./container";
+export { initializeContainer, registerAuth, Container } from "./container";
 
 export {
   EmailProviderType,
@@ -30,3 +30,24 @@ export type {
   GetUserByEmailInput,
   GetUserCountInput,
 } from "./user";
+
+export {
+  OrganizationRepository,
+  OrganizationService,
+  GetUserOrganizationsQuery,
+  CreateOrganizationCommand,
+} from "./organization";
+export type {
+  OrganizationView,
+  CreateOrganizationData,
+  OrganizationWithMembers,
+} from "./organization";
+export {
+  GetUserOrganizationsSchema,
+  CreateOrganizationCommandSchema,
+} from "./organization";
+export type {
+  GetUserOrganizationsInput,
+  CreateOrganizationCommandInput,
+} from "./organization";
+export { registerOrganizationServices } from "./organization";

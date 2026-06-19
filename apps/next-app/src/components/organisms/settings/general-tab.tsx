@@ -133,11 +133,6 @@ export function GeneralTab({ user }: GeneralTabProps) {
               filter
               placeholder="Select a timezone"
               className="w-full"
-              pt={{
-                root: { className: inputClassName },
-                input: { className: "text-slate-900" },
-                filterInput: { className: inputClassName },
-              }}
             />
           </div>
 
@@ -155,10 +150,6 @@ export function GeneralTab({ user }: GeneralTabProps) {
               onChange={(e) => setFieldValue("language", e.value)}
               placeholder="Select a language"
               className="w-full"
-              pt={{
-                root: { className: inputClassName },
-                input: { className: "text-slate-900" },
-              }}
             />
           </div>
 

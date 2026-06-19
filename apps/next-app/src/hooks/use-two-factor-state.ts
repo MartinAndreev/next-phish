@@ -2,13 +2,7 @@
 
 import { useReducer } from "react";
 
-type Step =
-  | "idle"
-  | "password-enable-totp"
-  | "setup"
-  | "done"
-  | "password-disable"
-  | "password-enable-otp";
+type Step = "idle" | "password-enable-totp" | "setup" | "password-disable";
 
 type FormStatus =
   | { type: "idle"; message: "" }
@@ -30,10 +24,8 @@ type TwoFactorAction =
   | { type: "SET_ERROR"; message: string }
   | { type: "SETUP_TOTP"; totpUri: string; backupCodes: string[] }
   | { type: "ENABLE_TOTP" }
-  | { type: "ENABLE_OTP" }
   | { type: "CONFIRM_DISABLE" }
   | { type: "COMPLETE"; message: string }
-  | { type: "DISMISS_DONE" }
   | { type: "RESET" };
 
 const initialState: TwoFactorState = {
@@ -69,12 +61,6 @@ function twoFactorReducer(
         step: "password-enable-totp",
         status: { type: "idle", message: "" },
       };
-    case "ENABLE_OTP":
-      return {
-        ...state,
-        step: "password-enable-otp",
-        status: { type: "idle", message: "" },
-      };
     case "CONFIRM_DISABLE":
       return {
         ...state,
@@ -84,11 +70,8 @@ function twoFactorReducer(
     case "COMPLETE":
       return {
         ...initialState,
-        step: "done",
         status: { type: "success", message: action.message },
       };
-    case "DISMISS_DONE":
-      return initialState;
     case "RESET":
       return initialState;
     default:
@@ -109,10 +92,8 @@ export function useTwoFactorState() {
     setupTotp: (totpUri: string, backupCodes: string[]) =>
       dispatch({ type: "SETUP_TOTP", totpUri, backupCodes }),
     enableTotp: () => dispatch({ type: "ENABLE_TOTP" }),
-    enableOtp: () => dispatch({ type: "ENABLE_OTP" }),
     confirmDisable: () => dispatch({ type: "CONFIRM_DISABLE" }),
     complete: (message: string) => dispatch({ type: "COMPLETE", message }),
-    dismissDone: () => dispatch({ type: "DISMISS_DONE" }),
     reset: () => dispatch({ type: "RESET" }),
   } as const;
 }

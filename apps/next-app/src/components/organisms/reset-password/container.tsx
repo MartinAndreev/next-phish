@@ -1,32 +1,50 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
-import { resetPasswordSchema } from "@next-phish/shared";
-import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { ResetPasswordPresentation } from "./presentation";
+import { VerifyOtpView } from "./verify-otp-view";
+import { ResetPasswordView } from "./reset-password-view";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 
-interface ResetPasswordValues {
-  newPassword: string;
-  confirmPassword: string;
-}
-
 interface ResetPasswordContainerProps {
-  token: string;
+  email: string;
 }
 
-export function ResetPasswordContainer({ token }: ResetPasswordContainerProps) {
+export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
   const router = useRouter();
-  const { status, setError } = useFormStatus();
+  const { status, setError, reset } = useFormStatus();
+  const [otpVerified, setOtpVerified] = useState(false);
+  const otpRef = useRef("");
 
-  async function handleSubmit(values: ResetPasswordValues) {
-    setError("");
+  async function handleVerifyOtp(values: { otp: string }) {
+    reset();
 
-    const { error: err } = await authClient.resetPassword({
-      newPassword: values.newPassword,
-      token,
+    const { error: err } = await authClient.emailOtp.checkVerificationOtp({
+      email,
+      type: "forget-password",
+      otp: values.otp,
+    });
+
+    if (err) {
+      setError(err.message || err.code || "Invalid or expired code");
+      return;
+    }
+
+    otpRef.current = values.otp;
+    setOtpVerified(true);
+  }
+
+  async function handleResetPassword(values: {
+    newPassword: string;
+    confirmPassword: string;
+  }) {
+    reset();
+
+    const { error: err } = await authClient.emailOtp.resetPassword({
+      email,
+      otp: otpRef.current,
+      password: values.newPassword,
     });
 
     if (err) {
@@ -37,18 +55,20 @@ export function ResetPasswordContainer({ token }: ResetPasswordContainerProps) {
     router.push("/login?message=password-reset");
   }
 
+  if (!otpVerified) {
+    return (
+      <VerifyOtpView
+        email={email}
+        error={status.type === "error" ? status.message : ""}
+        onSubmit={handleVerifyOtp}
+      />
+    );
+  }
+
   return (
-    <Formik<ResetPasswordValues>
-      initialValues={{ newPassword: "", confirmPassword: "" }}
-      validate={toFormikValidation(resetPasswordSchema)}
-      onSubmit={handleSubmit}
-    >
-      {({ isSubmitting }) => (
-        <ResetPasswordPresentation
-          error={status.type === "error" ? status.message : ""}
-          isSubmitting={isSubmitting}
-        />
-      )}
-    </Formik>
+    <ResetPasswordView
+      error={status.type === "error" ? status.message : ""}
+      onSubmit={handleResetPassword}
+    />
   );
 }

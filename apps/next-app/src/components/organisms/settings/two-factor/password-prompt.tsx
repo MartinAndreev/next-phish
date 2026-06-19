@@ -21,8 +21,13 @@ export function PasswordPrompt({
   onCancel,
   label,
 }: PasswordPromptProps) {
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    onSubmit();
+  }
+
   return (
-    <div className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <p className="text-sm text-zinc-400">
         {label || "Enter your password to continue."}
       </p>
@@ -43,17 +48,18 @@ export function PasswordPrompt({
       </div>
       <div className="flex gap-2">
         <Button
+          type="submit"
           label="Continue"
-          onClick={onSubmit}
           className="rounded-xl border-0 bg-[var(--brand-gradient)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
         />
         <Button
+          type="button"
           label="Cancel"
           outlined
           onClick={onCancel}
           className="rounded-xl border-white/10 px-6 py-3 text-sm text-zinc-300"
         />
       </div>
-    </div>
+    </form>
   );
 }

@@ -3,6 +3,7 @@ export {
   magicLinkSchema,
   setupSchema,
   forgotPasswordSchema,
+  verifyOtpSchema,
   resetPasswordSchema,
   changePasswordSchema,
   updateProfileSchema,

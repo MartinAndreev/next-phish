@@ -111,17 +111,16 @@ export function LoginPresentation({
         disabled={isSubmitting}
       />
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-1.5">
-        <button
-          type="button"
-          onClick={onToggleMagicLink}
-          className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-cyan-200 transition-colors hover:bg-white/5 hover:text-cyan-100"
-        >
-          {useMagicLink
-            ? "Sign in with password instead"
-            : "Sign in with magic link instead"}
-        </button>
-      </div>
+      <Button
+        outlined
+        type="button"
+        onClick={onToggleMagicLink}
+        className="w-full rounded-xl px-4 py-2.5 justify-center text-sm font-medium text-cyan-200 transition-colors hover:bg-white/5 hover:text-cyan-100"
+      >
+        {useMagicLink
+          ? "Sign in with password instead"
+          : "Sign in with magic link instead"}
+      </Button>
     </Form>
   );
 }

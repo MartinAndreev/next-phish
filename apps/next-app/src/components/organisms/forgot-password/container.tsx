@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { forgotPasswordSchema } from "@next-phish/shared";
@@ -12,14 +13,14 @@ interface ForgotPasswordValues {
 }
 
 export function ForgotPasswordContainer() {
-  const { status, setError, setSuccess, reset } = useFormStatus();
+  const router = useRouter();
+  const { status, setError, reset } = useFormStatus();
 
   async function handleSubmit(values: ForgotPasswordValues) {
     reset();
 
-    const { error: err } = await authClient.requestPasswordReset({
+    const { error: err } = await authClient.emailOtp.requestPasswordReset({
       email: values.email,
-      redirectTo: "/reset-password",
     });
 
     if (err) {
@@ -27,9 +28,7 @@ export function ForgotPasswordContainer() {
       return;
     }
 
-    setSuccess(
-      "If an account exists with that email, a reset link has been sent.",
-    );
+    router.push(`/reset-password?email=${encodeURIComponent(values.email)}`);
   }
 
   return (

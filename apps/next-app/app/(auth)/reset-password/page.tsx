@@ -1,18 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ResetPasswordContainer } from "@/src/components/organisms/reset-password";
-import { getAuthErrorMessage } from "@/src/lib/auth-errors";
+import { FormMessage } from "@/src/components/atoms/form-message";
 
 export default async function ResetPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { token, error: errorCode } = await searchParams;
-  const authToken = typeof token === "string" ? token : undefined;
-  const authError = getAuthErrorMessage(
-    typeof errorCode === "string" ? errorCode : undefined,
-  );
+  const { email: emailParam } = await searchParams;
+  const email = typeof emailParam === "string" ? emailParam : "";
 
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
@@ -36,30 +33,22 @@ export default async function ResetPasswordPage({
             </div>
             <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-[var(--brand-gradient)]" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
-              Set new password
+              Reset password
             </h1>
-            <p className="mt-2 text-sm leading-6 text-zinc-400">
-              Enter your new password below.
-            </p>
           </div>
-          {authToken ? (
-            <ResetPasswordContainer token={authToken} />
+          {email ? (
+            <ResetPasswordContainer email={email} />
           ) : (
             <div className="flex flex-col items-center gap-4">
-              {authError && (
-                <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-                  {authError}
-                </p>
-              )}
-              <p className="text-sm text-zinc-400">
-                This link is invalid or has expired.{" "}
-                <Link
-                  href="/forgot-password"
-                  className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
-                >
-                  Request a new one
-                </Link>
-              </p>
+              <FormMessage variant="error">
+                Missing email address. Please request a new verification code.
+              </FormMessage>
+              <Link
+                href="/forgot-password"
+                className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
+              >
+                Go to forgot password
+              </Link>
             </div>
           )}
         </div>

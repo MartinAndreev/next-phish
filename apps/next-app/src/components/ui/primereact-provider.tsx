@@ -87,7 +87,10 @@ const customTailwind = {
     ...Tailwind.dropdown,
     root: {
       className:
-        "cursor-pointer inline-flex relative select-none bg-white/95 border border-white/10 transition-colors duration-200 ease-in-out rounded-xl w-full hover:border-white/20 focus:outline-none focus:outline-offset-0",
+        "cursor-pointer inline-flex relative select-none transition-colors duration-200 ease-in-out rounded-xl w-full shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 m-0 font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border transition-colors duration-200 appearance-none rounded-lg focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] hover:border-blue-500 border-gray-300 dark:border-blue-900/40",
+    },
+    label: {
+      className: "text-white/80",
     },
     header: {
       className:
@@ -96,8 +99,17 @@ const customTailwind = {
     panel: {
       className: "bg-brand-dark border border-white/10 rounded-xl shadow-lg",
     },
+    transition: {
+      timeout: 150,
+      classNames: {
+        enter: "opacity-0",
+        enterActive: "opacity-100 transition-opacity duration-150 ease-in",
+        exit: "opacity-100",
+        exitActive: "opacity-0 transition-opacity duration-150 ease-linear",
+      },
+    },
     wrapper: {
-      className: "max-h-60 overflow-auto bg-brand-dark",
+      className: "max-h-60 overflow-auto bg-brand-dark rounded-xl",
     },
     list: { className: "list-none p-1 m-0" },
     item: {

@@ -81,3 +81,26 @@ export const dynamic = "force-dynamic";
 Without this, Next.js tries to prerender the page at build time, which fails because no database is available in CI. This applies to any server component that calls Prisma, `auth.api.getSession()`, or a tRPC caller.
 
 Currently there are no public-facing pages that need SEO/static generation, so `force-dynamic` is safe to use everywhere. If a public page is added later that needs static rendering, it must not query the database directly — use client-side fetching or ISR instead.
+
+### Loading states with `loading.tsx`
+
+Use Next.js `loading.tsx` files to show skeleton UI while server components fetch data. Next.js automatically wraps the page in `<Suspense>` when this file exists.
+
+- Use PrimeReact `Skeleton` component for consistency
+- Match the layout structure of the actual page (same dimensions, spacing)
+- Place `loading.tsx` alongside the `page.tsx` it covers
+
+```tsx
+import { Skeleton } from "primereact/skeleton";
+
+export default function Loading() {
+  return (
+    <div className="p-6">
+      <Skeleton width="40%" height="2rem" className="mb-6" />
+      <Skeleton width="100%" height="200px" borderRadius="1rem" />
+    </div>
+  );
+}
+```
+
+Every route that queries the database (layouts or pages) should have a corresponding `loading.tsx`.

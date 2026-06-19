@@ -13,14 +13,11 @@ export default function AppLoading() {
 
         {/* Nav items */}
         <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton
-              key={i}
-              width={`${70 + Math.random() * 30}%`}
-              height="2.25rem"
-              borderRadius="0.75rem"
-            />
-          ))}
+          <Skeleton width="100%" height="2.25rem" borderRadius="0.75rem" />
+          <Skeleton width="85%" height="2.25rem" borderRadius="0.75rem" />
+          <Skeleton width="90%" height="2.25rem" borderRadius="0.75rem" />
+          <Skeleton width="75%" height="2.25rem" borderRadius="0.75rem" />
+          <Skeleton width="80%" height="2.25rem" borderRadius="0.75rem" />
         </div>
 
         {/* Profile at bottom */}

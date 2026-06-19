@@ -1,23 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { forgotPasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { ForgotPasswordPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 interface ForgotPasswordValues {
   email: string;
 }
 
 export function ForgotPasswordContainer() {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { status, setError, setSuccess, reset } = useFormStatus();
 
   async function handleSubmit(values: ForgotPasswordValues) {
-    setError("");
-    setSuccess("");
+    reset();
 
     const { error: err } = await authClient.requestPasswordReset({
       email: values.email,
@@ -42,8 +40,8 @@ export function ForgotPasswordContainer() {
     >
       {({ isSubmitting }) => (
         <ForgotPasswordPresentation
-          error={error}
-          success={success}
+          error={status.type === "error" ? status.message : ""}
+          success={status.type === "success" ? status.message : ""}
           isSubmitting={isSubmitting}
         />
       )}

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { setupSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SetupPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 interface SetupValues {
   name: string;
@@ -17,7 +17,7 @@ interface SetupValues {
 
 export function SetupContainer() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const { status, setError } = useFormStatus();
 
   async function handleSubmit(values: SetupValues) {
     setError("");
@@ -42,7 +42,9 @@ export function SetupContainer() {
       validate={toFormikValidation(setupSchema)}
       onSubmit={handleSubmit}
     >
-      <SetupPresentation error={error} />
+      <SetupPresentation
+        error={status.type === "error" ? status.message : ""}
+      />
     </Formik>
   );
 }

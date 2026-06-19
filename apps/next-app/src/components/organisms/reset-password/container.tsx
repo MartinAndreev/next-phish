@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { resetPasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { ResetPasswordPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 interface ResetPasswordValues {
   newPassword: string;
@@ -19,7 +19,7 @@ interface ResetPasswordContainerProps {
 
 export function ResetPasswordContainer({ token }: ResetPasswordContainerProps) {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const { status, setError } = useFormStatus();
 
   async function handleSubmit(values: ResetPasswordValues) {
     setError("");
@@ -44,7 +44,10 @@ export function ResetPasswordContainer({ token }: ResetPasswordContainerProps) {
       onSubmit={handleSubmit}
     >
       {({ isSubmitting }) => (
-        <ResetPasswordPresentation error={error} isSubmitting={isSubmitting} />
+        <ResetPasswordPresentation
+          error={status.type === "error" ? status.message : ""}
+          isSubmitting={isSubmitting}
+        />
       )}
     </Formik>
   );

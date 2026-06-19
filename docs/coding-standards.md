@@ -1,29 +1,69 @@
 # Coding Standards
 
-## Transactions
+## State Management
 
-All data mutations MUST be executed within a Prisma transaction (`db.$transaction`).
-This is enforced by the `MessageBus.dispatch()` method — commands go through it,
-never call repositories directly from procedures or components.
+### Simple form status (error/success)
 
-## Validation
+Use the `useFormStatus` hook from `src/hooks/use-form-status.ts` instead of separate `useState` calls for `error` and `success` strings.
 
-- Zod schemas live exclusively in each domain's `validations/` folder.
-- Validation is the caller's responsibility (typically a tRPC procedure).
-- Commands and queries always receive already-validated data.
-- The MessageBus does not validate — it only routes and (for commands) wraps in a
-  transaction.
+```tsx
+// Bad
+const [error, setError] = useState("");
+const [success, setSuccess] = useState("");
 
-## Server Components
+// Good
+const { status, setError, setSuccess, reset } = useFormStatus();
+```
 
-Server components MUST use the DI container and the MessageBus for all data access.
-They MUST NOT import `db` from `@next-phish/database` directly. Use:
+Display status messages with discriminated union checks:
 
-```ts
-import { Container } from "@/src/server/container";
-import { MessageBus, SomeQuery } from "@next-phish/backend";
+```tsx
+{
+  status.type === "error" && (
+    <FormMessage variant="error">{status.message}</FormMessage>
+  );
+}
+{
+  status.type === "success" && (
+    <FormMessage variant="success">{status.message}</FormMessage>
+  );
+}
+```
 
-const bus = Container.get(MessageBus);
-const handler = Container.get(SomeQuery);
-const result = await bus.query(handler, data);
+### Complex multi-step state
+
+Use `useReducer` with a custom hook when a component has:
+
+- 3+ related state variables
+- A `reset()` function that clears multiple state values
+- State transitions that depend on current state
+
+Extract the reducer and hook into `src/hooks/` (e.g., `use-two-factor-state.ts`).
+
+Expose semantic actions instead of raw dispatch:
+
+```tsx
+// Bad
+dispatch({ type: "SET_STEP", step: "done" });
+dispatch({ type: "SET_SUCCESS", message: "Done!" });
+
+// Good
+complete("Done!");
+```
+
+### Debouncing
+
+Debounce API calls triggered by user input using `useRef` + `setTimeout`:
+
+```tsx
+const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+const debouncedCheck = useCallback((value: string) => {
+  if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  if (!value) return;
+
+  timeoutRef.current = setTimeout(async () => {
+    // API call here
+  }, 300);
+}, []);
 ```

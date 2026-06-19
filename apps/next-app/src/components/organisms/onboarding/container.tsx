@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { createOrganizationSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { OnboardingPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 interface OnboardingValues {
   name: string;
@@ -25,27 +26,39 @@ function slugify(text: string): string {
 
 export function OnboardingContainer() {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const { status, setError } = useFormStatus();
   const [slugStatus, setSlugStatus] = useState<
     "idle" | "checking" | "available" | "taken"
   >("idle");
 
-  const checkSlug = useCallback(async (slug: string) => {
+  const checkSlugTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  const checkSlug = useCallback((slug: string) => {
+    if (checkSlugTimeoutRef.current) {
+      clearTimeout(checkSlugTimeoutRef.current);
+    }
+
     if (!slug) {
       setSlugStatus("idle");
       return;
     }
+
     setSlugStatus("checking");
-    const { data, error: err } = await authClient.organization.checkSlug({
-      slug,
-    });
-    if (err) {
-      setSlugStatus("taken");
-    } else if (data?.status) {
-      setSlugStatus("available");
-    } else {
-      setSlugStatus("idle");
-    }
+
+    checkSlugTimeoutRef.current = setTimeout(async () => {
+      const { data, error: err } = await authClient.organization.checkSlug({
+        slug,
+      });
+      if (err) {
+        setSlugStatus("taken");
+      } else if (data?.status) {
+        setSlugStatus("available");
+      } else {
+        setSlugStatus("idle");
+      }
+    }, 300);
   }, []);
 
   async function handleSubmit(values: OnboardingValues) {
@@ -77,7 +90,7 @@ export function OnboardingContainer() {
       onSubmit={handleSubmit}
     >
       <OnboardingPresentation
-        error={error}
+        error={status.type === "error" ? status.message : ""}
         slugStatus={slugStatus}
         onSlugChange={checkSlug}
         slugify={slugify}

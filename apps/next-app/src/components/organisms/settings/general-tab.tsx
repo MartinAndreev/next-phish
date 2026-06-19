@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
@@ -14,6 +13,7 @@ import {
   FormMessage,
   errorClassName,
 } from "@/src/components/atoms/form-message";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -45,12 +45,10 @@ interface GeneralValues {
 }
 
 export function GeneralTab({ user }: GeneralTabProps) {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { status, setError, setSuccess, reset } = useFormStatus();
 
   async function handleSubmit(values: GeneralValues) {
-    setError("");
-    setSuccess("");
+    reset();
 
     const { error: err } = await authClient.updateUser({
       name: values.name,
@@ -164,8 +162,12 @@ export function GeneralTab({ user }: GeneralTabProps) {
             />
           </div>
 
-          {error && <FormMessage variant="error">{error}</FormMessage>}
-          {success && <FormMessage variant="success">{success}</FormMessage>}
+          {status.type === "error" && (
+            <FormMessage variant="error">{status.message}</FormMessage>
+          )}
+          {status.type === "success" && (
+            <FormMessage variant="success">{status.message}</FormMessage>
+          )}
 
           <Button
             type="submit"

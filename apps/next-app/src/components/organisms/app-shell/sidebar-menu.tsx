@@ -1,0 +1,116 @@
+"use client";
+
+import { useRouter, usePathname } from "next/navigation";
+import { Menu } from "primereact/menu";
+import { Tooltip } from "primereact/tooltip";
+import type { MenuItem } from "primereact/menuitem";
+
+const navItems: { label: string; icon: string; href: string }[] = [
+  { label: "Dashboard", icon: "pi pi-home", href: "/" },
+  { label: "Campaigns", icon: "pi pi-bolt", href: "/campaigns" },
+  { label: "Pages", icon: "pi pi-file", href: "/pages" },
+  {
+    label: "Email templates",
+    icon: "pi pi-envelope",
+    href: "/email-templates",
+  },
+  { label: "Sending Profiles", icon: "pi pi-send", href: "/sending-profiles" },
+  { label: "Target Groups", icon: "pi pi-users", href: "/target-groups" },
+];
+
+const adminItems: { label: string; icon: string; href: string }[] = [
+  { label: "Users", icon: "pi pi-user", href: "/users" },
+  { label: "Settings", icon: "pi pi-cog", href: "/settings" },
+];
+
+interface SidebarMenuProps {
+  collapsed?: boolean;
+  role?: string | null;
+}
+
+function buildMenuItems(
+  items: { label: string; icon: string; href: string }[],
+  pathname: string,
+  router: ReturnType<typeof useRouter>,
+  collapsed?: boolean,
+): MenuItem[] {
+  return items.map((item) => ({
+    template: () => {
+      const isActive = pathname === item.href;
+      if (collapsed) {
+        return (
+          <>
+            <Tooltip
+              target={`.nav-icon-${item.icon.replace(/\s+/g, "-")}`}
+              content={item.label}
+              position="right"
+            />
+            <button
+              type="button"
+              className={`nav-icon-${item.icon.replace(/\s+/g, "-")} flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
+                isActive
+                  ? "bg-white/10 text-white"
+                  : "text-zinc-300 hover:bg-white/5 hover:text-white"
+              }`}
+              onClick={() => router.push(item.href)}
+            >
+              <i className={`${item.icon} text-lg`} />
+            </button>
+          </>
+        );
+      }
+      return (
+        <button
+          type="button"
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+            isActive
+              ? "bg-white/10 text-white"
+              : "text-zinc-300 hover:bg-white/5 hover:text-white"
+          }`}
+          onClick={() => router.push(item.href)}
+        >
+          <i className={`${item.icon} text-base`} />
+          <span>{item.label}</span>
+        </button>
+      );
+    },
+  }));
+}
+
+export function SidebarMenu({ collapsed, role }: SidebarMenuProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const items: MenuItem[] = buildMenuItems(
+    navItems,
+    pathname,
+    router,
+    collapsed,
+  );
+
+  if (role === "admin") {
+    items.push(
+      { separator: true },
+      ...(collapsed
+        ? []
+        : [
+            {
+              template: () => (
+                <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                  Administration
+                </p>
+              ),
+            },
+          ]),
+      ...buildMenuItems(adminItems, pathname, router, collapsed),
+    );
+  }
+
+  return (
+    <nav
+      className={`flex-1 overflow-y-auto ${collapsed ? "px-2 py-3" : "px-3 py-4"}`}
+    >
+      <Menu model={items} />
+    </nav>
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
 import { loginSchema, magicLinkSchema } from "@next-phish/shared";
@@ -21,6 +22,7 @@ export function LoginContainer({
   authError,
   authSuccess,
 }: LoginContainerProps) {
+  const router = useRouter();
   const [useMagicLink, setUseMagicLink] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -50,6 +52,7 @@ export function LoginContainer({
           setError(err.message || err.code || "Invalid credentials");
           return;
         }
+        router.push("/");
       }
     } catch {
       setError("An unexpected error occurred");

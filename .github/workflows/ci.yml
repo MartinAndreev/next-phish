@@ -41,6 +41,12 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    env:
+      BETTER_AUTH_SECRET: "ci-dummy-secret-for-build-only"
+      BETTER_AUTH_URL: "http://localhost:3000"
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      REDIS_HOST: "localhost"
+      REDIS_PORT: "6379"
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4

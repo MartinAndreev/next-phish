@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/src/lib/auth-client";
 import { VerifyOtpView } from "./verify-otp-view";
@@ -11,14 +11,11 @@ interface ResetPasswordContainerProps {
   email: string;
 }
 
-export function ResetPasswordContainer({
-  email: initialEmail,
-}: ResetPasswordContainerProps) {
+export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
   const router = useRouter();
   const { status, setError, reset } = useFormStatus();
   const [otpVerified, setOtpVerified] = useState(false);
-  const [email] = useState(initialEmail);
-  const [otp, setOtp] = useState("");
+  const otpRef = useRef("");
 
   async function handleVerifyOtp(values: { otp: string }) {
     reset();
@@ -34,7 +31,7 @@ export function ResetPasswordContainer({
       return;
     }
 
-    setOtp(values.otp);
+    otpRef.current = values.otp;
     setOtpVerified(true);
   }
 
@@ -46,7 +43,7 @@ export function ResetPasswordContainer({
 
     const { error: err } = await authClient.emailOtp.resetPassword({
       email,
-      otp,
+      otp: otpRef.current,
       password: values.newPassword,
     });
 

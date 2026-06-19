@@ -48,8 +48,6 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm db:generate
       - run: |
           cat > .env << 'EOF'
           DATABASE_URL=postgresql://ci:ci@localhost:5432/ci
@@ -68,4 +66,6 @@ jobs:
           R2_SECRET_ACCESS_KEY=ci
           R2_BUCKET_NAME=ci
           EOF
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
       - run: pnpm build

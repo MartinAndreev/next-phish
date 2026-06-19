@@ -42,11 +42,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      BETTER_AUTH_SECRET: "ci-dummy-secret-for-build-only"
-      BETTER_AUTH_URL: "http://localhost:3000"
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      BETTER_AUTH_SECRET: "ci-dummy-secret-for-build-only-32chars-long"
+      BETTER_AUTH_URL: "http://localhost:3000"
+      BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost,http://localhost:3000"
+      APP_URL: "http://localhost"
       REDIS_HOST: "localhost"
       REDIS_PORT: "6379"
+      SMTP_HOST: "localhost"
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      SMTP_FROM: "ci@localhost"
+      R2_ACCOUNT_ID: "ci"
+      R2_ACCESS_KEY_ID: "ci"
+      R2_SECRET_ACCESS_KEY: "ci"
+      R2_BUCKET_NAME: "ci"
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4

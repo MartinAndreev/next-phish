@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/src/server/auth";
 import { SettingsContainer } from "@/src/components/organisms/settings";
 
+export const dynamic = "force-dynamic";
+
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
     headers: await headers(),

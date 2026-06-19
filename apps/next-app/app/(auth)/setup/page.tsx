@@ -5,6 +5,8 @@ import { Container } from "@/src/server/container";
 import { MessageBus, GetUserCountQuery } from "@next-phish/backend";
 import { SetupContainer } from "@/src/components/organisms/setup";
 
+export const dynamic = "force-dynamic";
+
 export default async function SetupPage() {
   const bus = Container.get(MessageBus);
   const handler = Container.get(GetUserCountQuery);

@@ -4,6 +4,8 @@ export {
   setupSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
+  updateProfileSchema,
 } from "./schemas";
 export type { LoginInput, SetupInput } from "./schemas";
 

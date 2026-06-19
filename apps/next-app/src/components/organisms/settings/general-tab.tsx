@@ -7,6 +7,8 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { authClient } from "@/src/lib/auth-client";
+import { updateProfileSchema } from "@next-phish/shared";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SUPPORTED_LANGUAGES } from "@/src/lib/constants";
 import {
   FormMessage,
@@ -71,6 +73,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
         timezone: user.timezone || "UTC",
         language: user.language || "en",
       }}
+      validate={toFormikValidation(updateProfileSchema)}
       onSubmit={handleSubmit}
     >
       {({ isSubmitting, setFieldValue, values }) => (

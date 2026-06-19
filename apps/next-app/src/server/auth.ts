@@ -49,11 +49,14 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          const count = await db.user.count();
-          if (count === 0) {
+          try {
+            await db.setting.create({
+              data: { key: "initialized", value: { initialized: true } },
+            });
             return { data: { ...user, role: "admin" } };
+          } catch {
+            return { data: user };
           }
-          return { data: user };
         },
       },
     },

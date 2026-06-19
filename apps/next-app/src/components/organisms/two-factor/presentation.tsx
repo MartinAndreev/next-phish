@@ -68,7 +68,7 @@ export function TwoFactorPresentation({
               value={code}
               onChange={(e) => onCodeChange(e.value?.toString() || "")}
               length={6}
-              integerOnly={false}
+              integerOnly
             />
           </div>
           <Button
@@ -103,7 +103,7 @@ export function TwoFactorPresentation({
                   value={code}
                   onChange={(e) => onCodeChange(e.value?.toString() || "")}
                   length={6}
-                  integerOnly={false}
+                  integerOnly
                 />
               </div>
               <Button

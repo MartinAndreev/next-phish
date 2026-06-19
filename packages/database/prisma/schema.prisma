@@ -114,7 +114,7 @@ model Member {
   organization Organization @relation(references: [id], fields: [organizationId], onDelete: Cascade)
   user         User         @relation(references: [id], fields: [userId], onDelete: Cascade)
 
-  @@index([organizationId])
+  @@unique([organizationId, userId])
   @@index([userId])
   @@map("member")
 }
@@ -135,6 +135,14 @@ model Invitation {
   @@index([organizationId])
   @@index([inviterId])
   @@map("invitation")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  @@map("setting")
 }
 
 model Page {

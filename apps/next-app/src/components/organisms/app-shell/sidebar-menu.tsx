@@ -45,33 +45,33 @@ function buildMenuItems(
               content={item.label}
               position="right"
             />
-            <a
+            <button
+              type="button"
               className={`nav-icon-${item.icon.replace(/\s+/g, "-")} flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
                 isActive
                   ? "bg-white/10 text-white"
                   : "text-zinc-300 hover:bg-white/5 hover:text-white"
               }`}
               onClick={() => router.push(item.href)}
-              role="menuitem"
             >
               <i className={`${item.icon} text-lg`} />
-            </a>
+            </button>
           </>
         );
       }
       return (
-        <a
+        <button
+          type="button"
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
             isActive
               ? "bg-white/10 text-white"
               : "text-zinc-300 hover:bg-white/5 hover:text-white"
           }`}
           onClick={() => router.push(item.href)}
-          role="menuitem"
         >
           <i className={`${item.icon} text-base`} />
           <span>{item.label}</span>
-        </a>
+        </button>
       );
     },
   }));

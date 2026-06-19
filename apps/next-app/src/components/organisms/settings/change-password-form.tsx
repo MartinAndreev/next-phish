@@ -6,6 +6,8 @@ import type { FieldInputProps } from "formik";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { authClient } from "@/src/lib/auth-client";
+import { changePasswordSchema } from "@next-phish/shared";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import {
   FormMessage,
   errorClassName,
@@ -28,11 +30,6 @@ export function ChangePasswordForm() {
     setError("");
     setSuccess("");
 
-    if (values.newPassword !== values.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
     const { error: err } = await authClient.changePassword({
       currentPassword: values.currentPassword,
       newPassword: values.newPassword,
@@ -54,6 +51,7 @@ export function ChangePasswordForm() {
         newPassword: "",
         confirmPassword: "",
       }}
+      validate={toFormikValidation(changePasswordSchema)}
       onSubmit={handleSubmit}
     >
       {({ isSubmitting, errors, touched, submitCount }) => (

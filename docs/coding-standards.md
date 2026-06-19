@@ -67,3 +67,17 @@ const debouncedCheck = useCallback((value: string) => {
   }, 300);
 }, []);
 ```
+
+## Server Components & Pages
+
+### Database access requires `force-dynamic`
+
+Any page or layout that queries the database (directly or via tRPC/betterAuth) must opt out of static generation:
+
+```tsx
+export const dynamic = "force-dynamic";
+```
+
+Without this, Next.js tries to prerender the page at build time, which fails because no database is available in CI. This applies to any server component that calls Prisma, `auth.api.getSession()`, or a tRPC caller.
+
+Currently there are no public-facing pages that need SEO/static generation, so `force-dynamic` is safe to use everywhere. If a public page is added later that needs static rendering, it must not query the database directly — use client-side fetching or ISR instead.

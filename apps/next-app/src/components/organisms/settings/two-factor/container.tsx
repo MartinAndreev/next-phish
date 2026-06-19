@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { authClient } from "@/src/lib/auth-client";
 import { TwoFactorPresentation } from "./presentation";
+import { useTwoFactorState } from "@/src/hooks/use-two-factor-state";
 
 interface TwoFactorContainerProps {
   user: {
@@ -15,41 +15,19 @@ interface TwoFactorContainerProps {
 export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
   const { data: session } = authClient.useSession();
   const isEnabled = session?.user?.twoFactorEnabled ?? user.twoFactorEnabled;
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [totpUri, setTotpUri] = useState("");
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [verifyCode, setVerifyCode] = useState("");
-  const [password, setPassword] = useState("");
-  const [step, setStep] = useState<
-    | "idle"
-    | "password-enable-totp"
-    | "setup"
-    | "done"
-    | "password-disable"
-    | "password-enable-otp"
-  >("idle");
-
-  function reset() {
-    setStep("idle");
-    setTotpUri("");
-    setBackupCodes([]);
-    setVerifyCode("");
-    setPassword("");
-    setError("");
-    setSuccess("");
-  }
-
-  function handleDone() {
-    setStep("idle");
-    setSuccess("");
-    setError("");
-  }
-
-  async function handleEnableTotp() {
-    setError("");
-    setStep("password-enable-totp");
-  }
+  const {
+    state: { step, status, totpUri, backupCodes, verifyCode, password },
+    setPassword,
+    setVerifyCode,
+    setError,
+    setupTotp,
+    enableTotp,
+    enableOtp,
+    confirmDisable,
+    complete,
+    dismissDone,
+    reset,
+  } = useTwoFactorState();
 
   async function handleEnableTotpWithPassword() {
     setError("");
@@ -62,9 +40,7 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
     }
 
     if (data) {
-      setTotpUri(data.totpURI);
-      setBackupCodes(data.backupCodes);
-      setStep("setup");
+      setupTotp(data.totpURI, data.backupCodes);
     }
   }
 
@@ -77,17 +53,7 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
       setError(err.message || err.code || "Invalid code");
       return;
     }
-    setStep("done");
-    setSuccess("Authenticator app has been configured successfully.");
-    setVerifyCode("");
-    setPassword("");
-    setTotpUri("");
-    setBackupCodes([]);
-  }
-
-  async function handleEnableOtp() {
-    setError("");
-    setStep("password-enable-otp");
+    complete("Authenticator app has been configured successfully.");
   }
 
   async function handleEnableOtpWithPassword() {
@@ -98,16 +64,9 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
       return;
     }
 
-    setStep("done");
-    setSuccess(
+    complete(
       "Email verification has been enabled. You will receive codes via email when signing in.",
     );
-    setPassword("");
-  }
-
-  async function handleConfirmDisable() {
-    setError("");
-    setStep("password-disable");
   }
 
   async function handleDisable() {
@@ -124,22 +83,22 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
     <TwoFactorPresentation
       isEnabled={!!isEnabled}
       step={step}
-      error={error}
-      success={success}
+      error={status.type === "error" ? status.message : ""}
+      success={status.type === "success" ? status.message : ""}
       totpUri={totpUri}
       backupCodes={backupCodes}
       verifyCode={verifyCode}
       password={password}
       onPasswordChange={setPassword}
       onVerifyCodeChange={setVerifyCode}
-      onEnableTotp={handleEnableTotp}
+      onEnableTotp={enableTotp}
       onEnableTotpWithPassword={handleEnableTotpWithPassword}
-      onEnableOtp={handleEnableOtp}
+      onEnableOtp={enableOtp}
       onEnableOtpWithPassword={handleEnableOtpWithPassword}
       onVerify={handleVerify}
       onDisable={handleDisable}
-      onConfirmDisable={handleConfirmDisable}
-      onDone={handleDone}
+      onConfirmDisable={confirmDisable}
+      onDone={dismissDone}
       onReset={reset}
     />
   );

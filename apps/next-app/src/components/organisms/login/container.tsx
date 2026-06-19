@@ -7,6 +7,7 @@ import { authClient } from "@/src/lib/auth-client";
 import { loginSchema, magicLinkSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { LoginPresentation } from "./presentation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
 
 interface LoginValues {
   email: string;
@@ -24,12 +25,10 @@ export function LoginContainer({
 }: LoginContainerProps) {
   const router = useRouter();
   const [useMagicLink, setUseMagicLink] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { status, setError, setSuccess, reset } = useFormStatus();
 
   async function handleSubmit(values: LoginValues) {
-    setError("");
-    setSuccess("");
+    reset();
 
     try {
       if (useMagicLink) {
@@ -61,8 +60,7 @@ export function LoginContainer({
 
   const toggleMagicLink = () => {
     setUseMagicLink((prev) => !prev);
-    setError("");
-    setSuccess("");
+    reset();
   };
 
   return (
@@ -77,8 +75,8 @@ export function LoginContainer({
         <LoginPresentation
           useMagicLink={useMagicLink}
           onToggleMagicLink={toggleMagicLink}
-          error={error}
-          success={success}
+          error={status.type === "error" ? status.message : ""}
+          success={status.type === "success" ? status.message : ""}
           authError={authError}
           authSuccess={authSuccess}
           isSubmitting={isSubmitting}

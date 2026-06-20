@@ -173,7 +173,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
             label="Save changes"
             loading={isSubmitting}
             disabled={isSubmitting}
-            className="mt-2 w-fit rounded-xl border-0 bg-[var(--brand-gradient)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
+            className="mt-2 w-fit rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
           />
         </Form>
       )}

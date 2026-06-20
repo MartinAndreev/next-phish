@@ -30,7 +30,7 @@ Defined as a CSS custom property on `:root`:
 );
 ```
 
-**Tailwind usage:** `bg-[var(--brand-gradient)]`
+**Tailwind usage:** `bg-(image:--brand-gradient)`
 
 ## Recommended Usage
 
@@ -40,7 +40,7 @@ Defined as a CSS custom property on `:root`:
 | Button hover     | `bg-brand-azure`                           |
 | Success          | `text-brand-cyan`                          |
 | Links            | `text-brand-blue` `hover:text-brand-azure` |
-| Brand background | `bg-[var(--brand-gradient)]`               |
+| Brand background | `bg-(image:--brand-gradient)`              |
 | Page background  | `bg-brand-navy` (dark)                     |
 | Cards            | `bg-brand-dark`                            |
 | Borders          | `border-[#1C2945]`                         |

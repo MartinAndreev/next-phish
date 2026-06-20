@@ -8,19 +8,41 @@ const memberSelect = {
   createdAt: true,
 } as const;
 
+interface FindByUserIdInput {
+  search?: string;
+  limit: number;
+  offset: number;
+  sort?: Array<{ field: string; order: "asc" | "desc" }>;
+  filters?: { role?: string };
+}
+
 export class OrganizationRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async findByUserId(
     userId: string,
-    input: { search?: string; limit: number; offset: number },
+    input: FindByUserIdInput,
   ): Promise<{ rows: OrganizationWithMembers[]; total: number }> {
-    const where = {
+    const where: Record<string, unknown> = {
       members: { some: { userId } },
-      ...(input.search
-        ? { name: { contains: input.search, mode: "insensitive" as const } }
-        : {}),
     };
+
+    if (input.search) {
+      where.name = { contains: input.search, mode: "insensitive" as const };
+    }
+
+    if (input.filters?.role) {
+      where.members = {
+        some: {
+          userId,
+          role: input.filters.role,
+        },
+      };
+    }
+
+    const orderBy = input.sort?.length
+      ? input.sort.map((s) => ({ [s.field]: s.order }))
+      : [{ name: "asc" as const }];
 
     const [rows, total] = await Promise.all([
       this.db.organization.findMany({
@@ -28,7 +50,7 @@ export class OrganizationRepository {
         include: {
           members: { where: { userId }, select: memberSelect },
         },
-        orderBy: { name: "asc" },
+        orderBy,
         take: input.limit,
         skip: input.offset,
       }),

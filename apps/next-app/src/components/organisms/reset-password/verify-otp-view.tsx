@@ -65,7 +65,7 @@ export function VerifyOtpView({ email, error, onSubmit }: VerifyOtpViewProps) {
             label="Verify code"
             loading={isSubmitting}
             disabled={isSubmitting}
-            className="mt-2 w-full justify-center rounded-xl border-0 bg-[var(--brand-gradient)] px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
+            className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
           />
 
           <p className="text-center text-sm text-zinc-400">

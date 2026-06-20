@@ -56,7 +56,7 @@ export function TotpSetup({
             label="Verify & activate"
             onClick={onVerify}
             disabled={verifyCode.length < 6}
-            className="rounded-xl border-0 bg-[var(--brand-gradient)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
+            className="rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
           />
           <Button
             size="small"

@@ -97,7 +97,7 @@ export function CreateOrgForm({
               label="Create"
               loading={isSubmitting}
               disabled={isSubmitting || slugStatus === "taken"}
-              className="rounded-xl border-0 bg-[var(--brand-gradient)] px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-2 text-sm font-semibold text-white"
             />
           </div>
         </Form>

@@ -67,6 +67,18 @@ const customTailwind = {
     separator: { className: "border-0" },
   },
 
+  // Breadcrumb
+  breadcrumb: {
+    root: { className: "bg-transparent p-0" },
+    menu: { className: "flex items-center gap-1" },
+    action: {
+      className: "text-zinc-400 hover:text-white transition-colors text-sm",
+    },
+    icon: { className: "text-zinc-400" },
+    separator: { className: "text-zinc-600 mx-2" },
+    separatorIcon: { className: "w-3 h-3" },
+  },
+
   // Tooltip
   tooltip: {
     ...Tailwind.tooltip,
@@ -116,7 +128,7 @@ const customTailwind = {
     ...Tailwind.dropdown,
     root: {
       className:
-        "cursor-pointer inline-flex relative select-none transition-colors duration-200 ease-in-out rounded-xl w-full shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 m-0 font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border transition-colors duration-200 appearance-none rounded-lg focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] hover:border-blue-500 border-gray-300 dark:border-blue-900/40",
+        "cursor-pointer inline-flex relative select-none transition-colors duration-200 ease-in-out rounded-xl w-full shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 m-0 font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border transition-colors duration-200 appearance-none rounded-lg focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] hover:border-blue-500 border-gray-300 dark:border-blue-900/40 items-center",
     },
     label: {
       className: "text-white/80",
@@ -156,6 +168,220 @@ const customTailwind = {
     emptyMessage: {
       className: "text-zinc-400 px-4 py-2.5",
     },
+  },
+
+  // MultiSelect
+  multiselect: {
+    root: {
+      className:
+        "inline-flex cursor-pointer select-none bg-brand-dark border border-white/10 text-white/80 transition-colors duration-200 ease-in-out rounded-xl w-full hover:border-white/20 focus:outline-none focus:outline-offset-0 items-center",
+    },
+    labelContainer: {
+      className: "overflow-hidden flex flex-auto cursor-pointer",
+    },
+    label: { className: "text-white/80 px-3 py-2 text-sm" },
+    token: {
+      className:
+        "py-1 px-2 mr-2 bg-white/10 text-white/80 rounded-full inline-flex items-center",
+    },
+    removeTokenIcon: { className: "ml-1 text-zinc-400 hover:text-white" },
+    trigger: {
+      className: "flex items-center justify-center shrink-0 text-zinc-400 w-12",
+    },
+    dropdownIcon: { className: "w-4 h-4" },
+    header: {
+      className:
+        "p-3 border-b border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+    },
+    panel: {
+      className: "bg-brand-dark border border-white/10 rounded-xl shadow-lg",
+    },
+    wrapper: {
+      className: "max-h-60 overflow-auto bg-brand-dark rounded-xl",
+    },
+    list: { className: "list-none p-1 m-0" },
+    itemGroup: {
+      className:
+        "text-zinc-400 text-xs font-semibold px-3 py-2 uppercase tracking-wider",
+    },
+    item: ({ context }: { context?: { checked?: boolean } }) => ({
+      className: classNames(
+        "cursor-pointer font-normal whitespace-nowrap px-3 py-2 rounded-lg transition-colors flex items-center gap-2",
+        context?.checked
+          ? "bg-cyan-500/20 text-cyan-200"
+          : "text-zinc-100 hover:bg-white/10",
+      ),
+    }),
+    checkboxContainer: { className: "mr-2" },
+    checkbox: {
+      root: {
+        className:
+          "inline-flex items-center justify-center w-5 h-5 rounded border border-white/10 bg-white/5",
+      },
+      icon: { className: "text-cyan-400 text-xs" },
+    },
+    filterContainer: { className: "relative p-2" },
+    filterInput: {
+      className:
+        "w-full rounded-lg border border-white/10 bg-white/95 text-slate-900 px-4 py-2.5 pr-10",
+    },
+    filterIcon: {
+      className: "absolute right-5 top-1/2 -translate-y-1/2 text-gray-400",
+    },
+    emptyMessage: {
+      className: "text-zinc-400 px-4 py-2.5",
+    },
+  },
+
+  // DataTable
+  datatable: {
+    root: {
+      className: "relative",
+    },
+    header: {
+      className:
+        "bg-brand-dark text-zinc-100 border-b border-white/10 p-4 rounded-t-xl",
+    },
+    table: {
+      className: "w-full border-spacing-0",
+    },
+    thead: {
+      className: "bg-brand-dark",
+    },
+    headerRow: {
+      className: "",
+    },
+    column: {
+      headerCell: {
+        className:
+          "text-zinc-300 font-semibold text-sm px-4 py-3 text-left bg-brand-dark border-b border-white/10",
+      },
+      headerContent: {
+        className: "flex flex-row items-center",
+      },
+      headerTitle: {
+        className: "font-semibold",
+      },
+      sortIcon: {
+        className: "text-zinc-400 ml-1",
+      },
+      columnResizer: {
+        className: "w-2 h-full cursor-col-resize",
+      },
+      bodyCell: {
+        className: "text-zinc-200 text-sm px-4 py-3 border-b border-white/10",
+      },
+    },
+    tbody: {
+      className: "bg-brand-dark/50",
+    },
+    bodyRow: {
+      className: "hover:bg-white/5 transition-colors",
+    },
+    footerRow: {
+      className: "",
+    },
+    footerCell: {
+      className:
+        "text-zinc-300 text-sm px-4 py-3 border-t border-white/10 bg-brand-dark",
+    },
+    emptyMessage: {
+      className: "text-zinc-400 px-4 py-8 text-center text-sm",
+    },
+    loadingOverlay: {
+      className:
+        "absolute inset-0 bg-brand-dark/60 flex items-center justify-center z-10",
+    },
+    loadingIcon: {
+      className: "w-8 h-8 text-cyan-400 animate-spin",
+    },
+    footer: {
+      className:
+        "bg-brand-dark text-zinc-300 border-t border-white/10 p-4 rounded-b-xl",
+    },
+    paginator: {
+      root: {
+        className:
+          "rounded-b-xl rounded-t-none flex items-center flex-wrap gap-2 bg-brand-dark text-zinc-300 px-4 py-3 border-t border-white/10",
+      },
+      firstPageButton: {
+        className:
+          "w-8 h-8 rounded-lg border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors",
+      },
+      prevPageButton: {
+        className:
+          "w-8 h-8 rounded-lg border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors",
+      },
+      nextPageButton: {
+        className:
+          "w-8 h-8 rounded-lg border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors",
+      },
+      lastPageButton: {
+        className:
+          "w-8 h-8 rounded-lg border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors",
+      },
+      pageButton: {
+        className:
+          "w-8 h-8 rounded-lg border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors",
+      },
+      current: {
+        className: "text-zinc-100 font-medium",
+      },
+      RPPDropdown: {
+        root: {
+          className:
+            "inline-flex relative cursor-pointer bg-brand-dark border border-white/10 rounded-lg text-white/80 h-8 mx-2 w-auto",
+        },
+        input: {
+          className:
+            "text-white/80 text-xs py-1.5 px-2 bg-transparent flex-auto w-[1%] cursor-pointer border-0 focus:outline-none",
+        },
+        trigger: {
+          className:
+            "flex items-center justify-center shrink-0 text-zinc-400 w-8 rounded-r-md",
+        },
+        panel: {
+          className:
+            "bg-brand-dark border border-white/10 rounded-lg shadow-lg",
+        },
+        wrapper: { className: "bg-brand-dark" },
+        list: { className: "list-none p-1 m-0" },
+        item: {
+          className:
+            "text-zinc-100 cursor-pointer font-normal whitespace-nowrap px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-xs",
+        },
+      },
+      JTPInput: {
+        root: {
+          className: "inline-flex mx-2",
+        },
+        input: {
+          root: {
+            className:
+              "w-12 text-white/80 text-xs py-1.5 px-2 bg-brand-dark border border-white/10 rounded-lg focus:outline-none",
+          },
+        },
+      },
+    },
+  },
+
+  // Badge
+  badge: {
+    ...Tailwind.badge,
+    root: ({ props }: { props: Record<string, unknown> }) => ({
+      className: classNames(
+        "inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium",
+        {
+          "bg-cyan-500/20 text-cyan-300": !props.severity && !props.value,
+          "bg-emerald-500/20 text-emerald-300": props.severity === "success",
+          "bg-blue-500/20 text-blue-300": props.severity === "info",
+          "bg-orange-500/20 text-orange-300": props.severity === "warning",
+          "bg-red-500/20 text-red-300": props.severity === "danger",
+          "bg-gray-500/20 text-gray-300": props.severity === "secondary",
+          "bg-purple-500/20 text-purple-300": props.severity === "help",
+        },
+      ),
+    }),
   },
 
   // Button

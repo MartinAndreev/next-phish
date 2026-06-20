@@ -31,8 +31,8 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
     <>
       {expanded && isMobile && (
         <button
+          type="button"
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          role="button"
           tabIndex={0}
           onClick={collapse}
           onKeyDown={(e) => {

@@ -1,5 +1,9 @@
 import { Container } from "./container";
-import { EMAIL_SERVICE_TOKEN, renderTemplate } from "@next-phish/backend";
+import {
+  EMAIL_SERVICE_TOKEN,
+  OrganizationRepository,
+  renderTemplate,
+} from "@next-phish/backend";
 import type { IEmailService } from "@next-phish/backend";
 
 import { betterAuth } from "better-auth";
@@ -61,11 +65,8 @@ export const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
-          const member = await db.member.findFirst({
-            where: { userId: session.userId },
-            orderBy: { createdAt: "asc" },
-            select: { organizationId: true },
-          });
+          const orgRepo = Container.get(OrganizationRepository);
+          const member = await orgRepo.findFirstByUserId(session.userId);
 
           return {
             data: {

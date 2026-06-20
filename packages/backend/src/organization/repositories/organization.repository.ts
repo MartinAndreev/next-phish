@@ -46,4 +46,14 @@ export class OrganizationRepository {
       },
     }) as Promise<OrganizationWithMembers | null>;
   }
+
+  async findFirstByUserId(
+    userId: string,
+  ): Promise<{ organizationId: string } | null> {
+    return this.db.member.findFirst({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+      select: { organizationId: true },
+    });
+  }
 }

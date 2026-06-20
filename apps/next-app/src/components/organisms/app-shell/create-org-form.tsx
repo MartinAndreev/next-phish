@@ -5,10 +5,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import {
-  FormMessage,
-  errorClassName,
-} from "@/src/components/atoms/form-message";
+import { FormMessage } from "@/src/components/atoms/form-message";
+import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { createOrganizationSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SlugField } from "@/src/components/atoms/slug-field";

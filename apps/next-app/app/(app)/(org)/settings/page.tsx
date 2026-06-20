@@ -1,16 +1,10 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/src/server/auth";
 import { SettingsContainer } from "@/src/components/organisms/settings";
+import { getRequiredSession } from "@/src/server/get-required-session";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) redirect("/login");
+  const session = await getRequiredSession();
 
   return (
     <div className="px-6 py-8">

@@ -7,19 +7,26 @@ import { twMerge } from "tailwind-merge";
 function classNames(
   ...args: (string | boolean | undefined | null | Record<string, unknown>)[]
 ): string {
-  return args
-    .filter(Boolean)
-    .map((arg) => {
-      if (typeof arg === "string") return arg;
-      if (typeof arg === "object" && arg !== null) {
-        return Object.entries(arg)
-          .filter(([, v]) => Boolean(v))
-          .map(([k]) => k)
-          .join(" ");
+  const classList: string[] = [];
+
+  for (const arg of args) {
+    if (!arg) {
+      continue;
+    }
+
+    if (typeof arg === "string") {
+      classList.push(arg);
+      continue;
+    }
+
+    for (const [key, value] of Object.entries(arg)) {
+      if (value) {
+        classList.push(key);
       }
-      return "";
-    })
-    .join(" ");
+    }
+  }
+
+  return classList.join(" ");
 }
 
 const customTailwind = {

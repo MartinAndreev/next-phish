@@ -5,10 +5,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import type { FieldInputProps } from "formik";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
-import {
-  FormMessage,
-  errorClassName,
-} from "@/src/components/atoms/form-message";
+import { FormMessage } from "@/src/components/atoms/form-message";
+import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { resetPasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import Link from "next/link";

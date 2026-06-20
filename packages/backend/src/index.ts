@@ -57,3 +57,37 @@ export type {
   GetOrganizationMembersInput,
 } from "./organization";
 export { registerOrganizationServices } from "./organization";
+
+export {
+  EmailTemplateRepository,
+  EmailTemplateService,
+  GetEmailTemplatesQuery,
+  GetEmailTemplateByIdQuery,
+  CreateEmailTemplateCommand,
+  UpdateEmailTemplateCommand,
+  DeleteEmailTemplateCommand,
+} from "./email-template";
+export type {
+  EmailTemplateStatus,
+  EmailTemplateAuthorView,
+  EmailTemplateListItemView,
+  EmailTemplateView,
+  CreateEmailTemplateData,
+  UpdateEmailTemplateData,
+} from "./email-template";
+export {
+  emailTemplateStatusSchema,
+  GetEmailTemplatesSchema,
+  CreateEmailTemplateCommandSchema,
+  UpdateEmailTemplateCommandSchema,
+  GetEmailTemplateByIdSchema,
+  DeleteEmailTemplateCommandSchema,
+} from "./email-template";
+export type {
+  GetEmailTemplatesInput,
+  CreateEmailTemplateCommandInput,
+  UpdateEmailTemplateCommandInput,
+  GetEmailTemplateByIdInput,
+  DeleteEmailTemplateCommandInput,
+} from "./email-template";
+export { registerEmailTemplateServices } from "./email-template";

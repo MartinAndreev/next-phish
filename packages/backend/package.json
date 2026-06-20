@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next-phish/database": "workspace:*",
+    "@prisma/client": "^6.19.3",
     "ejs": "^3",
     "nodemailer": "^6",
     "typedi": "^0.10",

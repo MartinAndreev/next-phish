@@ -52,3 +52,43 @@ export const organizationMemberProcedure = protectedProcedure
       ctx: { ...ctx, member },
     });
   });
+
+export const activeOrganizationProcedure = protectedProcedure.use(
+  async ({ ctx, next }) => {
+    const activeOrganizationId = (
+      ctx.session as typeof ctx.session & {
+        session?: { activeOrganizationId?: string | null };
+      }
+    ).session?.activeOrganizationId;
+
+    if (!activeOrganizationId) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "You must select an active organization",
+      });
+    }
+
+    const orgRepo = Container.get(OrganizationRepository);
+    const org = await orgRepo.findById(activeOrganizationId);
+
+    if (!org) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Organization not found",
+      });
+    }
+
+    const member = org.members.find((m) => m.userId === ctx.session.user.id);
+
+    if (!member) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "You are not a member of the active organization",
+      });
+    }
+
+    return next({
+      ctx: { ...ctx, activeOrganizationId, member },
+    });
+  },
+);

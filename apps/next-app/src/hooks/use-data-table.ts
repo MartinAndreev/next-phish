@@ -17,6 +17,16 @@ export function useDataTable(options?: UseDataTableOptions) {
   });
 
   function buildQueryInput<T extends string>(sortFields: T[]) {
+    const normalizedFilters = Object.entries(filterValues).reduce<
+      Record<string, string>
+    >((acc, [key, value]) => {
+      if (typeof value === "string" && value) {
+        acc[key] = value;
+      }
+
+      return acc;
+    }, {});
+
     const sort =
       sorts.length > 0
         ? sorts.reduce<Array<{ field: T; order: DataTableSort["order"] }>>(
@@ -40,8 +50,8 @@ export function useDataTable(options?: UseDataTableOptions) {
       offset: page.offset,
       sort: sort && sort.length > 0 ? sort : undefined,
       filters:
-        Object.keys(filterValues).length > 0
-          ? (filterValues as Record<string, string>)
+        Object.keys(normalizedFilters).length > 0
+          ? normalizedFilters
           : undefined,
     };
   }

@@ -8,6 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EmailTemplateStatus {
+  DRAFT
+  ACTIVE
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String
@@ -26,6 +31,7 @@ model User {
   twoFactor        TwoFactor?
   members          Member[]
   invitations      Invitation[]
+  emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
 
   @@map("user")
 }
@@ -100,6 +106,7 @@ model Organization {
 
   members     Member[]
   invitations Invitation[]
+  emailTemplates EmailTemplate[]
 
   @@map("organization")
 }
@@ -143,6 +150,27 @@ model Setting {
   value Json
 
   @@map("setting")
+}
+
+model EmailTemplate {
+  id             String              @id @default(cuid())
+  name           String
+  tags           String[]
+  html           String
+  design         Json
+  organizationId String
+  createdById    String
+  status         EmailTemplateStatus @default(DRAFT)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization @relation(references: [id], fields: [organizationId], onDelete: Cascade)
+  createdBy    User         @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
+  @@map("email_template")
 }
 
 model Page {

@@ -211,6 +211,28 @@ const customTailwind = {
     },
   },
 
+  // Chips
+  chips: {
+    root: {
+      className:
+        "flex-row items-center flex-wrap gap-2 bg-brand-dark text-white border border-white/10 rounded-lg p-1",
+    },
+    container: {
+      className: "flex flex-row items-center gap-1 flex-wrap",
+    },
+    input: {
+      className:
+        "w-full text-white/80 text-xs py-1 px-2 bg-transparent flex-auto w-[1%] cursor-pointer border-0 focus:outline-none",
+    },
+    inputToken: {
+      className: "text-white/80 inline-flex items-center",
+    },
+    token: {
+      className:
+        "text-white/80 text-xs py-1 px-2 bg-[image:var(--brand-gradient)] rounded-lg flex items-center gap-2 transition-colors items-center",
+    },
+  },
+
   // DataTable
   datatable: {
     root: {

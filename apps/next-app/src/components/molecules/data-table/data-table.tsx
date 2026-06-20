@@ -7,6 +7,7 @@ import type { AppDataTableProps } from "./types";
 import { FilterBar } from "./filter-bar";
 import { ActionColumn } from "./action-column";
 import { useTableState } from "@/src/hooks/use-table-state";
+import { useTranslation } from "@/src/lib/i18n";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -27,6 +28,7 @@ export function AppDataTable<T extends Record<string, any>>({
   defaultRows = 10,
   rowsPerPageOptions = ROWS_PER_PAGE_OPTIONS,
 }: AppDataTableProps<T>) {
+  const t = useTranslation();
   const { state, setSearch, setSorts, setPage, setFilter, multiSortMeta } =
     useTableState({ defaultRows, onSearch, onSort, onFilter, onPage });
 
@@ -40,8 +42,7 @@ export function AppDataTable<T extends Record<string, any>>({
           placeholder={searchPlaceholder}
           pt={{
             root: {
-              className:
-                "w-full rounded-lg border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 text-xs py-2 pl-9 pr-3",
+              className: "w-full text-xs py-2 pl-9 pr-3",
             },
           }}
         />
@@ -66,7 +67,7 @@ export function AppDataTable<T extends Record<string, any>>({
       totalRecords={total}
       rowsPerPageOptions={rowsPerPageOptions}
       paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-      currentPageReportTemplate="{first} to {last} of {totalRecords}"
+      currentPageReportTemplate={t("common.currentPageReport")}
       onPage={setPage}
       sortMode="multiple"
       multiSortMeta={multiSortMeta}
@@ -75,7 +76,7 @@ export function AppDataTable<T extends Record<string, any>>({
       loading={loading}
       showGridlines
       header={header}
-      emptyMessage="No records found."
+      emptyMessage={t("common.noRecordsFound")}
       size="normal"
       dataKey={dataKey as string}
       tableStyle={{ minWidth: "50rem" }}

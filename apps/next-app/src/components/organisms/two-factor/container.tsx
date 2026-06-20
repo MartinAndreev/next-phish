@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/src/lib/auth-client";
 import { TwoFactorPresentation } from "./presentation";
+import { useTranslation } from "@/src/lib/i18n";
 
 export function TwoFactorContainer() {
+  const t = useTranslation();
   const router = useRouter();
   const [error, setError] = useState("");
   const [code, setCode] = useState("");
@@ -17,7 +19,7 @@ export function TwoFactorContainer() {
       trustDevice: true,
     });
     if (err) {
-      setError(err.message || err.code || "Invalid code");
+      setError(err.message || err.code || t("twoFactorPage.invalidCode"));
       return;
     }
     router.push("/");

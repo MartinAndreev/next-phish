@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { PasswordPrompt } from "./password-prompt";
 import { TotpSetup } from "./totp-setup";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface TwoFactorPresentationProps {
   isEnabled: boolean;
@@ -42,11 +43,13 @@ export function TwoFactorPresentation({
   onConfirmDisable,
   onReset,
 }: TwoFactorPresentationProps) {
+  const t = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <h3 className="text-lg font-medium text-white">
-          Two-Factor Authentication
+          {t("settings.twoFactorTitle")}
         </h3>
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -55,7 +58,7 @@ export function TwoFactorPresentation({
               : "bg-zinc-500/20 text-zinc-400"
           }`}
         >
-          {isEnabled ? "Enabled" : "Disabled"}
+          {isEnabled ? t("common.enabled") : t("common.disabled")}
         </span>
       </div>
 
@@ -67,21 +70,21 @@ export function TwoFactorPresentation({
                 <i className="pi pi-mobile text-lg text-zinc-300" />
                 <div>
                   <p className="text-sm font-medium text-zinc-100">
-                    Authenticator app
+                    {t("settings.authenticatorApp")}
                   </p>
                   <p className="text-xs text-zinc-400">
-                    Use an app like Google Authenticator or Authy
+                    {t("settings.authenticatorHint")}
                   </p>
                 </div>
               </div>
               {isEnabled ? (
                 <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
-                  Active
+                  {t("common.active")}
                 </span>
               ) : (
                 <Button
                   size="small"
-                  label="Set up"
+                  label={t("settings.setupAction")}
                   onClick={onEnableTotp}
                   className="rounded-lg px-3 py-1.5 text-xs"
                 />
@@ -94,7 +97,7 @@ export function TwoFactorPresentation({
           {isEnabled && (
             <Button
               size="small"
-              label="Disable two-factor authentication"
+              label={t("settings.disableAction")}
               severity="danger"
               onClick={onConfirmDisable}
               className="w-fit rounded-lg px-3 py-1.5 text-xs"
@@ -109,7 +112,7 @@ export function TwoFactorPresentation({
           onChange={onPasswordChange}
           onSubmit={onEnableTotpWithPassword}
           onCancel={onReset}
-          label="Enter your password to set up the authenticator app."
+          label={t("settings.enablePasswordPrompt")}
         />
       )}
 
@@ -130,7 +133,7 @@ export function TwoFactorPresentation({
           onChange={onPasswordChange}
           onSubmit={onDisable}
           onCancel={onReset}
-          label="Enter your password to disable two-factor authentication."
+          label={t("settings.disablePasswordPrompt")}
         />
       )}
 

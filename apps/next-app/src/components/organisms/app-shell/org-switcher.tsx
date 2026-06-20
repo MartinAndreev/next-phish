@@ -6,12 +6,14 @@ import { Button } from "primereact/button";
 import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
 import { CreateOrgModal } from "./create-org-modal";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface OrgSwitcherProps {
   collapsed?: boolean;
 }
 
 export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
+  const t = useTranslation();
   const { organizations, activeOrg, setActive, isLoading } =
     useMyOrganizations();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -39,7 +41,7 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
           value={selectedOrg}
           options={organizations}
           optionLabel="name"
-          placeholder="Select organization"
+          placeholder={t("nav.selectOrganization")}
           onChange={(e) => {
             if (e.value) {
               setActive(e.value.id);
@@ -51,7 +53,7 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
             if (!option)
               return (
                 <span className="text-xs text-zinc-400">
-                  Select organization
+                  {t("nav.selectOrganization")}
                 </span>
               );
             return (
@@ -69,7 +71,7 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
               </div>
               {option.$me.role === "owner" && (
                 <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-medium text-cyan-300">
-                  Owner
+                  {t("organizations.ownerBadge")}
                 </span>
               )}
             </div>
@@ -80,7 +82,7 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
             size="small"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
             icon="pi pi-plus text-xs"
-            tooltip="New organization"
+            tooltip={t("nav.newOrganization")}
             tooltipOptions={{ position: "top" }}
             onClick={() => setShowCreateModal(true)}
           />

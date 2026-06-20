@@ -7,6 +7,7 @@ import { setupSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SetupPresentation } from "./presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface SetupValues {
   name: string;
@@ -16,6 +17,7 @@ interface SetupValues {
 }
 
 export function SetupContainer() {
+  const t = useTranslation();
   const router = useRouter();
   const { status, setError } = useFormStatus();
 
@@ -29,7 +31,7 @@ export function SetupContainer() {
     });
 
     if (err) {
-      setError(err.message || err.code || "Failed to create account");
+      setError(err.message || err.code || t("setup.failedToCreateAccount"));
       return;
     }
 

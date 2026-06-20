@@ -3,6 +3,7 @@
 import { authClient } from "@/src/lib/auth-client";
 import { TwoFactorPresentation } from "./presentation";
 import { useTwoFactorState } from "@/src/hooks/use-two-factor-state";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface TwoFactorContainerProps {
   user: {
@@ -13,6 +14,7 @@ interface TwoFactorContainerProps {
 }
 
 export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
+  const t = useTranslation();
   const { data: session } = authClient.useSession();
   const isEnabled = session?.user?.twoFactorEnabled ?? user.twoFactorEnabled;
   const {
@@ -33,7 +35,7 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
       password,
     });
     if (err) {
-      setError(err.message || err.code || "Failed to enable 2FA");
+      setError(err.message || err.code || t("settings.failedToEnable2fa"));
       return;
     }
 
@@ -48,17 +50,17 @@ export function TwoFactorContainer({ user }: TwoFactorContainerProps) {
       code: verifyCode,
     });
     if (err) {
-      setError(err.message || err.code || "Invalid code");
+      setError(err.message || err.code || t("twoFactorPage.invalidCode"));
       return;
     }
-    complete("Authenticator app has been configured successfully.");
+    complete(t("settings.authenticatorConfigured"));
   }
 
   async function handleDisable() {
     setError("");
     const { error: err } = await authClient.twoFactor.disable({ password });
     if (err) {
-      setError(err.message || err.code || "Failed to disable 2FA");
+      setError(err.message || err.code || t("settings.failedToDisable2fa"));
       return;
     }
     reset();

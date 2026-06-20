@@ -1,7 +1,10 @@
 import Image from "next/image";
 import { ForgotPasswordContainer } from "@/src/components/organisms/forgot-password";
+import { getTranslator } from "@/src/lib/i18n/server";
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const t = await getTranslator();
+
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
       <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,_rgba(41,184,255,0.22),_transparent_65%)]" />
@@ -20,14 +23,14 @@ export default function ForgotPasswordPage() {
               priority
             />
             <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
-              Password recovery
+              {t("forgotPassword.badge")}
             </div>
             <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
-              Forgot your password?
+              {t("forgotPassword.title")}
             </h1>
             <p className="mt-2 text-sm leading-6 text-zinc-400">
-              No worries, we will send you a reset link.
+              {t("forgotPassword.subtitle")}
             </p>
           </div>
           <ForgotPasswordContainer />

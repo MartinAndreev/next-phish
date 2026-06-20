@@ -3,6 +3,7 @@
 import { InputOtp } from "primereact/inputotp";
 import { Button } from "primereact/button";
 import { FormMessage } from "@/src/components/atoms/form-message";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface TwoFactorPresentationProps {
   error: string;
@@ -17,11 +18,11 @@ export function TwoFactorPresentation({
   onCodeChange,
   onVerify,
 }: TwoFactorPresentationProps) {
+  const t = useTranslation();
+
   return (
     <div className="space-y-4">
-      <p className="text-sm text-zinc-400">
-        Enter the code from your authenticator app.
-      </p>
+      <p className="text-sm text-zinc-400">{t("twoFactorPage.intro")}</p>
       <div className="flex justify-center">
         <InputOtp
           value={code}
@@ -32,7 +33,7 @@ export function TwoFactorPresentation({
       </div>
       <Button
         size="small"
-        label="Verify"
+        label={t("twoFactorPage.verify")}
         onClick={onVerify}
         disabled={code.length < 6}
         className="w-full mt-4"

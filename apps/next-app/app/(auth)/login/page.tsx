@@ -7,6 +7,7 @@ import {
   getAuthErrorMessage,
   getAuthSuccessMessage,
 } from "@/src/lib/auth-errors";
+import { getLocale, getTranslator } from "@/src/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,15 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const [locale, t] = await Promise.all([getLocale(), getTranslator()]);
   const { error: errorCode, message: messageCode } = await searchParams;
   const authError = getAuthErrorMessage(
     typeof errorCode === "string" ? errorCode : undefined,
+    locale,
   );
   const authSuccess = getAuthSuccessMessage(
     typeof messageCode === "string" ? messageCode : undefined,
+    locale,
   );
 
   const bus = Container.get(MessageBus);
@@ -45,25 +49,25 @@ export default async function LoginPage({
               priority
             />
             <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
-              Secure access
+              {t("login.badge")}
             </div>
             <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
-              Welcome back
+              {t("login.title")}
             </h1>
             <p className="mt-2 text-sm leading-6 text-zinc-400">
-              Sign in to your account
+              {t("login.subtitle")}
             </p>
           </div>
           <LoginContainer authError={authError} authSuccess={authSuccess} />
           {count === 0 && (
             <p className="mt-6 text-center text-sm text-zinc-400">
-              Need the first admin account?{" "}
+              {t("login.firstAdminPrompt")}{" "}
               <Link
                 href="/setup"
                 className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
               >
-                Start setup
+                {t("login.startSetup")}
               </Link>
             </p>
           )}

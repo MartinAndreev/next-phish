@@ -13,6 +13,8 @@ import { FormMessage } from "@/src/components/atoms/form-message";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { useRouter } from "next/navigation";
+import { type Locale, useSetLocale, useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -44,6 +46,9 @@ interface GeneralValues {
 }
 
 export function GeneralTab({ user }: GeneralTabProps) {
+  const t = useTranslation();
+  const setLocale = useSetLocale();
+  const router = useRouter();
   const { status, setError, setSuccess, reset } = useFormStatus();
 
   async function handleSubmit(values: GeneralValues) {
@@ -56,11 +61,13 @@ export function GeneralTab({ user }: GeneralTabProps) {
     } as Parameters<typeof authClient.updateUser>[0]);
 
     if (err) {
-      setError(err.message || err.code || "Failed to update profile");
+      setError(err.message || err.code || t("settings.failedToUpdateProfile"));
       return;
     }
 
-    setSuccess("Profile updated successfully");
+    setLocale(values.language as Locale);
+    router.refresh();
+    setSuccess(t("settings.profileUpdated"));
   }
 
   return (
@@ -80,7 +87,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               htmlFor="name"
               className="block text-sm font-medium text-zinc-100"
             >
-              Name
+              {t("common.name")}
             </label>
             <Field name="name">
               {({ field }: { field: FieldInputProps<string> }) => (
@@ -105,7 +112,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               htmlFor="email"
               className="block text-sm font-medium text-zinc-100"
             >
-              Email
+              {t("common.email")}
             </label>
             <InputText
               size="small"
@@ -115,7 +122,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               className={`${inputClassName} opacity-60`}
             />
             <p className="text-xs text-zinc-400 mt-2">
-              Email cannot be changed here.
+              {t("settings.emailReadonly")}
             </p>
           </div>
 
@@ -124,7 +131,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               htmlFor="timezone"
               className="block text-sm font-medium text-zinc-100"
             >
-              Timezone
+              {t("settings.timezone")}
             </label>
             <Dropdown
               pt={selectSmall}
@@ -134,7 +141,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               options={timezones.map((tz) => ({ label: tz, value: tz }))}
               onChange={(e) => setFieldValue("timezone", e.value)}
               filter
-              placeholder="Select a timezone"
+              placeholder={t("settings.selectTimezone")}
               className="w-full"
             />
           </div>
@@ -144,7 +151,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               htmlFor="language"
               className="block text-sm font-medium text-zinc-100"
             >
-              Language
+              {t("settings.language")}
             </label>
             <Dropdown
               pt={selectSmall}
@@ -153,7 +160,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
               value={values.language}
               options={SUPPORTED_LANGUAGES}
               onChange={(e) => setFieldValue("language", e.value)}
-              placeholder="Select a language"
+              placeholder={t("settings.selectLanguage")}
               className="w-full"
             />
           </div>
@@ -168,7 +175,7 @@ export function GeneralTab({ user }: GeneralTabProps) {
           <Button
             size="small"
             type="submit"
-            label="Save changes"
+            label={t("common.saveChanges")}
             loading={isSubmitting}
             disabled={isSubmitting}
             className="mt-2 w-fit rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"

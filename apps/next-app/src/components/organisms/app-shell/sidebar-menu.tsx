@@ -7,42 +7,13 @@ import { Tooltip } from "primereact/tooltip";
 import type { MenuItem } from "primereact/menuitem";
 import type { OrganizationView } from "@next-phish/backend";
 import { canManageOrganizations } from "@/src/lib/organization-helpers";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface NavItem {
   label: string;
   icon: string;
   href: string;
 }
-
-const dashboardItems: NavItem[] = [
-  { label: "Dashboard", icon: "pi pi-home", href: "/" },
-];
-
-const planningItems: NavItem[] = [
-  { label: "Tasks", icon: "pi pi-check-square", href: "/tasks" },
-  { label: "Schedule", icon: "pi pi-calendar", href: "/schedule" },
-];
-
-const simulationItems: NavItem[] = [
-  { label: "Campaigns", icon: "pi pi-bolt", href: "/campaigns" },
-  { label: "Pages", icon: "pi pi-file", href: "/pages" },
-  {
-    label: "Email templates",
-    icon: "pi pi-envelope",
-    href: "/email-templates",
-  },
-  { label: "Sending Profiles", icon: "pi pi-send", href: "/sending-profiles" },
-  { label: "Target Groups", icon: "pi pi-users", href: "/target-groups" },
-];
-
-const managementItems: NavItem[] = [
-  { label: "Organizations", icon: "pi pi-building", href: "/organizations" },
-];
-
-const adminItems: NavItem[] = [
-  { label: "Users", icon: "pi pi-user", href: "/users" },
-  { label: "Settings", icon: "pi pi-cog", href: "/settings" },
-];
 
 interface SidebarMenuProps {
   collapsed?: boolean;
@@ -125,26 +96,79 @@ export function SidebarMenu({
   role,
   organizations = EMPTY_ORGANIZATIONS,
 }: SidebarMenuProps) {
+  const t = useTranslation();
   const pathname = usePathname();
+
+  const dashboardItems: NavItem[] = [
+    { label: t("common.dashboard"), icon: "pi pi-home", href: "/" },
+  ];
+
+  const planningItems: NavItem[] = [
+    { label: t("nav.tasks"), icon: "pi pi-check-square", href: "/tasks" },
+    { label: t("nav.schedule"), icon: "pi pi-calendar", href: "/schedule" },
+  ];
+
+  const simulationItems: NavItem[] = [
+    { label: t("nav.campaigns"), icon: "pi pi-bolt", href: "/campaigns" },
+    { label: t("nav.pages"), icon: "pi pi-file", href: "/pages" },
+    {
+      label: t("nav.emailTemplates"),
+      icon: "pi pi-envelope",
+      href: "/email-templates",
+    },
+    {
+      label: t("nav.sendingProfiles"),
+      icon: "pi pi-send",
+      href: "/sending-profiles",
+    },
+    {
+      label: t("nav.targetGroups"),
+      icon: "pi pi-users",
+      href: "/target-groups",
+    },
+  ];
+
+  const managementItems: NavItem[] = [
+    {
+      label: t("nav.organizations"),
+      icon: "pi pi-building",
+      href: "/organizations",
+    },
+  ];
+
+  const adminItems: NavItem[] = [
+    { label: t("nav.users"), icon: "pi pi-user", href: "/users" },
+    { label: t("common.settings"), icon: "pi pi-cog", href: "/settings" },
+  ];
 
   const canManageOrgs = canManageOrganizations(organizations);
 
   const items: MenuItem[] = [
     ...buildMenuItems(dashboardItems, pathname, collapsed),
     { separator: true },
-    ...buildGroup("Planning", planningItems, pathname, collapsed),
+    ...buildGroup(t("nav.planning"), planningItems, pathname, collapsed),
     { separator: true },
-    ...buildGroup("Simulations", simulationItems, pathname, collapsed),
+    ...buildGroup(t("nav.simulations"), simulationItems, pathname, collapsed),
     ...(canManageOrgs
       ? [
           { separator: true },
-          ...buildGroup("Management", managementItems, pathname, collapsed),
+          ...buildGroup(
+            t("nav.management"),
+            managementItems,
+            pathname,
+            collapsed,
+          ),
         ]
       : []),
     ...(role === "admin"
       ? [
           { separator: true },
-          ...buildGroup("Administration", adminItems, pathname, collapsed),
+          ...buildGroup(
+            t("nav.administration"),
+            adminItems,
+            pathname,
+            collapsed,
+          ),
         ]
       : []),
   ];

@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { ResetPasswordContainer } from "@/src/components/organisms/reset-password";
 import { FormMessage } from "@/src/components/atoms/form-message";
+import { getTranslator } from "@/src/lib/i18n/server";
 
 export default async function ResetPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const t = await getTranslator();
   const { email: emailParam } = await searchParams;
   const email = typeof emailParam === "string" ? emailParam : "";
 
@@ -29,11 +31,11 @@ export default async function ResetPasswordPage({
               priority
             />
             <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
-              Password recovery
+              {t("resetPassword.badge")}
             </div>
             <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
-              Reset password
+              {t("resetPassword.title")}
             </h1>
           </div>
           {email ? (
@@ -41,13 +43,13 @@ export default async function ResetPasswordPage({
           ) : (
             <div className="flex flex-col items-center gap-4">
               <FormMessage variant="error">
-                Missing email address. Please request a new verification code.
+                {t("resetPassword.missingEmail")}
               </FormMessage>
               <Link
                 href="/forgot-password"
                 className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
               >
-                Go to forgot password
+                {t("resetPassword.goToForgotPassword")}
               </Link>
             </div>
           )}

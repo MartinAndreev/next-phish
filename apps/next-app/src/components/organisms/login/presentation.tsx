@@ -8,6 +8,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import Link from "next/link";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -31,6 +32,7 @@ export function LoginPresentation({
   authSuccess,
   isSubmitting,
 }: LoginPresentationProps) {
+  const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
@@ -40,7 +42,7 @@ export function LoginPresentation({
           htmlFor="email"
           className="block text-sm font-medium text-zinc-100"
         >
-          Email
+          {t("common.email")}
         </label>
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
@@ -56,8 +58,8 @@ export function LoginPresentation({
         </Field>
         <p className="text-xs text-zinc-400 mt-2">
           {useMagicLink
-            ? "We will send a secure sign-in link to this email."
-            : "Use the email address linked to your account."}
+            ? t("login.emailHintMagicLink")
+            : t("login.emailHintPassword")}
         </p>
       </div>
 
@@ -67,7 +69,7 @@ export function LoginPresentation({
             htmlFor="password"
             className="block text-sm font-medium text-zinc-100"
           >
-            Password
+            {t("common.password")}
           </label>
           <Field name="password">
             {({ field }: { field: FieldInputProps<string> }) => (
@@ -80,19 +82,17 @@ export function LoginPresentation({
                 className="w-full"
                 inputClassName={inputClassName}
                 pt={{ iconField: { root: { className: "w-full" } } }}
-                placeholder="Your password"
+                placeholder={t("login.passwordPlaceholder")}
               />
             )}
           </Field>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-400">
-              Password visibility can be toggled from the eye icon.
-            </p>
+            <p className="text-xs text-zinc-400">{t("login.passwordHint")}</p>
             <Link
               href="/forgot-password"
               className="text-xs font-medium text-cyan-300 transition-colors hover:text-cyan-200"
             >
-              Forgot password?
+              {t("login.forgotPassword")}
             </Link>
           </div>
         </div>
@@ -108,7 +108,7 @@ export function LoginPresentation({
       <Button
         size="small"
         type="submit"
-        label={useMagicLink ? "Send magic link" : "Sign in"}
+        label={useMagicLink ? t("login.sendMagicLink") : t("common.signIn")}
         loading={isSubmitting}
         className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
         disabled={isSubmitting}
@@ -122,8 +122,8 @@ export function LoginPresentation({
         className="w-full rounded-xl px-4 py-2.5 justify-center text-sm font-medium text-cyan-200 transition-colors hover:bg-white/5 hover:text-cyan-100"
       >
         {useMagicLink
-          ? "Sign in with password instead"
-          : "Sign in with magic link instead"}
+          ? t("login.signInWithPasswordInstead")
+          : t("login.signInWithMagicLinkInstead")}
       </Button>
     </Form>
   );

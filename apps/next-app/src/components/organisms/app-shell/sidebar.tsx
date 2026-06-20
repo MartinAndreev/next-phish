@@ -5,6 +5,7 @@ import { SidebarHeader } from "./sidebar-header";
 import { SidebarMenu } from "./sidebar-menu";
 import { SidebarProfile } from "./sidebar-profile";
 import type { OrganizationView } from "@next-phish/backend";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface SidebarUser {
   name: string;
@@ -20,6 +21,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
+  const t = useTranslation();
   const [userExpanded, setUserExpanded] = useState(false);
   const expand = useCallback(() => setUserExpanded(true), []);
   const collapse = useCallback(() => setUserExpanded(false), []);
@@ -38,9 +40,9 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") collapse();
           }}
-          aria-label="Close sidebar"
+          aria-label={t("nav.closeSidebar")}
         >
-          <span className="sr-only">Close sidebar</span>
+          <span className="sr-only">{t("nav.closeSidebar")}</span>
         </button>
       )}
 

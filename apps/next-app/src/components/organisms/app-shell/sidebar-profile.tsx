@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Avatar } from "primereact/avatar";
-import { Tooltip } from "primereact/tooltip";
+import { OrgSwitcher } from "./org-switcher";
 
 interface SidebarProfileProps {
   user: {
@@ -17,11 +17,6 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
   if (collapsed) {
     return (
       <div className="border-t border-white/10 p-2">
-        <Tooltip
-          target=".profile-avatar"
-          content={user.name}
-          position="right"
-        />
         <div className="flex flex-col items-center gap-2">
           <Avatar
             image={user.image || undefined}
@@ -43,37 +38,40 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
   }
 
   return (
-    <div className="border-t border-white/10 p-4">
-      <div className="flex items-center gap-3">
-        <Avatar
-          image={user.image || undefined}
-          label={user.image ? undefined : user.name.charAt(0).toUpperCase()}
-          size="normal"
-          shape="circle"
-          className="bg-cyan-600 text-white"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="truncate text-sm font-medium text-zinc-100">
-            {user.name}
-          </p>
-          <p className="truncate text-xs text-zinc-400">{user.email}</p>
+    <div className="border-t border-white/10">
+      <OrgSwitcher />
+      <div className="border-t border-white/10 p-4">
+        <div className="flex items-center gap-3">
+          <Avatar
+            image={user.image || undefined}
+            label={user.image ? undefined : user.name.charAt(0).toUpperCase()}
+            size="normal"
+            shape="circle"
+            className="bg-cyan-600 text-white"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="truncate text-sm font-medium text-zinc-100">
+              {user.name}
+            </p>
+            <p className="truncate text-xs text-zinc-400">{user.email}</p>
+          </div>
         </div>
-      </div>
-      <div className="mt-3 flex gap-2">
-        <Link
-          href="/settings"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <i className="pi pi-cog text-xs" />
-          Settings
-        </Link>
-        <Link
-          href="/signout"
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <i className="pi pi-sign-out text-xs" />
-          Sign out
-        </Link>
+        <div className="mt-3 flex gap-2">
+          <Link
+            href="/settings"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <i className="pi pi-cog text-xs" />
+            Settings
+          </Link>
+          <Link
+            href="/signout"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <i className="pi pi-sign-out text-xs" />
+            Sign out
+          </Link>
+        </div>
       </div>
     </div>
   );

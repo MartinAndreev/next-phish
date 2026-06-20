@@ -22,7 +22,7 @@ export default function OnboardingPage() {
             <div className="mx-auto mb-4 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200/80">
               Getting started
             </div>
-            <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-[var(--brand-gradient)]" />
+            <div className="mx-auto mb-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
             <h1 className="text-3xl font-semibold tracking-tight text-white">
               Create your organization
             </h1>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Formik } from "formik";
 import { authClient } from "@/src/lib/auth-client";
@@ -14,60 +13,12 @@ interface OnboardingValues {
   slug: string;
 }
 
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export function OnboardingContainer() {
   const router = useRouter();
   const { status, setError } = useFormStatus();
-  const [slugStatus, setSlugStatus] = useState<
-    "idle" | "checking" | "available" | "taken"
-  >("idle");
-
-  const checkSlugTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-
-  const checkSlug = useCallback((slug: string) => {
-    if (checkSlugTimeoutRef.current) {
-      clearTimeout(checkSlugTimeoutRef.current);
-    }
-
-    if (!slug) {
-      setSlugStatus("idle");
-      return;
-    }
-
-    setSlugStatus("checking");
-
-    checkSlugTimeoutRef.current = setTimeout(async () => {
-      const { data, error: err } = await authClient.organization.checkSlug({
-        slug,
-      });
-      if (err) {
-        setSlugStatus("taken");
-      } else if (data?.status) {
-        setSlugStatus("available");
-      } else {
-        setSlugStatus("idle");
-      }
-    }, 300);
-  }, []);
 
   async function handleSubmit(values: OnboardingValues) {
     setError("");
-
-    if (slugStatus === "taken") {
-      setError("This slug is already taken");
-      return;
-    }
 
     const { error: err } = await authClient.organization.create({
       name: values.name,
@@ -91,9 +42,6 @@ export function OnboardingContainer() {
     >
       <OnboardingPresentation
         error={status.type === "error" ? status.message : ""}
-        slugStatus={slugStatus}
-        onSlugChange={checkSlug}
-        slugify={slugify}
       />
     </Formik>
   );

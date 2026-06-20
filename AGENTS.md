@@ -11,3 +11,7 @@ Read `docs/architecture.md` before making architectural decisions. It documents 
 Read `docs/coding-standards.md` for state management patterns, hook conventions, and other coding guidelines.
 
 Read `docs/brand.md` for the color palette, gradient usage, and accessibility rules when styling UI.
+
+**IMPORTANT:** NEVER push to remote unless the user explicitly asks you to. Always wait for confirmation before running `git push`.
+
+Run `npx react-doctor@latest --no-telemetry` as part of your checks before committing React component changes. This catches common React issues like missing key props, unnecessary re-renders, and accessibility problems.

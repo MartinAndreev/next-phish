@@ -1,5 +1,9 @@
 import { Container } from "./container";
-import { EMAIL_SERVICE_TOKEN, renderTemplate } from "@next-phish/backend";
+import {
+  EMAIL_SERVICE_TOKEN,
+  OrganizationRepository,
+  renderTemplate,
+} from "@next-phish/backend";
 import type { IEmailService } from "@next-phish/backend";
 
 import { betterAuth } from "better-auth";
@@ -55,6 +59,21 @@ export const auth = betterAuth({
           } catch {
             return { data: user };
           }
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          const orgRepo = Container.get(OrganizationRepository);
+          const member = await orgRepo.findFirstByUserId(session.userId);
+
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: member?.organizationId ?? null,
+            },
+          };
         },
       },
     },

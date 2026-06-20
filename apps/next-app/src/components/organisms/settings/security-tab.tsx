@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangePasswordForm } from "./change-password-form";
-import { TwoFactorContainer } from "./two-factor";
+import { TwoFactorContainer } from "./two-factor/container";
 
 interface SecurityTabProps {
   user: {

@@ -44,6 +44,7 @@ export function TotpSetup({
           Enter the code from your authenticator app to verify setup.
         </p>
         <InputText
+          size="small"
           value={verifyCode}
           onChange={(e) => onVerifyCodeChange(e.target.value)}
           placeholder="000000"
@@ -51,12 +52,14 @@ export function TotpSetup({
         />
         <div className="flex gap-2 mt-5">
           <Button
+            size="small"
             label="Verify & activate"
             onClick={onVerify}
             disabled={verifyCode.length < 6}
-            className="rounded-xl border-0 bg-[var(--brand-gradient)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
+            className="rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"
           />
           <Button
+            size="small"
             label="Cancel"
             outlined
             onClick={onCancel}

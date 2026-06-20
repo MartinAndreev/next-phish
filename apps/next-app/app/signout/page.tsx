@@ -34,6 +34,7 @@ export default function SignOutPage() {
             Something went wrong. Please try again.
           </p>
           <button
+            type="button"
             onClick={() => router.push("/login")}
             className="text-sm text-cyan-300 underline"
           >

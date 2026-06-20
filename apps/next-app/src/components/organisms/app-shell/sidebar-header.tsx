@@ -26,6 +26,7 @@ export function SidebarHeader({
         <button
           type="button"
           onClick={onExpand}
+          aria-label="Expand sidebar"
           className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
           title="Expand sidebar"
         >
@@ -51,6 +52,7 @@ export function SidebarHeader({
         <button
           type="button"
           onClick={onClose}
+          aria-label="Collapse sidebar"
           className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
           title="Collapse sidebar"
         >

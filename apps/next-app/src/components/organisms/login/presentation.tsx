@@ -45,6 +45,7 @@ export function LoginPresentation({
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
             <InputText
+              size="small"
               id="email"
               {...field}
               type="email"
@@ -71,6 +72,7 @@ export function LoginPresentation({
           <Field name="password">
             {({ field }: { field: FieldInputProps<string> }) => (
               <Password
+                size={"small" as never}
                 id="password"
                 {...field}
                 feedback={false}
@@ -104,14 +106,16 @@ export function LoginPresentation({
       {success && <FormMessage variant="success">{success}</FormMessage>}
 
       <Button
+        size="small"
         type="submit"
         label={useMagicLink ? "Send magic link" : "Sign in"}
         loading={isSubmitting}
-        className="mt-2 w-full justify-center rounded-xl border-0 bg-[var(--brand-gradient)] px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
+        className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
         disabled={isSubmitting}
       />
 
       <Button
+        size="small"
         outlined
         type="button"
         onClick={onToggleMagicLink}
@@ -124,5 +128,3 @@ export function LoginPresentation({
     </Form>
   );
 }
-
-export { inputClassName };

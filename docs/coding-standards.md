@@ -149,3 +149,54 @@ organisms/reset-password/
 ├── reset-password-view.tsx # new password form
 └── index.ts
 ```
+
+## Client-Side Data Fetching
+
+### Use tRPC + React Query
+
+All client-side data fetching must go through tRPC with React Query. This provides loading states, caching, and query invalidation out of the box.
+
+- tRPC client is in `src/lib/trpc.ts`
+- `TRPCProvider` wraps the app in `app/layout.tsx`
+- Use `trpc.<router>.<procedure>.useQuery()` for reads
+- Use `trpc.<router>.<procedure>.useMutation()` for writes
+- Invalidate queries after mutations with `utils.<router>.<procedure>.invalidate()`
+
+### Custom hooks wrap tRPC queries
+
+Create domain-specific hooks in `src/hooks/` that wrap tRPC queries and expose a clean API:
+
+```tsx
+// src/hooks/use-my-organizations.ts
+export function useMyOrganizations() {
+  const utils = trpc.useUtils();
+  const { data, isLoading } = trpc.organization.list.useQuery({ limit: 50 });
+  const create = trpc.organization.create.useMutation({
+    onSuccess: () => utils.organization.list.invalidate(),
+  });
+
+  return { organizations: data?.organizations ?? [], isLoading, create };
+}
+```
+
+### Backend module structure
+
+Follow DDD patterns for new backend modules in `packages/backend/src/<domain>/`:
+
+```
+organization/
+├── repositories/         # Prisma data access (raw queries)
+├── services/             # Transformation logic (unit testable)
+├── queries/              # Read operations (IQueryHandler)
+├── commands/             # Write operations (ICommandHandler)
+├── types/                # TypeScript interfaces
+├── validations/          # Zod schemas
+├── index.ts              # Public exports
+└── <domain>-service.provider.ts  # TypeDI registration
+```
+
+- **Repository** — raw Prisma queries, returns domain types
+- **Service** — transforms raw data to view types (e.g., `$me` membership)
+- **Query** — orchestrates repository + service, registered via TypeDI
+- **Command** — write operations, registered via TypeDI
+- **tRPC router** — calls queries/commands via message bus

@@ -80,8 +80,8 @@ export function TwoFactorPresentation({
                 </span>
               ) : (
                 <Button
-                  label="Set up"
                   size="small"
+                  label="Set up"
                   onClick={onEnableTotp}
                   className="rounded-lg px-3 py-1.5 text-xs"
                 />
@@ -93,9 +93,9 @@ export function TwoFactorPresentation({
 
           {isEnabled && (
             <Button
+              size="small"
               label="Disable two-factor authentication"
               severity="danger"
-              size="small"
               onClick={onConfirmDisable}
               className="w-fit rounded-lg px-3 py-1.5 text-xs"
             />

@@ -5,7 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
 import { CreateOrgModal } from "./create-org-modal";
-import { selectSmall } from "@/src/components/ui/primereact-provider";
+import { selectSmall } from "@/src/components/ui/theme-constants";
 
 interface OrgSwitcherProps {
   collapsed?: boolean;

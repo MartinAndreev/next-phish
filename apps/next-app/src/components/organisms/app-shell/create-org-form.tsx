@@ -11,7 +11,8 @@ import {
 } from "@/src/components/atoms/form-message";
 import { createOrganizationSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { SlugField, slugify } from "@/src/components/atoms/slug-field";
+import { SlugField } from "@/src/components/atoms/slug-field";
+import { slugify } from "@/src/lib/slugify";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 mb-2";

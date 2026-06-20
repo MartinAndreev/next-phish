@@ -128,5 +128,3 @@ export function LoginPresentation({
     </Form>
   );
 }
-
-export { inputClassName };

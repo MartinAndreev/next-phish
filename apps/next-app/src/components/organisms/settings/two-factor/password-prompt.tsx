@@ -32,10 +32,14 @@ export function PasswordPrompt({
         {label || "Enter your password to continue."}
       </p>
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-zinc-100">
+        <label
+          htmlFor="password-input"
+          className="block text-sm font-medium text-zinc-100"
+        >
           Password
         </label>
         <Password
+          inputId="password-input"
           size={"small" as never}
           value={password}
           onChange={(e) => onChange(e.target.value)}

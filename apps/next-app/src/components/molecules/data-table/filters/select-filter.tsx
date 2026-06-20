@@ -1,7 +1,7 @@
 "use client";
 
 import { Dropdown } from "primereact/dropdown";
-import { selectSmall } from "@/src/components/ui/primereact-provider";
+import { selectSmall } from "@/src/components/ui/theme-constants";
 
 interface SelectFilterProps {
   field: string;

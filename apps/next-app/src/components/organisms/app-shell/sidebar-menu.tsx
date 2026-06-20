@@ -118,10 +118,12 @@ function buildGroup(
   ];
 }
 
+const EMPTY_ORGANIZATIONS: OrganizationView[] = [];
+
 export function SidebarMenu({
   collapsed,
   role,
-  organizations = [],
+  organizations = EMPTY_ORGANIZATIONS,
 }: SidebarMenuProps) {
   const pathname = usePathname();
 

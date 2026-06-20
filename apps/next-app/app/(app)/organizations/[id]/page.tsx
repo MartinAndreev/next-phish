@@ -60,6 +60,8 @@ const memberFilters: DataTableFilter[] = [
   },
 ];
 
+const breadcrumbHome = { icon: "pi pi-home", url: "/" };
+
 export default function OrganizationManagerPage() {
   const params = useParams();
   const id = params.id as string;
@@ -81,7 +83,6 @@ export default function OrganizationManagerPage() {
   const members = membersData?.members ?? [];
   const membersTotal = membersData?.total ?? 0;
 
-  const breadcrumbHome = { icon: "pi pi-home", url: "/" };
   const breadcrumbItems = [
     { label: "Organizations", url: "/organizations" },
     { label: org?.name ?? "Loading..." },

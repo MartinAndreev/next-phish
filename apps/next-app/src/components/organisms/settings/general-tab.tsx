@@ -14,7 +14,7 @@ import {
   errorClassName,
 } from "@/src/components/atoms/form-message";
 import { useFormStatus } from "@/src/hooks/use-form-status";
-import { selectSmall } from "@/src/components/ui/primereact-provider";
+import { selectSmall } from "@/src/components/ui/theme-constants";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";

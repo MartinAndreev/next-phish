@@ -32,7 +32,13 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
       {expanded && isMobile && (
         <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          role="button"
+          tabIndex={0}
           onClick={collapse}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") collapse();
+          }}
+          aria-label="Close sidebar"
         />
       )}
 

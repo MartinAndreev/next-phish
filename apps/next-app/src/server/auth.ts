@@ -58,6 +58,24 @@ export const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        before: async (session) => {
+          const member = await db.member.findFirst({
+            where: { userId: session.userId },
+            orderBy: { createdAt: "asc" },
+            select: { organizationId: true },
+          });
+
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: member?.organizationId ?? null,
+            },
+          };
+        },
+      },
+    },
   },
   plugins: [
     magicLink({

@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarMenu } from "./sidebar-menu";
 import { SidebarProfile } from "./sidebar-profile";
+import type { OrganizationView } from "@next-phish/backend";
 
 interface SidebarUser {
   name: string;
@@ -15,9 +16,10 @@ interface SidebarUser {
 interface SidebarProps {
   user: SidebarUser;
   isMobile: boolean;
+  organizations?: OrganizationView[];
 }
 
-export function Sidebar({ user, isMobile }: SidebarProps) {
+export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
   const [userExpanded, setUserExpanded] = useState(false);
   const expand = useCallback(() => setUserExpanded(true), []);
   const collapse = useCallback(() => setUserExpanded(false), []);
@@ -48,7 +50,11 @@ export function Sidebar({ user, isMobile }: SidebarProps) {
           onExpand={isMobile ? expand : undefined}
           onClose={isMobile && !collapsed ? collapse : undefined}
         />
-        <SidebarMenu collapsed={collapsed} role={user.role} />
+        <SidebarMenu
+          collapsed={collapsed}
+          role={user.role}
+          organizations={organizations}
+        />
         <SidebarProfile user={user} collapsed={collapsed} />
       </aside>
     </>

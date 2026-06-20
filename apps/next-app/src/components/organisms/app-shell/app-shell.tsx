@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useIsMobile } from "@/src/hooks/use-is-mobile";
 import { Sidebar } from "./sidebar";
+import type { OrganizationView } from "@next-phish/backend";
 
 interface AppShellProps {
   user: {
@@ -14,10 +15,16 @@ interface AppShellProps {
     role?: string | null;
   };
   hasOrg: boolean;
+  organizations?: OrganizationView[];
   children: React.ReactNode;
 }
 
-export function AppShell({ user, hasOrg, children }: AppShellProps) {
+export function AppShell({
+  user,
+  hasOrg,
+  organizations,
+  children,
+}: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -48,6 +55,7 @@ export function AppShell({ user, hasOrg, children }: AppShellProps) {
         key={`${pathname}-${isMobile}`}
         user={user}
         isMobile={isMobile}
+        organizations={organizations}
       />
 
       <main className={`flex-1 overflow-y-auto`}>{children}</main>

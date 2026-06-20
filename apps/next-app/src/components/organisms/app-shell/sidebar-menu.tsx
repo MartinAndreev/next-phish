@@ -1,12 +1,28 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu } from "primereact/menu";
 import { Tooltip } from "primereact/tooltip";
 import type { MenuItem } from "primereact/menuitem";
+import type { OrganizationView } from "@next-phish/backend";
 
-const navItems: { label: string; icon: string; href: string }[] = [
+interface NavItem {
+  label: string;
+  icon: string;
+  href: string;
+}
+
+const dashboardItems: NavItem[] = [
   { label: "Dashboard", icon: "pi pi-home", href: "/" },
+];
+
+const planningItems: NavItem[] = [
+  { label: "Tasks", icon: "pi pi-check-square", href: "/tasks" },
+  { label: "Schedule", icon: "pi pi-calendar", href: "/schedule" },
+];
+
+const simulationItems: NavItem[] = [
   { label: "Campaigns", icon: "pi pi-bolt", href: "/campaigns" },
   { label: "Pages", icon: "pi pi-file", href: "/pages" },
   {
@@ -18,7 +34,11 @@ const navItems: { label: string; icon: string; href: string }[] = [
   { label: "Target Groups", icon: "pi pi-users", href: "/target-groups" },
 ];
 
-const adminItems: { label: string; icon: string; href: string }[] = [
+const managementItems: NavItem[] = [
+  { label: "Organizations", icon: "pi pi-building", href: "/organizations" },
+];
+
+const adminItems: NavItem[] = [
   { label: "Users", icon: "pi pi-user", href: "/users" },
   { label: "Settings", icon: "pi pi-cog", href: "/settings" },
 ];
@@ -26,12 +46,12 @@ const adminItems: { label: string; icon: string; href: string }[] = [
 interface SidebarMenuProps {
   collapsed?: boolean;
   role?: string | null;
+  organizations?: OrganizationView[];
 }
 
 function buildMenuItems(
-  items: { label: string; icon: string; href: string }[],
+  items: NavItem[],
   pathname: string,
-  router: ReturnType<typeof useRouter>,
   collapsed?: boolean,
 ): MenuItem[] {
   return items.map((item) => ({
@@ -45,66 +65,88 @@ function buildMenuItems(
               content={item.label}
               position="right"
             />
-            <button
-              type="button"
+            <Link
+              href={item.href}
               className={`nav-icon-${item.icon.replace(/\s+/g, "-")} flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
                 isActive
                   ? "bg-white/10 text-white"
                   : "text-zinc-300 hover:bg-white/5 hover:text-white"
               }`}
-              onClick={() => router.push(item.href)}
             >
               <i className={`${item.icon} text-lg`} />
-            </button>
+            </Link>
           </>
         );
       }
       return (
-        <button
-          type="button"
+        <Link
+          href={item.href}
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
             isActive
               ? "bg-white/10 text-white"
               : "text-zinc-300 hover:bg-white/5 hover:text-white"
           }`}
-          onClick={() => router.push(item.href)}
         >
           <i className={`${item.icon} text-base`} />
           <span>{item.label}</span>
-        </button>
+        </Link>
       );
     },
   }));
 }
 
-export function SidebarMenu({ collapsed, role }: SidebarMenuProps) {
-  const router = useRouter();
+function buildGroup(
+  label: string,
+  items: NavItem[],
+  pathname: string,
+  collapsed?: boolean,
+): MenuItem[] {
+  return [
+    ...(collapsed
+      ? []
+      : [
+          {
+            template: () => (
+              <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                {label}
+              </p>
+            ),
+          },
+        ]),
+    ...buildMenuItems(items, pathname, collapsed),
+  ];
+}
+
+export function SidebarMenu({
+  collapsed,
+  role,
+  organizations = [],
+}: SidebarMenuProps) {
   const pathname = usePathname();
 
-  const items: MenuItem[] = buildMenuItems(
-    navItems,
-    pathname,
-    router,
-    collapsed,
+  const canManageOrgs = organizations.some(
+    (org) => org.$me.role === "owner" || org.$me.role === "admin",
   );
 
-  if (role === "admin") {
-    items.push(
-      { separator: true },
-      ...(collapsed
-        ? []
-        : [
-            {
-              template: () => (
-                <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                  Administration
-                </p>
-              ),
-            },
-          ]),
-      ...buildMenuItems(adminItems, pathname, router, collapsed),
-    );
-  }
+  const items: MenuItem[] = [
+    ...buildMenuItems(dashboardItems, pathname, collapsed),
+    { separator: true },
+    ...buildGroup("Planning", planningItems, pathname, collapsed),
+    { separator: true },
+    ...buildGroup("Simulations", simulationItems, pathname, collapsed),
+    ...(canManageOrgs
+      ? [
+          { separator: true },
+          ...buildGroup("Management", managementItems, pathname, collapsed),
+        ]
+      : []),
+    ...(role === "admin"
+      ? [
+          { separator: true },
+          ...buildGroup("Administration", adminItems, pathname, collapsed),
+        ]
+      : []),
+  ];
 
   return (
     <nav

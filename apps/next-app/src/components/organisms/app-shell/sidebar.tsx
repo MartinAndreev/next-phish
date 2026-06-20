@@ -30,7 +30,7 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
   return (
     <>
       {expanded && isMobile && (
-        <div
+        <button
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
           role="button"
           tabIndex={0}
@@ -39,11 +39,13 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
             if (e.key === "Enter" || e.key === " ") collapse();
           }}
           aria-label="Close sidebar"
-        />
+        >
+          <span className="sr-only">Close sidebar</span>
+        </button>
       )}
 
       <aside
-        className={`flex flex-shrink-0 flex-col border-r border-white/10 bg-brand-dark transition-all duration-200 ${
+        className={`flex shrink-0 flex-col border-r border-white/10 bg-brand-dark transition-all duration-200 ${
           collapsed
             ? "w-14"
             : expanded && isMobile

@@ -7,7 +7,8 @@ import {
   getAuthErrorMessage,
   getAuthSuccessMessage,
 } from "@/src/lib/auth-errors";
-import { getLocale, getTranslator } from "@/src/lib/i18n/server";
+import { createTranslator } from "@/src/lib/i18n";
+import { getLocale } from "@/src/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,16 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const [locale, t] = await Promise.all([getLocale(), getTranslator()]);
-  const { error: errorCode, message: messageCode } = await searchParams;
+  const bus = Container.get(MessageBus);
+  const handler = Container.get(GetUserCountQuery);
+
+  const [locale, resolvedSearchParams, count] = await Promise.all([
+    getLocale(),
+    searchParams,
+    bus.query(handler, {}),
+  ]);
+  const t = createTranslator(locale);
+  const { error: errorCode, message: messageCode } = resolvedSearchParams;
   const authError = getAuthErrorMessage(
     typeof errorCode === "string" ? errorCode : undefined,
     locale,
@@ -26,10 +35,6 @@ export default async function LoginPage({
     typeof messageCode === "string" ? messageCode : undefined,
     locale,
   );
-
-  const bus = Container.get(MessageBus);
-  const handler = Container.get(GetUserCountQuery);
-  const count = await bus.query(handler, {});
 
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">

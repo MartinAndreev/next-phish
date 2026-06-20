@@ -9,8 +9,11 @@ export default async function ResetPasswordPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const t = await getTranslator();
-  const { email: emailParam } = await searchParams;
+  const [t, resolvedSearchParams] = await Promise.all([
+    getTranslator(),
+    searchParams,
+  ]);
+  const { email: emailParam } = resolvedSearchParams;
   const email = typeof emailParam === "string" ? emailParam : "";
 
   return (

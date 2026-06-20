@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, use, useEffect, useState, type ReactNode } from "react";
 import { getMessages } from "./shared";
 import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, type Locale } from "./config";
 import {
@@ -60,7 +54,7 @@ export function I18nProvider({ initialLocale, children }: I18nProviderProps) {
 }
 
 export function useI18n() {
-  const context = useContext(I18nContext);
+  const context = use(I18nContext);
 
   if (!context) {
     throw new Error("useI18n must be used within I18nProvider");

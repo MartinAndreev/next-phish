@@ -5,8 +5,10 @@ import { getTranslator } from "@/src/lib/i18n/server";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const t = await getTranslator();
-  const session = await getRequiredSession();
+  const [t, session] = await Promise.all([
+    getTranslator(),
+    getRequiredSession(),
+  ]);
 
   return (
     <div className="px-6 py-8">

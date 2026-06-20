@@ -10,6 +10,7 @@ import type {
 } from "primereact/datatable";
 import type { AppDataTableProps, DataTableSort } from "./types";
 import { FilterBar } from "./filter-bar";
+import { ActionColumn } from "./action-column";
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -22,6 +23,7 @@ export function AppDataTable<T extends Record<string, any>>({
   loading = false,
   searchPlaceholder = "Search...",
   filters,
+  actions,
   onSearch,
   onSort,
   onFilter,
@@ -149,6 +151,13 @@ export function AppDataTable<T extends Record<string, any>>({
           style={col.style}
         />
       ))}
+      {actions && actions.length > 0 && (
+        <Column
+          header=""
+          body={(row: T) => <ActionColumn row={row} actions={actions} />}
+          style={{ width: "4rem" }}
+        />
+      )}
     </PrimeDataTable>
   );
 }

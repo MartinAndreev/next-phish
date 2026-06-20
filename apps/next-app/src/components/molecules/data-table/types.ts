@@ -8,6 +8,14 @@ export interface DataTableColumn<T> {
   style?: React.CSSProperties;
 }
 
+export interface DataTableAction<T> {
+  label: string;
+  icon: string;
+  onClick: (row: T) => void;
+  visible?: (row: T) => boolean;
+  severity?: "danger" | "default";
+}
+
 export interface DataTableFilter {
   field: string;
   label: string;
@@ -28,6 +36,7 @@ export interface AppDataTableProps<T> {
   loading?: boolean;
   searchPlaceholder?: string;
   filters?: DataTableFilter[];
+  actions?: DataTableAction<T>[];
   onSearch?: (query: string) => void;
   onSort?: (sorts: DataTableSort[]) => void;
   onFilter?: (filters: Record<string, unknown>) => void;

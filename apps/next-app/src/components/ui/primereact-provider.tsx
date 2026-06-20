@@ -384,6 +384,33 @@ const customTailwind = {
     }),
   },
 
+  // ConfirmDialog
+  confirmdialog: {
+    root: {
+      className: "bg-brand-dark border border-white/10 rounded-2xl shadow-2xl",
+    },
+    content: {
+      className: "p-6",
+    },
+    icon: {
+      className: "text-orange-400 mr-2",
+    },
+    message: {
+      className: "text-zinc-300 text-sm",
+    },
+    footer: {
+      className: "flex justify-end gap-2 p-4 border-t border-white/10",
+    },
+    rejectButton: {
+      outlined: true,
+      size: "small",
+    },
+    acceptButton: {
+      severity: "danger",
+      size: "small",
+    },
+  },
+
   // Button
   button: {
     ...Tailwind.button,

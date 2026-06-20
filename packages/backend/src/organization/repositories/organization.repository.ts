@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@next-phish/database";
-import type { OrganizationWithMembers } from "../types";
+import type { OrganizationWithMembers, MemberView } from "../types";
 
 const memberSelect = {
   id: true,
@@ -9,6 +9,14 @@ const memberSelect = {
 } as const;
 
 interface FindByUserIdInput {
+  search?: string;
+  limit: number;
+  offset: number;
+  sort?: Array<{ field: string; order: "asc" | "desc" }>;
+  filters?: { role?: string };
+}
+
+interface FindMembersInput {
   search?: string;
   limit: number;
   offset: number;
@@ -77,5 +85,42 @@ export class OrganizationRepository {
       orderBy: { createdAt: "asc" },
       select: { organizationId: true },
     });
+  }
+
+  async findMembersByOrganizationId(
+    organizationId: string,
+    input: FindMembersInput,
+  ): Promise<{ rows: MemberView[]; total: number }> {
+    const where: Record<string, unknown> = { organizationId };
+
+    if (input.search) {
+      where.user = {
+        OR: [
+          { name: { contains: input.search, mode: "insensitive" as const } },
+          { email: { contains: input.search, mode: "insensitive" as const } },
+        ],
+      };
+    }
+
+    if (input.filters?.role) {
+      where.role = input.filters.role;
+    }
+
+    const orderBy = input.sort?.length
+      ? input.sort.map((s) => ({ [s.field]: s.order }))
+      : [{ createdAt: "desc" as const }];
+
+    const [rows, total] = await Promise.all([
+      this.db.member.findMany({
+        where,
+        include: { user: { select: { name: true, email: true, image: true } } },
+        orderBy,
+        take: input.limit,
+        skip: input.offset,
+      }),
+      this.db.member.count({ where }),
+    ]);
+
+    return { rows: rows as MemberView[], total };
   }
 }

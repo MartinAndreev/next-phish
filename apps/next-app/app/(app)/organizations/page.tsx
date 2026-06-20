@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Badge } from "primereact/badge";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { AppDataTable } from "@/src/components/molecules/data-table";
 import type {
   DataTableColumn,
   DataTableFilter,
-  DataTableSort,
+  DataTableAction,
 } from "@/src/components/molecules/data-table";
+import { useDataTable } from "@/src/hooks/use-data-table";
 import { trpc } from "@/src/lib/trpc";
 import type { OrganizationView } from "@next-phish/backend";
+
+const breadcrumbHome = { icon: "pi pi-home", url: "/" };
+const breadcrumbItems = [{ label: "Organizations" }];
 
 const columns: DataTableColumn<OrganizationView>[] = [
   { field: "name", header: "Name", sortable: true },
@@ -49,31 +54,51 @@ const filters: DataTableFilter[] = [
   },
 ];
 
-const breadcrumbHome = { icon: "pi pi-home", url: "/" };
-
 export default function OrganizationsPage() {
-  const [search, setSearch] = useState("");
-  const [sorts, setSorts] = useState<DataTableSort[]>([]);
-  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
-  const [page, setPage] = useState({ offset: 0, limit: 10 });
+  const router = useRouter();
+  const utils = trpc.useUtils();
+  const { setSearch, setSorts, setFilterValues, setPage, buildQueryInput } =
+    useDataTable();
 
-  const { data, isLoading } = trpc.organization.list.useQuery({
-    search: search || undefined,
-    limit: page.limit,
-    offset: page.offset,
-    sort:
-      sorts.length > 0
-        ? sorts.map((s) => ({
-            field: s.field as "name" | "slug" | "createdAt",
-            order: s.order,
-          }))
-        : undefined,
-    filters: filterValues.role
-      ? { role: filterValues.role as string }
-      : undefined,
+  const queryInput = buildQueryInput(["name", "slug", "createdAt"]);
+  const { data, isLoading } = trpc.organization.list.useQuery(queryInput);
+
+  const deleteMutation = trpc.organization.delete.useMutation({
+    onSuccess: () => {
+      utils.organization.list.invalidate();
+    },
   });
 
-  const breadcrumbItems = [{ label: "Organizations" }];
+  const organizations = data?.organizations ?? [];
+  const total = data?.total ?? 0;
+
+  const ownedOrgCount = organizations.filter(
+    (org) => org.$me.role === "owner",
+  ).length;
+
+  const actions: DataTableAction<OrganizationView>[] = [
+    {
+      label: "Manage",
+      icon: "pi pi-cog",
+      onClick: (org) => router.push(`/organizations/${org.id}`),
+    },
+    {
+      label: "Delete",
+      icon: "pi pi-trash",
+      severity: "danger",
+      visible: (org) => org.$me.role === "owner" && ownedOrgCount > 1,
+      onClick: (org) => {
+        confirmDialog({
+          message: `Are you sure you want to delete "${org.name}"? This action cannot be undone.`,
+          header: "Delete organization",
+          icon: "pi pi-exclamation-triangle",
+          accept: () => {
+            deleteMutation.mutate({ organizationId: org.id });
+          },
+        });
+      },
+    },
+  ];
 
   return (
     <div className="px-6 py-8">
@@ -88,17 +113,24 @@ export default function OrganizationsPage() {
       </div>
 
       <AppDataTable
-        data={data?.organizations ?? []}
-        total={data?.total ?? 0}
+        data={organizations}
+        total={total}
         columns={columns}
         dataKey="id"
         loading={isLoading}
         searchPlaceholder="Search organizations..."
         filters={filters}
+        actions={actions}
         onSearch={setSearch}
         onSort={setSorts}
         onFilter={setFilterValues}
         onPage={(offset, limit) => setPage({ offset: offset * limit, limit })}
+      />
+
+      <ConfirmDialog
+        className="max-w-md"
+        draggable={false}
+        dismissableMask={true}
       />
     </div>
   );

@@ -2,12 +2,23 @@ import { Container } from "typedi";
 import type { PrismaClient } from "@next-phish/database";
 import { OrganizationRepository } from "./repositories";
 import { OrganizationService } from "./services";
-import { GetUserOrganizationsQuery } from "./queries";
-import { CreateOrganizationCommand } from "./commands";
+import {
+  GetUserOrganizationsQuery,
+  GetOrganizationByIdQuery,
+  GetOrganizationMembersQuery,
+} from "./queries";
+import {
+  CreateOrganizationCommand,
+  DeleteOrganizationCommand,
+} from "./commands";
 
 interface AuthApi {
   createOrganization: (opts: {
     body: { name: string; slug: string };
+    headers: Headers;
+  }) => Promise<unknown>;
+  deleteOrganization: (opts: {
+    body: { organizationId: string };
     headers: Headers;
   }) => Promise<unknown>;
 }
@@ -22,8 +33,17 @@ export function registerOrganizationServices(db: PrismaClient): void {
     GetUserOrganizationsQuery,
     new GetUserOrganizationsQuery(orgRepo, orgService),
   );
+  Container.set(
+    GetOrganizationByIdQuery,
+    new GetOrganizationByIdQuery(orgRepo, orgService),
+  );
+  Container.set(
+    GetOrganizationMembersQuery,
+    new GetOrganizationMembersQuery(orgRepo),
+  );
 }
 
 export function registerOrganizationAuth(auth: { api: AuthApi }): void {
   Container.set(CreateOrganizationCommand, new CreateOrganizationCommand(auth));
+  Container.set(DeleteOrganizationCommand, new DeleteOrganizationCommand(auth));
 }

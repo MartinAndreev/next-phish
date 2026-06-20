@@ -6,6 +6,7 @@ import { Menu } from "primereact/menu";
 import { Tooltip } from "primereact/tooltip";
 import type { MenuItem } from "primereact/menuitem";
 import type { OrganizationView } from "@next-phish/backend";
+import { canManageOrganizations } from "@/src/lib/organization-helpers";
 
 interface NavItem {
   label: string;
@@ -124,9 +125,7 @@ export function SidebarMenu({
 }: SidebarMenuProps) {
   const pathname = usePathname();
 
-  const canManageOrgs = organizations.some(
-    (org) => org.$me.role === "owner" || org.$me.role === "admin",
-  );
+  const canManageOrgs = canManageOrganizations(organizations);
 
   const items: MenuItem[] = [
     ...buildMenuItems(dashboardItems, pathname, collapsed),

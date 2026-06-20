@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface SidebarHeaderProps {
   collapsed?: boolean;
@@ -13,6 +14,8 @@ export function SidebarHeader({
   onExpand,
   onClose,
 }: SidebarHeaderProps) {
+  const t = useTranslation();
+
   if (collapsed) {
     return (
       <div className="flex flex-col items-center gap-2 border-b border-white/10 py-3">
@@ -26,9 +29,9 @@ export function SidebarHeader({
         <button
           type="button"
           onClick={onExpand}
-          aria-label="Expand sidebar"
+          aria-label={t("nav.expandSidebar")}
           className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-          title="Expand sidebar"
+          title={t("nav.expandSidebar")}
         >
           <i className="pi pi-chevron-right text-xs" />
         </button>
@@ -52,9 +55,9 @@ export function SidebarHeader({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Collapse sidebar"
+          aria-label={t("nav.collapseSidebar")}
           className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-          title="Collapse sidebar"
+          title={t("nav.collapseSidebar")}
         >
           <i className="pi pi-chevron-left text-base" />
         </button>

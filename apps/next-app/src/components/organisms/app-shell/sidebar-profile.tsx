@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Avatar } from "primereact/avatar";
 import { OrgSwitcher } from "./org-switcher";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface SidebarProfileProps {
   user: {
@@ -14,6 +15,8 @@ interface SidebarProfileProps {
 }
 
 export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
+  const t = useTranslation();
+
   if (collapsed) {
     return (
       <div className="border-t border-white/10 p-2">
@@ -28,16 +31,16 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
           <Link
             href="/settings"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-            title="Settings"
+            title={t("common.settings")}
           >
             <i className="pi pi-cog text-sm" />
           </Link>
           <form action="/api/signout" method="post">
             <button
               type="submit"
-              aria-label="Sign out"
+              aria-label={t("common.signOut")}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-              title="Sign out"
+              title={t("common.signOut")}
             >
               <i className="pi pi-sign-out text-sm" />
             </button>
@@ -72,7 +75,7 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
             className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             <i className="pi pi-cog text-xs" />
-            Settings
+            {t("common.settings")}
           </Link>
           <form action="/api/signout" method="post" className="flex flex-1">
             <button
@@ -80,7 +83,7 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <i className="pi pi-sign-out text-xs" />
-              Sign out
+              {t("common.signOut")}
             </button>
           </form>
         </div>

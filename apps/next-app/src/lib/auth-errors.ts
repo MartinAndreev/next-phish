@@ -1,26 +1,35 @@
+import { type Locale, translate } from "@/src/lib/i18n";
+
 const errorMessages: Record<string, string> = {
-  INVALID_TOKEN: "This link is invalid or has already been used.",
-  TOKEN_EXPIRED: "This link has expired. Please request a new one.",
-  USER_NOT_FOUND: "No account was found for this link.",
-  failed_to_create_user: "Account creation failed. Please try again.",
-  new_user_signup_disabled: "New sign-ups are currently disabled.",
-  failed_to_create_session: "Session creation failed. Please try again.",
-  UNAUTHORIZED: "You are not authorized. Please sign in.",
+  INVALID_TOKEN: "authErrors.invalidToken",
+  TOKEN_EXPIRED: "authErrors.tokenExpired",
+  USER_NOT_FOUND: "authErrors.userNotFound",
+  failed_to_create_user: "authErrors.failedToCreateUser",
+  new_user_signup_disabled: "authErrors.signupDisabled",
+  failed_to_create_session: "authErrors.failedToCreateSession",
+  UNAUTHORIZED: "authErrors.unauthorized",
 };
 
 const successMessages: Record<string, string> = {
-  "check-email": "Account created! Check your email to verify your address.",
-  "email-verified": "Email verified! You are now signed in.",
-  "password-reset":
-    "Password reset successfully! You can now sign in with your new password.",
+  "check-email": "authErrors.checkEmail",
+  "email-verified": "authErrors.emailVerified",
+  "password-reset": "authErrors.passwordReset",
 };
 
-export function getAuthErrorMessage(code: string | undefined): string | null {
+export function getAuthErrorMessage(
+  code: string | undefined,
+  locale: Locale,
+): string | null {
   if (!code) return null;
-  return errorMessages[code] ?? "Something went wrong. Please try again.";
+  return translate(locale, errorMessages[code] ?? "authErrors.generic");
 }
 
-export function getAuthSuccessMessage(code: string | undefined): string | null {
+export function getAuthSuccessMessage(
+  code: string | undefined,
+  locale: Locale,
+): string | null {
   if (!code) return null;
-  return successMessages[code] ?? null;
+  return successMessages[code]
+    ? translate(locale, successMessages[code])
+    : null;
 }

@@ -7,6 +7,7 @@ import { createOrganizationSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { OnboardingPresentation } from "./presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface OnboardingValues {
   name: string;
@@ -14,6 +15,7 @@ interface OnboardingValues {
 }
 
 export function OnboardingContainer() {
+  const t = useTranslation();
   const router = useRouter();
   const { status, setError } = useFormStatus();
 
@@ -26,7 +28,9 @@ export function OnboardingContainer() {
     });
 
     if (err) {
-      setError(err.message || err.code || "Failed to create organization");
+      setError(
+        err.message || err.code || t("onboarding.failedToCreateOrganization"),
+      );
       return;
     }
 

@@ -6,6 +6,7 @@ import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { authClient } from "@/src/lib/auth-client";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -17,6 +18,7 @@ interface SlugFieldProps {
 }
 
 export function SlugField({ onStatusChange }: SlugFieldProps) {
+  const t = useTranslation();
   const { errors, touched, submitCount } = useFormikContext<{ slug: string }>();
   const checkSlugTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -60,7 +62,7 @@ export function SlugField({ onStatusChange }: SlugFieldProps) {
   return (
     <div className="space-y-2">
       <label htmlFor="slug" className="block text-sm font-medium text-zinc-100">
-        Slug
+        {t("organizations.slug")}
       </label>
       <Field name="slug">
         {({ field }: { field: FieldInputProps<string> }) => (
@@ -81,25 +83,23 @@ export function SlugField({ onStatusChange }: SlugFieldProps) {
             />
             {statusRef.current === "checking" && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">
-                Checking...
+                {t("common.checking")}
               </span>
             )}
             {statusRef.current === "available" && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-400">
-                Available
+                {t("common.available")}
               </span>
             )}
             {statusRef.current === "taken" && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-400">
-                Taken
+                {t("common.taken")}
               </span>
             )}
           </div>
         )}
       </Field>
-      <p className="text-xs text-zinc-400">
-        Used in URLs. Auto-generated from the name, but you can edit it.
-      </p>
+      <p className="text-xs text-zinc-400">{t("organizations.slugHint")}</p>
       <ErrorMessage name="slug" component="p" className={errorClassName} />
     </div>
   );

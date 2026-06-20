@@ -6,12 +6,14 @@ import { authClient } from "@/src/lib/auth-client";
 import { VerifyOtpView } from "./verify-otp-view";
 import { ResetPasswordView } from "./reset-password-view";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface ResetPasswordContainerProps {
   email: string;
 }
 
 export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
+  const t = useTranslation();
   const router = useRouter();
   const { status, setError, reset } = useFormStatus();
   const [otpVerified, setOtpVerified] = useState(false);
@@ -27,7 +29,9 @@ export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
     });
 
     if (err) {
-      setError(err.message || err.code || "Invalid or expired code");
+      setError(
+        err.message || err.code || t("resetPassword.invalidOrExpiredCode"),
+      );
       return;
     }
 
@@ -48,7 +52,9 @@ export function ResetPasswordContainer({ email }: ResetPasswordContainerProps) {
     });
 
     if (err) {
-      setError(err.message || err.code || "Failed to reset password");
+      setError(
+        err.message || err.code || t("resetPassword.failedToResetPassword"),
+      );
       return;
     }
 

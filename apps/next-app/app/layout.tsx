@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider, TRPCProvider } from "@/src/components/ui";
+import { I18nProvider } from "@/src/lib/i18n";
+import { getLocale, getTranslator } from "@/src/lib/i18n/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,27 +15,35 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Next Phish",
-  description: `NextPhish is an open-source phishing simulation engine built with Next.js. 
-  It lets companies run internal phishing campaigns against their own employees to assess security 
-  awareness, replacing legacy tools like GoPhish.`,
-};
+export const dynamic = "force-dynamic";
 
-export default function RootLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslator();
+
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TRPCProvider>
-          <Provider>{children}</Provider>
-        </TRPCProvider>
+        <I18nProvider initialLocale={locale}>
+          <TRPCProvider>
+            <Provider>{children}</Provider>
+          </TRPCProvider>
+        </I18nProvider>
       </body>
     </html>
   );

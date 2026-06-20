@@ -10,6 +10,7 @@ import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -21,6 +22,7 @@ interface PasswordValues {
 }
 
 export function ChangePasswordForm() {
+  const t = useTranslation();
   const { status, setError, setSuccess, reset } = useFormStatus();
 
   async function handleSubmit(values: PasswordValues) {
@@ -33,11 +35,11 @@ export function ChangePasswordForm() {
     });
 
     if (err) {
-      setError(err.message || err.code || "Failed to change password");
+      setError(err.message || err.code || t("settings.failedToChangePassword"));
       return;
     }
 
-    setSuccess("Password changed successfully");
+    setSuccess(t("settings.passwordChanged"));
   }
 
   return (
@@ -57,7 +59,7 @@ export function ChangePasswordForm() {
               htmlFor="currentPassword"
               className="block text-sm font-medium text-zinc-100"
             >
-              Current password
+              {t("settings.currentPassword")}
             </label>
             <Field name="currentPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
@@ -74,7 +76,7 @@ export function ChangePasswordForm() {
                   className="w-full"
                   inputClassName={inputClassName}
                   pt={{ iconField: { root: { className: "w-full" } } }}
-                  placeholder="Enter current password"
+                  placeholder={t("settings.enterCurrentPassword")}
                 />
               )}
             </Field>
@@ -91,7 +93,7 @@ export function ChangePasswordForm() {
                 htmlFor="newPassword"
                 className="block text-sm font-medium text-zinc-100"
               >
-                New password
+                {t("resetPassword.newPassword")}
               </label>
               <Field name="newPassword">
                 {({ field }: { field: FieldInputProps<string> }) => (
@@ -109,11 +111,11 @@ export function ChangePasswordForm() {
                     inputClassName={inputClassName}
                     pt={{ iconField: { root: { className: "w-full" } } }}
                     panelClassName="rounded-2xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur"
-                    placeholder="At least 8 characters"
-                    promptLabel="Use a strong password"
-                    weakLabel="Weak"
-                    mediumLabel="Good"
-                    strongLabel="Strong"
+                    placeholder={t("settings.atLeastEightCharacters")}
+                    promptLabel={t("settings.passwordStrengthPrompt")}
+                    weakLabel={t("settings.weak")}
+                    mediumLabel={t("settings.good")}
+                    strongLabel={t("settings.strong")}
                   />
                 )}
               </Field>
@@ -129,7 +131,7 @@ export function ChangePasswordForm() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-zinc-100"
               >
-                Confirm password
+                {t("settings.confirmPassword")}
               </label>
               <Field name="confirmPassword">
                 {({ field }: { field: FieldInputProps<string> }) => (
@@ -146,7 +148,7 @@ export function ChangePasswordForm() {
                     className="w-full"
                     inputClassName={inputClassName}
                     pt={{ iconField: { root: { className: "w-full" } } }}
-                    placeholder="Repeat new password"
+                    placeholder={t("settings.repeatNewPassword")}
                   />
                 )}
               </Field>
@@ -168,7 +170,7 @@ export function ChangePasswordForm() {
           <Button
             size="small"
             type="submit"
-            label="Change password"
+            label={t("settings.changePasswordAction")}
             loading={isSubmitting}
             disabled={isSubmitting}
             className="mt-2 w-fit rounded-xl border-0 bg-(image:--brand-gradient) px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5"

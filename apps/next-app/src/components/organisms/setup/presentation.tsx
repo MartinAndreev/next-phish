@@ -8,6 +8,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -24,6 +25,7 @@ interface SetupValues {
 }
 
 export function SetupPresentation({ error }: SetupPresentationProps) {
+  const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const { errors, touched, submitCount, isSubmitting } =
     useFormikContext<SetupValues>();
@@ -35,7 +37,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
           htmlFor="name"
           className="block text-sm font-medium text-zinc-100"
         >
-          Name
+          {t("common.name")}
         </label>
         <Field name="name">
           {({ field }: { field: FieldInputProps<string> }) => (
@@ -51,9 +53,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
             />
           )}
         </Field>
-        <p className="text-xs text-zinc-400 mt-2">
-          This name will appear on the admin account.
-        </p>
+        <p className="text-xs text-zinc-400 mt-2">{t("setup.nameHint")}</p>
         <ErrorMessage name="name" component="p" className={errorClassName} />
       </div>
 
@@ -62,7 +62,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
           htmlFor="email"
           className="block text-sm font-medium text-zinc-100"
         >
-          Email
+          {t("common.email")}
         </label>
         <Field name="email">
           {({ field }: { field: FieldInputProps<string> }) => (
@@ -79,9 +79,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
             />
           )}
         </Field>
-        <p className="text-xs text-zinc-400 mt-2">
-          Use the email address you will sign in with.
-        </p>
+        <p className="text-xs text-zinc-400 mt-2">{t("setup.emailHint")}</p>
         <ErrorMessage name="email" component="p" className={errorClassName} />
       </div>
 
@@ -91,7 +89,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
             htmlFor="password"
             className="block text-sm font-medium text-zinc-100"
           >
-            Password
+            {t("common.password")}
           </label>
           <Field name="password">
             {({ field }: { field: FieldInputProps<string> }) => (
@@ -108,17 +106,15 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
                 inputClassName={inputClassName}
                 pt={{ iconField: { root: { className: "w-full" } } }}
                 panelClassName="rounded-2xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur"
-                placeholder="At least 8 characters"
-                promptLabel="Use a strong password"
-                weakLabel="Weak"
-                mediumLabel="Good"
-                strongLabel="Strong"
+                placeholder={t("settings.atLeastEightCharacters")}
+                promptLabel={t("settings.passwordStrengthPrompt")}
+                weakLabel={t("settings.weak")}
+                mediumLabel={t("settings.good")}
+                strongLabel={t("settings.strong")}
               />
             )}
           </Field>
-          <p className="text-xs text-zinc-400">
-            Use at least 8 characters with a mix of letters and numbers.
-          </p>
+          <p className="text-xs text-zinc-400">{t("setup.passwordHint")}</p>
           <ErrorMessage
             name="password"
             component="p"
@@ -131,7 +127,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
             htmlFor="confirmPassword"
             className="block text-sm font-medium text-zinc-100"
           >
-            Confirm password
+            {t("setup.confirmPassword")}
           </label>
           <Field name="confirmPassword">
             {({ field }: { field: FieldInputProps<string> }) => (
@@ -147,12 +143,12 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
                 className="w-full"
                 inputClassName={inputClassName}
                 pt={{ iconField: { root: { className: "w-full" } } }}
-                placeholder="Repeat your password"
+                placeholder={t("setup.confirmPassword")}
               />
             )}
           </Field>
           <p className="text-xs text-zinc-400">
-            Repeat the password exactly to avoid lockouts.
+            {t("setup.confirmPasswordHint")}
           </p>
           <ErrorMessage
             name="confirmPassword"
@@ -167,7 +163,7 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
       <Button
         size="small"
         type="submit"
-        label="Create account"
+        label={t("setup.createAccount")}
         loading={isSubmitting}
         className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
         disabled={isSubmitting}

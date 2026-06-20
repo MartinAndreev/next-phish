@@ -7,12 +7,14 @@ import { forgotPasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { ForgotPasswordPresentation } from "./presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface ForgotPasswordValues {
   email: string;
 }
 
 export function ForgotPasswordContainer() {
+  const t = useTranslation();
   const router = useRouter();
   const { status, setError, reset } = useFormStatus();
 
@@ -24,7 +26,9 @@ export function ForgotPasswordContainer() {
     });
 
     if (err) {
-      setError(err.message || err.code || "Something went wrong");
+      setError(
+        err.message || err.code || t("forgotPassword.somethingWentWrong"),
+      );
       return;
     }
 

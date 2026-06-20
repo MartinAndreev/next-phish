@@ -8,6 +8,7 @@ import { loginSchema, magicLinkSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { LoginPresentation } from "./presentation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface LoginValues {
   email: string;
@@ -23,6 +24,7 @@ export function LoginContainer({
   authError,
   authSuccess,
 }: LoginContainerProps) {
+  const t = useTranslation();
   const router = useRouter();
   const [useMagicLink, setUseMagicLink] = useState(false);
   const { status, setError, setSuccess, reset } = useFormStatus();
@@ -38,23 +40,23 @@ export function LoginContainer({
           errorCallbackURL: "/login",
         });
         if (err) {
-          setError(err.message || err.code || "Something went wrong");
+          setError(err.message || err.code || t("login.somethingWentWrong"));
           return;
         }
-        setSuccess("Magic link sent! Check your email.");
+        setSuccess(t("login.magicLinkSent"));
       } else {
         const { error: err } = await authClient.signIn.email({
           email: values.email,
           password: values.password,
         });
         if (err) {
-          setError(err.message || err.code || "Invalid credentials");
+          setError(err.message || err.code || t("login.invalidCredentials"));
           return;
         }
         router.push("/");
       }
     } catch {
-      setError("An unexpected error occurred");
+      setError(t("login.unexpectedError"));
     }
   }
 

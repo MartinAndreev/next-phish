@@ -1,17 +1,21 @@
 "use client";
 
 import { Button } from "primereact/button";
+import { useTranslation } from "@/src/lib/i18n";
 
-function downloadBackupCodes(codes: string[]) {
+function downloadBackupCodes(
+  codes: string[],
+  t: (key: string, params?: Record<string, string | number>) => string,
+) {
   const content = [
-    "NextPhish Backup Codes",
+    t("settings.backupCodesFileTitle"),
     "========================",
     "",
-    "Keep these codes safe. Each code can only be used once.",
+    t("settings.backupCodesFileHint"),
     "",
     ...codes,
     "",
-    `Generated: ${new Date().toISOString()}`,
+    t("settings.generatedAt", { date: new Date().toISOString() }),
   ].join("\n");
 
   const blob = new Blob([content], { type: "text/plain" });
@@ -28,12 +32,14 @@ interface BackupCodesProps {
 }
 
 export function BackupCodes({ codes }: BackupCodesProps) {
+  const t = useTranslation();
+
   return (
     <div className="space-y-3">
-      <p className="text-sm font-medium text-zinc-100">Backup codes</p>
-      <p className="text-xs text-zinc-400">
-        Save these codes somewhere safe. Each code can only be used once.
+      <p className="text-sm font-medium text-zinc-100">
+        {t("settings.backupCodes")}
       </p>
+      <p className="text-xs text-zinc-400">{t("settings.backupCodesHint")}</p>
       <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/5 p-4">
         {codes.map((code) => (
           <code key={code} className="text-sm tracking-wider text-zinc-200">
@@ -43,10 +49,10 @@ export function BackupCodes({ codes }: BackupCodesProps) {
       </div>
       <Button
         size="small"
-        label="Download backup codes"
+        label={t("settings.downloadBackupCodes")}
         icon="pi pi-download"
         outlined
-        onClick={() => downloadBackupCodes(codes)}
+        onClick={() => downloadBackupCodes(codes, t)}
         className="rounded-xl border-white/10 px-4 py-2 text-sm text-zinc-300"
       />
     </div>

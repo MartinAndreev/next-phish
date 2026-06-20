@@ -10,6 +10,7 @@ import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { resetPasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import Link from "next/link";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -25,6 +26,7 @@ interface ResetPasswordViewProps {
 }
 
 export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
+  const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
@@ -40,7 +42,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
               htmlFor="newPassword"
               className="block text-sm font-medium text-zinc-100"
             >
-              New password
+              {t("resetPassword.newPassword")}
             </label>
             <Field name="newPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
@@ -58,11 +60,11 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
                   inputClassName={inputClassName}
                   pt={{ iconField: { root: { className: "w-full" } } }}
                   panelClassName="rounded-2xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur"
-                  placeholder="At least 8 characters"
-                  promptLabel="Use a strong password"
-                  weakLabel="Weak"
-                  mediumLabel="Good"
-                  strongLabel="Strong"
+                  placeholder={t("settings.atLeastEightCharacters")}
+                  promptLabel={t("settings.passwordStrengthPrompt")}
+                  weakLabel={t("settings.weak")}
+                  mediumLabel={t("settings.good")}
+                  strongLabel={t("settings.strong")}
                 />
               )}
             </Field>
@@ -78,7 +80,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
               htmlFor="confirmPassword"
               className="block text-sm font-medium text-zinc-100"
             >
-              Confirm new password
+              {t("resetPassword.confirmNewPassword")}
             </label>
             <Field name="confirmPassword">
               {({ field }: { field: FieldInputProps<string> }) => (
@@ -95,7 +97,7 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
                   className="w-full"
                   inputClassName={inputClassName}
                   pt={{ iconField: { root: { className: "w-full" } } }}
-                  placeholder="Repeat your new password"
+                  placeholder={t("resetPassword.repeatNewPassword")}
                 />
               )}
             </Field>
@@ -111,19 +113,19 @@ export function ResetPasswordView({ error, onSubmit }: ResetPasswordViewProps) {
           <Button
             size="small"
             type="submit"
-            label="Reset password"
+            label={t("resetPassword.resetAction")}
             loading={isSubmitting}
             disabled={isSubmitting}
             className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"
           />
 
           <p className="text-center text-sm text-zinc-400">
-            Remember your password?{" "}
+            {t("forgotPassword.rememberPassword")}{" "}
             <Link
               href="/login"
               className="font-medium text-cyan-300 transition-colors hover:text-cyan-200"
             >
-              Sign in
+              {t("common.signIn")}
             </Link>
           </p>
         </Form>

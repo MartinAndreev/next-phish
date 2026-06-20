@@ -9,6 +9,7 @@ import { FormMessage } from "@/src/components/atoms/form-message";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { SlugField } from "@/src/components/atoms/slug-field";
 import { slugify } from "@/src/lib/slugify";
+import { useTranslation } from "@/src/lib/i18n";
 
 const inputClassName =
   "w-full rounded-xl border border-white/10 bg-white/95 text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400";
@@ -23,6 +24,7 @@ interface OnboardingValues {
 }
 
 export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
+  const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
   const { errors, touched, submitCount, isSubmitting, values, setFieldValue } =
     useFormikContext<OnboardingValues>();
@@ -44,13 +46,10 @@ export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <h3 className="text-sm font-semibold text-cyan-200">
-          What is an organization?
+          {t("onboarding.infoTitle")}
         </h3>
         <p className="mt-2 text-sm leading-6 text-zinc-400">
-          An organization is a way to manage users and share access to your
-          phishing simulation data. Members of an organization collaborate on
-          campaigns, target groups, email templates, page templates, sending
-          profiles, and logs — all under one roof.
+          {t("onboarding.infoBody")}
         </p>
       </div>
 
@@ -60,7 +59,7 @@ export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
             htmlFor="name"
             className="block text-sm font-medium text-zinc-100"
           >
-            Organization name
+            {t("onboarding.organizationName")}
           </label>
           <Field name="name">
             {({ field }: { field: FieldInputProps<string> }) => (
@@ -86,7 +85,7 @@ export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
         <Button
           size="small"
           type="submit"
-          label="Create organization"
+          label={t("onboarding.createOrganization")}
           loading={isSubmitting}
           disabled={isSubmitting || slugStatus === "taken"}
           className="mt-2 w-full justify-center rounded-xl border-0 bg-(image:--brand-gradient) px-4 py-3.5 text-base font-semibold text-white shadow-[0_18px_35px_rgba(41,184,255,0.32)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(41,184,255,0.42)]"

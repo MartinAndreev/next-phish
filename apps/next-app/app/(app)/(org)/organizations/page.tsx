@@ -13,48 +13,12 @@ import type {
 import { useDataTable } from "@/src/hooks/use-data-table";
 import { trpc } from "@/src/lib/trpc";
 import type { OrganizationView } from "@next-phish/backend";
+import { useTranslation } from "@/src/lib/i18n";
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
-const breadcrumbItems = [{ label: "Organizations" }];
-
-const columns: DataTableColumn<OrganizationView>[] = [
-  { field: "name", header: "Name", sortable: true },
-  { field: "slug", header: "Slug", sortable: true },
-  {
-    field: "$me",
-    header: "Role",
-    body: (org) => {
-      const severity =
-        org.$me.role === "owner"
-          ? "success"
-          : org.$me.role === "admin"
-            ? "info"
-            : "secondary";
-      return <Badge value={org.$me.role} severity={severity} />;
-    },
-  },
-  {
-    field: "createdAt",
-    header: "Created",
-    sortable: true,
-    body: (org) => new Date(org.createdAt).toLocaleDateString(),
-  },
-];
-
-const filters: DataTableFilter[] = [
-  {
-    field: "role",
-    label: "Role",
-    type: "select",
-    options: [
-      { label: "Owner", value: "owner" },
-      { label: "Admin", value: "admin" },
-      { label: "Member", value: "member" },
-    ],
-  },
-];
 
 export default function OrganizationsPage() {
+  const t = useTranslation();
   const router = useRouter();
   const utils = trpc.useUtils();
   const { setSearch, setSorts, setFilterValues, setPage, buildQueryInput } =
@@ -62,6 +26,56 @@ export default function OrganizationsPage() {
 
   const queryInput = buildQueryInput(["name", "slug", "createdAt"]);
   const { data, isLoading } = trpc.organization.list.useQuery(queryInput);
+
+  const roleLabel = (role: OrganizationView["$me"]["role"]) => {
+    switch (role) {
+      case "owner":
+        return t("common.owner");
+      case "admin":
+        return t("common.admin");
+      default:
+        return t("common.member");
+    }
+  };
+
+  const breadcrumbItems = [{ label: t("organizations.title") }];
+
+  const columns: DataTableColumn<OrganizationView>[] = [
+    { field: "name", header: t("organizations.name"), sortable: true },
+    { field: "slug", header: t("organizations.slug"), sortable: true },
+    {
+      field: "$me",
+      header: t("organizations.role"),
+      body: (org) => {
+        const severity =
+          org.$me.role === "owner"
+            ? "success"
+            : org.$me.role === "admin"
+              ? "info"
+              : "secondary";
+        return <Badge value={roleLabel(org.$me.role)} severity={severity} />;
+      },
+    },
+    {
+      field: "createdAt",
+      header: t("organizations.created"),
+      sortable: true,
+      body: (org) => new Date(org.createdAt).toLocaleDateString(),
+    },
+  ];
+
+  const filters: DataTableFilter[] = [
+    {
+      field: "role",
+      label: t("organizations.role"),
+      type: "select",
+      options: [
+        { label: t("common.owner"), value: "owner" },
+        { label: t("common.admin"), value: "admin" },
+        { label: t("common.member"), value: "member" },
+      ],
+    },
+  ];
 
   const deleteMutation = trpc.organization.delete.useMutation({
     onSuccess: () => {
@@ -78,19 +92,19 @@ export default function OrganizationsPage() {
 
   const actions: DataTableAction<OrganizationView>[] = [
     {
-      label: "Manage",
+      label: t("organizations.manage"),
       icon: "pi pi-cog",
       onClick: (org) => router.push(`/organizations/${org.id}`),
     },
     {
-      label: "Delete",
+      label: t("organizations.delete"),
       icon: "pi pi-trash",
       severity: "danger",
       visible: (org) => org.$me.role === "owner" && ownedOrgCount > 1,
       onClick: (org) => {
         confirmDialog({
-          message: `Are you sure you want to delete "${org.name}"? This action cannot be undone.`,
-          header: "Delete organization",
+          message: t("organizations.deleteConfirm", { name: org.name }),
+          header: t("organizations.deleteTitle"),
           icon: "pi pi-exclamation-triangle",
           accept: () => {
             deleteMutation.mutate({ organizationId: org.id });
@@ -105,10 +119,10 @@ export default function OrganizationsPage() {
       <div className="mb-6">
         <BreadCrumb home={breadcrumbHome} model={breadcrumbItems} />
         <h1 className="mt-2 text-2xl font-semibold text-white">
-          Organizations
+          {t("organizations.title")}
         </h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Manage your organizations and team access.
+          {t("organizations.subtitle")}
         </p>
       </div>
 
@@ -118,7 +132,7 @@ export default function OrganizationsPage() {
         columns={columns}
         dataKey="id"
         loading={isLoading}
-        searchPlaceholder="Search organizations..."
+        searchPlaceholder={t("organizations.searchOrganizations")}
         filters={filters}
         actions={actions}
         onSearch={setSearch}

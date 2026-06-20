@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { CreateOrgForm } from "./create-org-form";
 import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
+import { useTranslation } from "@/src/lib/i18n";
 
 interface CreateOrgModalProps {
   visible: boolean;
@@ -11,6 +12,7 @@ interface CreateOrgModalProps {
 }
 
 export function CreateOrgModal({ visible, onHide }: CreateOrgModalProps) {
+  const t = useTranslation();
   const { create, setActive } = useMyOrganizations();
   const [error, setError] = useState("");
 
@@ -25,7 +27,7 @@ export function CreateOrgModal({ visible, onHide }: CreateOrgModalProps) {
         onHide();
       },
       onError: (err) => {
-        setError(err.message || "Failed to create organization.");
+        setError(err.message || t("organizations.createError"));
       },
     });
   }
@@ -34,7 +36,7 @@ export function CreateOrgModal({ visible, onHide }: CreateOrgModalProps) {
     <Dialog
       visible={visible}
       onHide={onHide}
-      header="Create organization"
+      header={t("organizations.createTitle")}
       className="w-full max-w-md"
       draggable={false}
       pt={{

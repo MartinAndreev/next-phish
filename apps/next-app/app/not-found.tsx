@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { getTranslator } from "@/src/lib/i18n/server";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslator();
+
   return (
     <div className="relative isolate flex min-h-full flex-1 items-center justify-center overflow-hidden bg-brand-navy px-4 py-10">
       <div className="absolute inset-x-0 top-0 h-56 bg-[radial-gradient(circle_at_top,rgba(41,184,255,0.22),transparent_65%)]" />
@@ -10,15 +13,15 @@ export default function NotFound() {
       <div className="text-center">
         <h1 className="text-8xl font-bold tracking-tight text-white">404</h1>
         <div className="mx-auto my-5 h-1.5 w-24 rounded-full bg-(image:--brand-gradient)" />
-        <p className="mt-4 text-lg text-zinc-400">Page not found</p>
+        <p className="mt-4 text-lg text-zinc-400">{t("notFound.title")}</p>
         <p className="mt-2 text-sm text-zinc-500">
-          The page you are looking for does not exist or has been moved.
+          {t("notFound.description")}
         </p>
         <Link
           href="/"
           className="mt-8 inline-block rounded-xl border-0 bg-[image:var(--brand-gradient)] bg-[length:300%_100%] bg-[position:0%_50%] bg-no-repeat px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)] transition-transform duration-200 hover:-translate-y-0.5 hover:animate-[gradient-flow_3s_linear_infinite]"
         >
-          Back to dashboard
+          {t("notFound.backToDashboard")}
         </Link>
       </div>
     </div>

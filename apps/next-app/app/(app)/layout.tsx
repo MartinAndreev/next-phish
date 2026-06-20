@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/src/server/auth";
-import { createServerCaller } from "@/src/server/trpc/server";
-import { AppShell } from "@/src/components/organisms/app-shell";
+
+// Auth is resolved in this layout, so the whole authenticated app segment must stay dynamic.
+export const dynamic = "force-dynamic";
 
 export default async function AppLayout({
   children,
@@ -13,19 +14,9 @@ export default async function AppLayout({
     headers: await headers(),
   });
 
-  if (!session) redirect("/login");
+  if (!session) {
+    redirect("/login");
+  }
 
-  const caller = await createServerCaller();
-  const { organizations } = await caller.organization.list({
-    limit: 100,
-    offset: 0,
-  });
-
-  const hasOrg = organizations && organizations.length > 0;
-
-  return (
-    <AppShell user={session.user} hasOrg={hasOrg} organizations={organizations}>
-      {children}
-    </AppShell>
-  );
+  return children;
 }

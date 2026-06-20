@@ -1,7 +1,9 @@
-import { Container } from "./container";
+import "./container-init";
 import {
+  Container,
   EMAIL_SERVICE_TOKEN,
   OrganizationRepository,
+  registerAuth,
   renderTemplate,
 } from "@next-phish/backend";
 import type { IEmailService } from "@next-phish/backend";
@@ -133,3 +135,5 @@ export const auth = betterAuth({
     },
   },
 });
+
+registerAuth(auth);

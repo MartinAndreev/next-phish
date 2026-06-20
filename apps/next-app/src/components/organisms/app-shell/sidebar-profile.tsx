@@ -26,12 +26,22 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
             className="profile-avatar bg-cyan-600 text-white"
           />
           <Link
-            href="/signout"
+            href="/settings"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-            title="Sign out"
+            title="Settings"
           >
-            <i className="pi pi-sign-out text-sm" />
+            <i className="pi pi-cog text-sm" />
           </Link>
+          <form action="/api/signout" method="post">
+            <button
+              type="submit"
+              aria-label="Sign out"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+              title="Sign out"
+            >
+              <i className="pi pi-sign-out text-sm" />
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -64,13 +74,15 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
             <i className="pi pi-cog text-xs" />
             Settings
           </Link>
-          <Link
-            href="/signout"
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <i className="pi pi-sign-out text-xs" />
-            Sign out
-          </Link>
+          <form action="/api/signout" method="post" className="flex flex-1">
+            <button
+              type="submit"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <i className="pi pi-sign-out text-xs" />
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
     </div>

@@ -9,10 +9,8 @@ import { authClient } from "@/src/lib/auth-client";
 import { updateProfileSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SUPPORTED_LANGUAGES } from "@/src/lib/constants";
-import {
-  FormMessage,
-  errorClassName,
-} from "@/src/components/atoms/form-message";
+import { FormMessage } from "@/src/components/atoms/form-message";
+import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { selectSmall } from "@/src/components/ui/theme-constants";
 

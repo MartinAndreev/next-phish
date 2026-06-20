@@ -6,9 +6,9 @@ import { Badge } from "primereact/badge";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { AppDataTable } from "@/src/components/molecules/data-table";
 import type {
+  DataTableAction,
   DataTableColumn,
   DataTableFilter,
-  DataTableAction,
 } from "@/src/components/molecules/data-table";
 import { useDataTable } from "@/src/hooks/use-data-table";
 import { trpc } from "@/src/lib/trpc";

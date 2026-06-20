@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 import { Field, ErrorMessage, useFormikContext } from "formik";
 import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
-import { errorClassName } from "@/src/components/atoms/form-message";
+import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { authClient } from "@/src/lib/auth-client";
 
 const inputClassName =

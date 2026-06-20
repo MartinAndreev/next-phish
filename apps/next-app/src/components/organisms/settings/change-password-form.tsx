@@ -7,10 +7,8 @@ import { Button } from "primereact/button";
 import { authClient } from "@/src/lib/auth-client";
 import { changePasswordSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import {
-  FormMessage,
-  errorClassName,
-} from "@/src/components/atoms/form-message";
+import { FormMessage } from "@/src/components/atoms/form-message";
+import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 
 const inputClassName =

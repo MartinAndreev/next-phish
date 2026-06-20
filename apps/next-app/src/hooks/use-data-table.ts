@@ -17,19 +17,28 @@ export function useDataTable(options?: UseDataTableOptions) {
   });
 
   function buildQueryInput<T extends string>(sortFields: T[]) {
+    const sort =
+      sorts.length > 0
+        ? sorts.reduce<Array<{ field: T; order: DataTableSort["order"] }>>(
+            (acc, currentSort) => {
+              if (sortFields.includes(currentSort.field as T)) {
+                acc.push({
+                  field: currentSort.field as T,
+                  order: currentSort.order,
+                });
+              }
+
+              return acc;
+            },
+            [],
+          )
+        : undefined;
+
     return {
       search: search || undefined,
       limit: page.limit,
       offset: page.offset,
-      sort:
-        sorts.length > 0
-          ? sorts
-              .filter((s) => sortFields.includes(s.field as T))
-              .map((s) => ({
-                field: s.field as T,
-                order: s.order,
-              }))
-          : undefined,
+      sort: sort && sort.length > 0 ? sort : undefined,
       filters:
         Object.keys(filterValues).length > 0
           ? (filterValues as Record<string, string>)

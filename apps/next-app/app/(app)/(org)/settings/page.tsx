@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { auth } from "@/src/server/auth";
 import { SettingsContainer } from "@/src/components/organisms/settings";
 

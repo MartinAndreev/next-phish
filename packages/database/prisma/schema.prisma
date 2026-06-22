@@ -8,6 +8,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EmailTemplateStatus {
+  DRAFT
+  ACTIVE
+}
+
+enum FilePurpose {
+  EMAIL_ATTACHMENT
+  IMPORT
+  EXPORT
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String
@@ -26,6 +37,8 @@ model User {
   twoFactor        TwoFactor?
   members          Member[]
   invitations      Invitation[]
+  emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  uploadedFiles    File[] @relation("UploadedFiles")
 
   @@map("user")
 }
@@ -98,8 +111,10 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members     Member[]
-  invitations Invitation[]
+  members         Member[]
+  invitations     Invitation[]
+  emailTemplates  EmailTemplate[]
+  files           File[]
 
   @@map("organization")
 }
@@ -143,6 +158,64 @@ model Setting {
   value Json
 
   @@map("setting")
+}
+
+model File {
+  id             String       @id @default(cuid())
+  remoteId       String
+  name           String
+  size           Int
+  format         String
+  purpose        FilePurpose  @default(EMAIL_ATTACHMENT)
+  organizationId String?
+  uploadedById   String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  uploadedBy         User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  organization       Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  emailTemplateFiles EmailTemplateFile[]
+
+  @@index([organizationId])
+  @@index([uploadedById])
+  @@index([purpose])
+  @@map("file")
+}
+
+model EmailTemplateFile {
+  id              String         @id @default(cuid())
+  emailTemplateId String
+  fileId          String
+  createdAt       DateTime       @default(now())
+
+  emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade)
+  file          File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([emailTemplateId, fileId])
+  @@map("email_template_file")
+}
+
+model EmailTemplate {
+  id             String              @id @default(cuid())
+  name           String
+  tags           String[]
+  html           String
+  design         Json
+  organizationId String
+  createdById    String
+  status         EmailTemplateStatus @default(DRAFT)
+  trackingPixel  Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization          @relation(references: [id], fields: [organizationId], onDelete: Cascade)
+  createdBy    User                  @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+  files        EmailTemplateFile[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
+  @@map("email_template")
 }
 
 model Page {

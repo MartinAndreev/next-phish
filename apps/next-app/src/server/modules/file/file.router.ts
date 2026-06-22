@@ -23,6 +23,7 @@ export const fileRouter = router({
         size: input.size,
         format: input.format,
         purpose: input.purpose,
+        organizationId: ctx.activeOrganizationId,
         uploadedById: ctx.session.user.id,
         body: input.data,
       });
@@ -30,10 +31,11 @@ export const fileRouter = router({
 
   list: activeOrganizationProcedure
     .input(ListFilesSchema)
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const handler = Container.get(ListFilesQuery);
       return bus.query(handler, {
         ...input,
+        organizationId: ctx.activeOrganizationId,
       });
     }),
 

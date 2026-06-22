@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { Skeleton } from "primereact/skeleton";
 import { useEmailTemplateEditor } from "@/src/hooks/use-email-template-editor";
+import { useAttachmentManager } from "@/src/hooks/use-attachment-manager";
 import { EmailTemplateForm } from "./email-template-form";
-import type { AttachedFile } from "./file-attachment-panel";
 
 interface EmailTemplateFormContainerProps {
   templateId?: string;
@@ -30,18 +29,12 @@ export function EmailTemplateFormContainer({
     router,
   } = useEmailTemplateEditor({ templateId });
 
-  const [uploading, setUploading] = useState(false);
-  const [locallyAdded, setLocallyAdded] = useState<AttachedFile[]>([]);
-  const [locallyRemovedIds, setLocallyRemovedIds] = useState<Set<string>>(
-    new Set(),
-  );
-
-  const attachedFiles: AttachedFile[] = [
-    ...initialAttachedFiles.filter((f) => !locallyRemovedIds.has(f.id)),
-    ...locallyAdded.filter(
-      (f) => !initialAttachedFiles.some((e) => e.id === f.id),
-    ),
-  ];
+  const { uploading, attachedFiles, handleUpload, handleRemove } =
+    useAttachmentManager({
+      onUploadFile: handleUploadFile,
+      onDeleteFile: handleDeleteFile,
+      initialAttachedFiles,
+    });
 
   const formInitialValues = {
     name: initialValues.name,
@@ -79,29 +72,6 @@ export function EmailTemplateFormContainer({
       ...values,
       fileIds: attachedFiles.map((f) => f.id),
     });
-  }
-
-  async function handleUpload(file: File) {
-    setUploading(true);
-    try {
-      const fileView = await handleUploadFile(file);
-      setLocallyAdded((prev) => [
-        ...prev,
-        {
-          id: fileView.id,
-          name: fileView.name,
-          size: fileView.size,
-          format: fileView.format,
-        },
-      ]);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleRemove(fileId: string) {
-    await handleDeleteFile(fileId);
-    setLocallyRemovedIds((prev) => new Set(prev).add(fileId));
   }
 
   return (

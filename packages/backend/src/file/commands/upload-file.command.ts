@@ -24,6 +24,7 @@ export class UploadFileCommand implements ICommandHandler<
       size: data.size,
       format: data.format,
       purpose: data.purpose,
+      organizationId: data.organizationId,
       uploadedById: data.uploadedById,
     });
 

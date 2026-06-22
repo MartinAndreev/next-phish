@@ -9,6 +9,7 @@ export interface FileView {
   size: number;
   format: string;
   purpose: FilePurpose;
+  organizationId: string | null;
   uploadedById: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ export interface UploadFileData {
   size: number;
   format: string;
   purpose: FilePurpose;
+  organizationId: string | null;
   uploadedById: string;
   body: string; // base64-encoded
 }
@@ -30,5 +32,6 @@ export interface CreateFileRowData {
   size: number;
   format: string;
   purpose: FilePurpose;
+  organizationId: string | null;
   uploadedById: string;
 }

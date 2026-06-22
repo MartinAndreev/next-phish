@@ -8,6 +8,7 @@ const fileSelect = {
   size: true,
   format: true,
   purpose: true,
+  organizationId: true,
   uploadedById: true,
   createdAt: true,
   updatedAt: true,
@@ -30,9 +31,9 @@ export class FileRepository {
     });
   }
 
-  async findByPurpose(purpose: FilePurpose) {
+  async findByPurpose(purpose: FilePurpose, organizationId: string) {
     return this.db.file.findMany({
-      where: { purpose },
+      where: { purpose, organizationId },
       select: fileSelect,
       orderBy: { createdAt: "desc" },
     });

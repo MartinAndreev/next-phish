@@ -111,9 +111,10 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members     Member[]
-  invitations Invitation[]
-  emailTemplates EmailTemplate[]
+  members         Member[]
+  invitations     Invitation[]
+  emailTemplates  EmailTemplate[]
+  files           File[]
 
   @@map("organization")
 }
@@ -160,19 +161,22 @@ model Setting {
 }
 
 model File {
-  id           String       @id @default(cuid())
-  remoteId     String
-  name         String
-  size         Int
-  format       String
-  purpose      FilePurpose  @default(EMAIL_ATTACHMENT)
-  uploadedById String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  remoteId       String
+  name           String
+  size           Int
+  format         String
+  purpose        FilePurpose  @default(EMAIL_ATTACHMENT)
+  organizationId String?
+  uploadedById   String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  uploadedBy       User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedBy         User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  organization       Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   emailTemplateFiles EmailTemplateFile[]
 
+  @@index([organizationId])
   @@index([uploadedById])
   @@index([purpose])
   @@map("file")

@@ -276,6 +276,16 @@ export const messages: Record<"en" | "bg", Messages> = {
       copyFailed: "Failed to copy variable.",
       editorLabel: "Template editor",
       loadingEditor: "Loading editor...",
+      trackingPixel: "Tracking pixel",
+      trackingPixelHint:
+        "When enabled, a 1x1 transparent pixel is embedded to track email opens.",
+      attachments: "Attachments",
+      uploadFile: "Upload file",
+      dragDropHint: "Drag and drop files here to upload.",
+      removeFile: "Remove",
+      uploadingFile: "Uploading...",
+      uploadFailed: "Upload failed.",
+      uploadSuccess: "File uploaded successfully.",
     },
     pages: {
       dashboardSoon: "Dashboard coming soon",
@@ -577,6 +587,16 @@ export const messages: Record<"en" | "bg", Messages> = {
       copyFailed: "Променливата не можа да бъде копирана.",
       editorLabel: "Редактор на шаблона",
       loadingEditor: "Зареждане на редактора...",
+      trackingPixel: "Проследяващ пиксел",
+      trackingPixelHint:
+        "Когато е включено, се добавя прозрачен 1x1 пиксел за проследяване на отварянията на имейла.",
+      attachments: "Прикачени файлове",
+      uploadFile: "Качване на файл",
+      dragDropHint: "Плъзнете и пуснете файлове тук за качване.",
+      removeFile: "Премахни",
+      uploadingFile: "Качване...",
+      uploadFailed: "Неуспешно качване.",
+      uploadSuccess: "Файлът е качен успешно.",
     },
     pages: {
       dashboardSoon: "Таблото ще бъде налично скоро",

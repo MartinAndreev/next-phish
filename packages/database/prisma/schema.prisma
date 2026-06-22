@@ -13,6 +13,12 @@ enum EmailTemplateStatus {
   ACTIVE
 }
 
+enum FilePurpose {
+  EMAIL_ATTACHMENT
+  IMPORT
+  EXPORT
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String
@@ -32,6 +38,7 @@ model User {
   members          Member[]
   invitations      Invitation[]
   emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  uploadedFiles    File[] @relation("UploadedFiles")
 
   @@map("user")
 }
@@ -152,6 +159,38 @@ model Setting {
   @@map("setting")
 }
 
+model File {
+  id           String       @id @default(cuid())
+  remoteId     String
+  name         String
+  size         Int
+  format       String
+  purpose      FilePurpose  @default(EMAIL_ATTACHMENT)
+  uploadedById String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  uploadedBy       User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  emailTemplateFiles EmailTemplateFile[]
+
+  @@index([uploadedById])
+  @@index([purpose])
+  @@map("file")
+}
+
+model EmailTemplateFile {
+  id              String         @id @default(cuid())
+  emailTemplateId String
+  fileId          String
+  createdAt       DateTime       @default(now())
+
+  emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade)
+  file          File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([emailTemplateId, fileId])
+  @@map("email_template_file")
+}
+
 model EmailTemplate {
   id             String              @id @default(cuid())
   name           String
@@ -161,11 +200,13 @@ model EmailTemplate {
   organizationId String
   createdById    String
   status         EmailTemplateStatus @default(DRAFT)
+  trackingPixel  Boolean             @default(true)
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
-  organization Organization @relation(references: [id], fields: [organizationId], onDelete: Cascade)
-  createdBy    User         @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+  organization Organization          @relation(references: [id], fields: [organizationId], onDelete: Cascade)
+  createdBy    User                  @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+  files        EmailTemplateFile[]
 
   @@index([organizationId])
   @@index([createdById])

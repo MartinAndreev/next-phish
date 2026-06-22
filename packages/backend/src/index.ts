@@ -91,3 +91,20 @@ export type {
   DeleteEmailTemplateCommandInput,
 } from "./email-template";
 export { registerEmailTemplateServices } from "./email-template";
+
+export {
+  FileRepository,
+  FileService,
+  UploadFileCommand,
+  DeleteFileCommand,
+  ListFilesQuery,
+} from "./file";
+export type { FileView, FilePurpose } from "./file";
+export {
+  ListFilesSchema,
+  DeleteFileSchema,
+  UploadFileSchema,
+  filePurposeSchema,
+} from "./file";
+export type { ListFilesInput, DeleteFileInput, UploadFileInput } from "./file";
+export { registerFileServices } from "./file";

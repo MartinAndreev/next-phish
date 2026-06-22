@@ -61,6 +61,8 @@ export const emailTemplateRouter = router({
           html: input.html,
           design: input.design,
           status: input.status,
+          trackingPixel: input.trackingPixel,
+          fileIds: input.fileIds,
         },
       });
     }),

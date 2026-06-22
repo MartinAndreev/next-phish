@@ -41,6 +41,12 @@ const detailSelect = {
   ...listSelect,
   html: true,
   design: true,
+  trackingPixel: true,
+  files: {
+    select: {
+      fileId: true,
+    },
+  },
 } as const;
 
 export class EmailTemplateRepository {
@@ -96,10 +102,14 @@ export class EmailTemplateRepository {
   }
 
   async create(data: CreateEmailTemplateData): Promise<EmailTemplateRow> {
+    const { fileIds, ...rest } = data;
     const row = await this.db.emailTemplate.create({
       data: {
-        ...data,
-        design: this.toInputJsonValue(data.design),
+        ...rest,
+        design: this.toInputJsonValue(rest.design),
+        files: {
+          create: fileIds.map((fileId) => ({ fileId })),
+        },
       },
       select: detailSelect,
     });
@@ -112,16 +122,27 @@ export class EmailTemplateRepository {
     organizationId: string,
     data: UpdateEmailTemplateData,
   ): Promise<EmailTemplateRow> {
+    const { fileIds, ...rest } = data;
     const result = await this.db.emailTemplate.updateMany({
       where: { id, organizationId },
       data: {
-        ...data,
-        design: this.toInputJsonValue(data.design),
+        ...rest,
+        design: this.toInputJsonValue(rest.design),
       },
     });
 
     if (!result.count) {
       throw new Error("Email template not found");
+    }
+
+    await this.db.emailTemplateFile.deleteMany({
+      where: { emailTemplateId: id },
+    });
+
+    if (fileIds.length > 0) {
+      await this.db.emailTemplateFile.createMany({
+        data: fileIds.map((fileId) => ({ emailTemplateId: id, fileId })),
+      });
     }
 
     const row = await this.findById(id, organizationId);

@@ -21,6 +21,8 @@ export interface EmailTemplateListItemView {
 export interface EmailTemplateView extends EmailTemplateListItemView {
   html: string;
   design: unknown;
+  trackingPixel: boolean;
+  fileIds: string[];
 }
 
 export interface CreateEmailTemplateData {
@@ -29,6 +31,8 @@ export interface CreateEmailTemplateData {
   html: string;
   design: unknown;
   status: EmailTemplateStatus;
+  trackingPixel: boolean;
+  fileIds: string[];
   organizationId: string;
   createdById: string;
 }
@@ -39,6 +43,8 @@ export interface UpdateEmailTemplateData {
   html: string;
   design: unknown;
   status: EmailTemplateStatus;
+  trackingPixel: boolean;
+  fileIds: string[];
 }
 
 export interface EmailTemplateListRow {
@@ -53,7 +59,13 @@ export interface EmailTemplateListRow {
   createdBy: EmailTemplateAuthorView;
 }
 
+export interface EmailTemplateFileRef {
+  fileId: string;
+}
+
 export interface EmailTemplateRow extends EmailTemplateListRow {
   html: string;
   design: unknown;
+  trackingPixel: boolean;
+  files: EmailTemplateFileRef[];
 }

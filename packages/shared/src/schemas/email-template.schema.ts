@@ -8,6 +8,8 @@ export const createEmailTemplateSchema = z.object({
   html: z.string().min(1, "Template HTML is required"),
   design: z.unknown(),
   status: emailTemplateStatusSchema.default("DRAFT"),
+  trackingPixel: z.boolean().default(true),
+  fileIds: z.array(z.string()).default([]),
 });
 
 export const updateEmailTemplateSchema = createEmailTemplateSchema.extend({

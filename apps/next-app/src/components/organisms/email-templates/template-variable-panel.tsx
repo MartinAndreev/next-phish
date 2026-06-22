@@ -34,6 +34,7 @@ export function TemplateVariablePanel() {
       <div className="grid gap-3 sm:grid-cols-2">
         {variables.map((value) => (
           <Button
+            size="small"
             key={value}
             type="button"
             onClick={() => handleCopy(value)}

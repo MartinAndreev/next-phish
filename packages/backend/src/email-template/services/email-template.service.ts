@@ -29,6 +29,8 @@ export class EmailTemplateService {
       ...this.toListItemView(row),
       html: row.html,
       design: row.design,
+      trackingPixel: row.trackingPixel,
+      fileIds: row.files?.map((f) => f.fileId) ?? [],
     };
   }
 }

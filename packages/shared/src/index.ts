@@ -22,3 +22,15 @@ export type {
   CreateEmailTemplateInput,
   UpdateEmailTemplateInput,
 } from "./schemas";
+
+export {
+  listFilesSchema,
+  deleteFileSchema,
+  uploadFileSchema,
+  filePurposeSchema,
+} from "./schemas";
+export type {
+  ListFilesInput,
+  DeleteFileInput,
+  UploadFileInput,
+} from "./schemas";

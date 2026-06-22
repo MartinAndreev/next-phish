@@ -1,25 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import type { FieldInputProps } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
 import { Chips } from "primereact/chips";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
+import { Tooltip } from "primereact/tooltip";
 import { createEmailTemplateSchema } from "@next-phish/shared";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { FormMessage } from "@/src/components/atoms/form-message";
-import { useFormStatus } from "@/src/hooks/use-form-status";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
-import { trpc } from "@/src/lib/trpc";
-import { useTranslation } from "@/src/lib/i18n";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { useEmailTemplateEditor } from "@/src/hooks/use-email-template-editor";
 import { TemplateVariablePanel } from "./template-variable-panel";
+import {
+  FileAttachmentPanel,
+  type AttachedFile,
+} from "./file-attachment-panel";
 
 const GrapesEditor = dynamic(
   () =>
@@ -40,6 +43,8 @@ interface EmailTemplateFormValues {
   name: string;
   tags: string[];
   status: "DRAFT" | "ACTIVE";
+  trackingPixel: boolean;
+  fileIds: string[];
 }
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
@@ -54,46 +59,32 @@ const statusOptions = [
 export function EmailTemplateEditorForm({
   templateId,
 }: EmailTemplateEditorFormProps) {
-  const t = useTranslation();
-  const router = useRouter();
-  const utils = trpc.useUtils();
-  const { status, setError, setSuccess, reset } = useFormStatus();
-  const editorHtmlRef = useRef("");
-  const editorDesignRef = useRef<unknown>(null);
+  const {
+    data,
+    isLoading,
+    isLoadingFiles,
+    notFound,
+    initialValues,
+    attachedFiles: initialAttachedFiles,
+    editorHtmlRef,
+    editorDesignRef,
+    status,
+    handleSubmit,
+    handleUploadFile,
+    handleDeleteFile,
+    breadcrumbItems,
+    t,
+    router,
+  } = useEmailTemplateEditor({ templateId });
 
-  const { data, isLoading } = trpc.emailTemplate.getById.useQuery(
-    { id: templateId ?? "" },
-    { enabled: Boolean(templateId) },
-  );
-
-  const createMutation = trpc.emailTemplate.create.useMutation({
-    onSuccess: async (template) => {
-      await utils.emailTemplate.list.invalidate();
-      router.push(`/email-templates/${template.id}`);
-      setSuccess(t("emailTemplates.saveTemplate"));
-    },
-  });
-
-  const updateMutation = trpc.emailTemplate.update.useMutation({
-    onSuccess: async () => {
-      await Promise.all([
-        utils.emailTemplate.list.invalidate(),
-        templateId
-          ? utils.emailTemplate.getById.invalidate({ id: templateId })
-          : Promise.resolve(),
-      ]);
-      setSuccess(t("emailTemplates.updateTemplate"));
-    },
-  });
+  const [uploading, setUploading] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
   useEffect(() => {
-    if (!data) {
-      return;
+    if (templateId && !isLoadingFiles && initialAttachedFiles.length > 0) {
+      setAttachedFiles(initialAttachedFiles);
     }
-
-    editorHtmlRef.current = data.html;
-    editorDesignRef.current = data.design;
-  }, [data]);
+  }, [templateId, isLoadingFiles, initialAttachedFiles]);
 
   if (templateId && isLoading) {
     return (
@@ -106,7 +97,7 @@ export function EmailTemplateEditorForm({
     );
   }
 
-  if (templateId && !data) {
+  if (notFound) {
     return (
       <div className="flex flex-1 items-center justify-center px-6 py-8">
         <p className="text-zinc-400">{t("emailTemplates.notFound")}</p>
@@ -114,29 +105,10 @@ export function EmailTemplateEditorForm({
     );
   }
 
-  const initialValues: EmailTemplateFormValues = data
-    ? {
-        name: data.name,
-        tags: data.tags,
-        status: data.status,
-      }
-    : {
-        name: "",
-        tags: [],
-        status: "DRAFT",
-      };
-
-  const breadcrumbItems = [
-    { label: t("emailTemplates.title"), url: "/email-templates" },
-    {
-      label: templateId
-        ? t("emailTemplates.editTemplate")
-        : t("emailTemplates.createTitle"),
-    },
-  ];
-
   return (
     <div className="px-6 py-8">
+      <Tooltip target=".tracking-pixel-hint" position="top" />
+
       <div className="mb-6">
         <BreadCrumb home={breadcrumbHome} model={breadcrumbItems} />
         <h1 className="mt-2 text-2xl font-semibold text-white">
@@ -159,53 +131,19 @@ export function EmailTemplateEditorForm({
             name: true,
             tags: true,
             status: true,
+            trackingPixel: true,
+            fileIds: true,
           }),
         )}
-        onSubmit={async (values) => {
-          reset();
-
-          if (!editorHtmlRef.current) {
-            setError(
-              templateId
-                ? t("emailTemplates.updateError")
-                : t("emailTemplates.createError"),
-            );
-            return;
-          }
-
-          const payload = {
-            name: values.name.trim(),
-            tags: values.tags.flatMap((tag) => {
-              const normalizedTag = tag.trim();
-              return normalizedTag ? [normalizedTag] : [];
-            }),
-            html: editorHtmlRef.current,
-            design: editorDesignRef.current,
-            status: values.status,
-          };
-
-          try {
-            if (templateId) {
-              await updateMutation.mutateAsync({ id: templateId, ...payload });
-              return;
-            }
-
-            await createMutation.mutateAsync(payload);
-          } catch (error) {
-            const fallback = templateId
-              ? t("emailTemplates.updateError")
-              : t("emailTemplates.createError");
-            setError(error instanceof Error ? error.message : fallback);
-          }
-        }}
+        onSubmit={handleSubmit}
       >
         {({ isSubmitting, values, setFieldValue }) => (
           <Form className="space-y-6">
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
               <div className="space-y-6">
                 <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <div className="space-y-2 md:col-span-2">
+                  <div className="grid gap-5 md:grid-cols-3">
+                    <div className="space-y-2 md:col-span-3">
                       <label
                         htmlFor="name"
                         className="block text-sm font-medium text-zinc-100"
@@ -229,7 +167,7 @@ export function EmailTemplateEditorForm({
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                       <label className="block text-sm font-medium text-zinc-100">
                         {t("emailTemplates.tags")}
                       </label>
@@ -261,6 +199,35 @@ export function EmailTemplateEditorForm({
                         className="w-full"
                       />
                     </div>
+
+                    <div className="flex items-center gap-2 md:col-span-3">
+                      <Checkbox
+                        inputId="trackingPixel"
+                        checked={values.trackingPixel}
+                        onChange={(e) =>
+                          setFieldValue("trackingPixel", e.checked ?? false)
+                        }
+                        className="h-4 w-4"
+                        pt={{
+                          input: { className: "h-4 w-4" },
+                          box: {
+                            className:
+                              "h-4 w-4 rounded border border-white/10 bg-white/5",
+                          },
+                          icon: { className: "text-cyan-400 text-xs" },
+                        }}
+                      />
+                      <label
+                        htmlFor="trackingPixel"
+                        className="text-sm font-medium text-zinc-100"
+                      >
+                        {t("emailTemplates.trackingPixel")}
+                      </label>
+                      <i
+                        className="tracking-pixel-hint pi pi-info-circle cursor-help text-zinc-400"
+                        data-pr-tooltip={t("emailTemplates.trackingPixelHint")}
+                      />
+                    </div>
                   </div>
                 </section>
 
@@ -283,6 +250,42 @@ export function EmailTemplateEditorForm({
                     }}
                   />
                 </section>
+
+                <FileAttachmentPanel
+                  files={attachedFiles}
+                  onUpload={async (file) => {
+                    setUploading(true);
+                    try {
+                      const fileView = await handleUploadFile(file);
+                      setAttachedFiles((prev) => [
+                        ...prev,
+                        {
+                          id: fileView.id,
+                          name: fileView.name,
+                          size: fileView.size,
+                          format: fileView.format,
+                        },
+                      ]);
+                      setFieldValue("fileIds", [
+                        ...values.fileIds,
+                        fileView.id,
+                      ]);
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                  onRemove={async (fileId) => {
+                    await handleDeleteFile(fileId);
+                    setAttachedFiles((prev) =>
+                      prev.filter((f) => f.id !== fileId),
+                    );
+                    setFieldValue(
+                      "fileIds",
+                      values.fileIds.filter((id) => id !== fileId),
+                    );
+                  }}
+                  disabled={uploading}
+                />
               </div>
 
               <div className="space-y-6">
@@ -291,6 +294,7 @@ export function EmailTemplateEditorForm({
                 <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
                   <div className="flex flex-col gap-3">
                     <Button
+                      size="small"
                       type="submit"
                       loading={isSubmitting}
                       disabled={isSubmitting}
@@ -304,6 +308,7 @@ export function EmailTemplateEditorForm({
                       className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
                     />
                     <Button
+                      size="small"
                       type="button"
                       outlined
                       label={t("common.cancel")}

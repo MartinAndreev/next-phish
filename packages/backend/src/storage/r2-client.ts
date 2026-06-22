@@ -3,7 +3,6 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export class R2Client {
   private readonly s3: S3Client;
@@ -29,19 +28,6 @@ export class R2Client {
     });
     this.bucket = bucket;
     this.publicUrl = `https://${bucket}.${accountId}.r2.dev`;
-  }
-
-  async getPresignedUploadUrl(
-    key: string,
-    contentType: string,
-  ): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-      ContentType: contentType,
-    });
-
-    return getSignedUrl(this.s3, command, { expiresIn: 3600 });
   }
 
   async uploadObject(

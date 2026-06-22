@@ -1,11 +1,11 @@
 export {
-  ListFilesSchema,
-  DeleteFileSchema,
-  UploadFileSchema,
+  listFilesSchema as ListFilesSchema,
+  deleteFileSchema as DeleteFileSchema,
+  uploadFileSchema as UploadFileSchema,
   filePurposeSchema,
-} from "./file.validations";
+} from "@next-phish/shared";
 export type {
   ListFilesInput,
   DeleteFileInput,
   UploadFileInput,
-} from "./file.validations";
+} from "@next-phish/shared";

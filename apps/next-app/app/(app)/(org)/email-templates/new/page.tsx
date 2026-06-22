@@ -1,5 +1,5 @@
-import { EmailTemplateEditorForm } from "@/src/components/organisms/email-templates/email-template-editor-form";
+import EmailTemplateFormContainer from "@/src/components/organisms/email-templates";
 
 export default function NewEmailTemplatePage() {
-  return <EmailTemplateEditorForm />;
+  return <EmailTemplateFormContainer />;
 }

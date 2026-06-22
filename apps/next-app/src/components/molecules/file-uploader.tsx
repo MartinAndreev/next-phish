@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo } from "react";
 import { FileUpload, type FileUploadHandlerEvent } from "primereact/fileupload";
 import { useTranslation } from "@/src/lib/i18n";
 
@@ -16,22 +16,20 @@ export function FileUploader({
   maxFileSize,
 }: FileUploaderProps) {
   const t = useTranslation();
-  const uploadingRef = useRef(false);
+
+  const emptyTemplate = useMemo(
+    () => (
+      <p className="m-0 text-sm text-zinc-400">
+        {t("emailTemplates.dragDropHint")}
+      </p>
+    ),
+    [t],
+  );
 
   async function handleUpload(event: FileUploadHandlerEvent) {
-    if (uploadingRef.current) {
-      return;
-    }
-
-    uploadingRef.current = true;
-
-    try {
-      const promises = event.files.map((file) => onUpload(file));
-      await Promise.all(promises);
-    } finally {
-      uploadingRef.current = false;
-      event.options.clear();
-    }
+    const promises = event.files.map((file) => onUpload(file));
+    await Promise.all(promises);
+    event.options.clear();
   }
 
   return (
@@ -45,11 +43,7 @@ export function FileUploader({
       maxFileSize={maxFileSize}
       chooseLabel={t("emailTemplates.uploadFile")}
       className="w-full"
-      emptyTemplate={
-        <p className="m-0 text-sm text-zinc-400">
-          {t("emailTemplates.dragDropHint")}
-        </p>
-      }
+      emptyTemplate={emptyTemplate}
     />
   );
 }

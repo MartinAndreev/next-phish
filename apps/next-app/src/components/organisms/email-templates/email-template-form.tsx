@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import type { FieldInputProps } from "formik";
@@ -17,12 +16,10 @@ import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { selectSmall } from "@/src/components/ui/theme-constants";
-import { useEmailTemplateEditor } from "@/src/hooks/use-email-template-editor";
+import { FileAttachmentPanel } from "./file-attachment-panel";
 import { TemplateVariablePanel } from "./template-variable-panel";
-import {
-  FileAttachmentPanel,
-  type AttachedFile,
-} from "./file-attachment-panel";
+import type { AttachedFile } from "./file-attachment-panel";
+import type { FormStatus } from "@/src/hooks/use-form-status";
 
 const GrapesEditor = dynamic(
   () =>
@@ -35,16 +32,28 @@ const GrapesEditor = dynamic(
   },
 );
 
-interface EmailTemplateEditorFormProps {
-  templateId?: string;
-}
-
 interface EmailTemplateFormValues {
   name: string;
   tags: string[];
   status: "DRAFT" | "ACTIVE";
   trackingPixel: boolean;
-  fileIds: string[];
+}
+
+interface EmailTemplateFormProps {
+  templateId?: string;
+  initialValues: EmailTemplateFormValues;
+  attachedFiles: AttachedFile[];
+  uploading: boolean;
+  status: FormStatus;
+  breadcrumbItems: Array<{ label: string; url?: string }>;
+  editorHtmlRef: React.MutableRefObject<string>;
+  editorDesignRef: React.MutableRefObject<unknown>;
+  initialDesign?: unknown;
+  t: (key: string) => string;
+  onUpload: (file: File) => Promise<void>;
+  onRemove: (fileId: string) => Promise<void>;
+  onSubmit: (values: EmailTemplateFormValues) => Promise<void>;
+  onCancel: () => void;
 }
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
@@ -56,55 +65,22 @@ const statusOptions = [
   { label: "Active", value: "ACTIVE" },
 ] as const;
 
-export function EmailTemplateEditorForm({
+export function EmailTemplateForm({
   templateId,
-}: EmailTemplateEditorFormProps) {
-  const {
-    data,
-    isLoading,
-    isLoadingFiles,
-    notFound,
-    initialValues,
-    attachedFiles: initialAttachedFiles,
-    editorHtmlRef,
-    editorDesignRef,
-    status,
-    handleSubmit,
-    handleUploadFile,
-    handleDeleteFile,
-    breadcrumbItems,
-    t,
-    router,
-  } = useEmailTemplateEditor({ templateId });
-
-  const [uploading, setUploading] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-
-  useEffect(() => {
-    if (templateId && !isLoadingFiles && initialAttachedFiles.length > 0) {
-      setAttachedFiles(initialAttachedFiles);
-    }
-  }, [templateId, isLoadingFiles, initialAttachedFiles]);
-
-  if (templateId && isLoading) {
-    return (
-      <div className="px-6 py-8">
-        <Skeleton width="220px" height="1rem" className="mb-4" />
-        <Skeleton width="280px" height="2rem" className="mb-2" />
-        <Skeleton width="420px" height="1rem" className="mb-8" />
-        <Skeleton width="100%" height="720px" borderRadius="1rem" />
-      </div>
-    );
-  }
-
-  if (notFound) {
-    return (
-      <div className="flex flex-1 items-center justify-center px-6 py-8">
-        <p className="text-zinc-400">{t("emailTemplates.notFound")}</p>
-      </div>
-    );
-  }
-
+  initialValues,
+  attachedFiles,
+  uploading,
+  status,
+  breadcrumbItems,
+  editorHtmlRef,
+  editorDesignRef,
+  initialDesign,
+  t,
+  onUpload,
+  onRemove,
+  onSubmit,
+  onCancel,
+}: EmailTemplateFormProps) {
   return (
     <div className="px-6 py-8">
       <Tooltip target=".tracking-pixel-hint" position="top" />
@@ -132,10 +108,9 @@ export function EmailTemplateEditorForm({
             tags: true,
             status: true,
             trackingPixel: true,
-            fileIds: true,
           }),
         )}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
       >
         {({ isSubmitting, values, setFieldValue }) => (
           <Form className="space-y-6">
@@ -243,7 +218,7 @@ export function EmailTemplateEditorForm({
                   <GrapesEditor
                     mode="email"
                     key={templateId ?? "new"}
-                    initialDesign={data?.design}
+                    initialDesign={initialDesign}
                     onChange={({ html, design }) => {
                       editorHtmlRef.current = html;
                       editorDesignRef.current = design;
@@ -253,37 +228,8 @@ export function EmailTemplateEditorForm({
 
                 <FileAttachmentPanel
                   files={attachedFiles}
-                  onUpload={async (file) => {
-                    setUploading(true);
-                    try {
-                      const fileView = await handleUploadFile(file);
-                      setAttachedFiles((prev) => [
-                        ...prev,
-                        {
-                          id: fileView.id,
-                          name: fileView.name,
-                          size: fileView.size,
-                          format: fileView.format,
-                        },
-                      ]);
-                      setFieldValue("fileIds", [
-                        ...values.fileIds,
-                        fileView.id,
-                      ]);
-                    } finally {
-                      setUploading(false);
-                    }
-                  }}
-                  onRemove={async (fileId) => {
-                    await handleDeleteFile(fileId);
-                    setAttachedFiles((prev) =>
-                      prev.filter((f) => f.id !== fileId),
-                    );
-                    setFieldValue(
-                      "fileIds",
-                      values.fileIds.filter((id) => id !== fileId),
-                    );
-                  }}
+                  onUpload={onUpload}
+                  onRemove={onRemove}
                   disabled={uploading}
                 />
               </div>
@@ -312,7 +258,7 @@ export function EmailTemplateEditorForm({
                       type="button"
                       outlined
                       label={t("common.cancel")}
-                      onClick={() => router.push("/email-templates")}
+                      onClick={onCancel}
                       className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
                     />
                   </div>

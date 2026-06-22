@@ -1,10 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { EmailTemplateEditorForm } from "@/src/components/organisms/email-templates/email-template-editor-form";
+import EmailTemplateFormContainer from "@/src/components/organisms/email-templates";
 
 export default function EmailTemplateEditorPage() {
   const params = useParams();
 
-  return <EmailTemplateEditorForm templateId={params.id as string} />;
+  return <EmailTemplateFormContainer templateId={params.id as string} />;
 }

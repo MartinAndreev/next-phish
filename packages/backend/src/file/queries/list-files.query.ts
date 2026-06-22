@@ -25,8 +25,6 @@ export class ListFilesQuery implements IQueryHandler<
         ? await this.fileRepo.findByPurpose(input.purpose)
         : [];
 
-    return this.fileService.toViews(
-      rows as unknown as Record<string, unknown>[],
-    );
+    return this.fileService.toViews(rows);
   }
 }

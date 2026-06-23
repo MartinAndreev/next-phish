@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "primereact/skeleton";
+import { FormSkeleton } from "@/src/components/atoms/form-skeleton";
 import { useEmailTemplateEditor } from "@/src/hooks/use-email-template-editor";
 import { useAttachmentManager } from "@/src/hooks/use-attachment-manager";
 import { EmailTemplateForm } from "./email-template-form";
@@ -44,14 +44,7 @@ export function EmailTemplateFormContainer({
   };
 
   if (templateId && isLoading) {
-    return (
-      <div className="px-6 py-8">
-        <Skeleton width="220px" height="1rem" className="mb-4" />
-        <Skeleton width="280px" height="2rem" className="mb-2" />
-        <Skeleton width="420px" height="1rem" className="mb-8" />
-        <Skeleton width="100%" height="720px" borderRadius="1rem" />
-      </div>
-    );
+    return <FormSkeleton />;
   }
 
   if (notFound) {

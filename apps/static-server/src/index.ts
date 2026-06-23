@@ -1,26 +1,15 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { db } from "@next-phish/database";
 
 const app = new Hono();
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.get("*", async (c) => {
-  const path = c.req.path;
+  const requestPath = c.req.path;
 
-  const page = await db.page.findUnique({
-    where: { path, enabled: true },
-    select: { html: true, content_type: true },
-  });
-
-  if (!page) {
-    return c.notFound();
-  }
-
-  return c.html(page.html, 200, {
-    "Content-Type": page.content_type ?? "text/html",
-  });
+  // TODO: Page lookup by path was removed. Need a new mechanism.
+  return c.text(`Page not found: ${requestPath}`, 501);
 });
 
 const port = Number(process.env.STATIC_SERVER_PORT) || 3001;

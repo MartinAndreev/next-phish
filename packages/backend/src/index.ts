@@ -13,6 +13,9 @@ export { renderTemplate } from "./email/templates";
 export { MessageBus } from "./message-bus";
 export type { ICommandHandler, IQueryHandler } from "./message-bus";
 
+export { EncryptionService, registerEncryptionServices } from "./encryption";
+export type { EncryptedPayload } from "./encryption";
+
 export {
   UserRepository,
   CreateUserCommand,
@@ -108,3 +111,45 @@ export {
 } from "./file";
 export type { ListFilesInput, DeleteFileInput, UploadFileInput } from "./file";
 export { registerFileServices } from "./file";
+
+export {
+  PageRepository,
+  PageService,
+  GetPagesQuery,
+  GetPageByIdQuery,
+  CreatePageCommand,
+  UpdatePageCommand,
+  DeletePageCommand,
+  CreatePageSubmissionCommand,
+} from "./page";
+export type {
+  PageType,
+  PageStatus,
+  PageAuthorView,
+  PageListItemView,
+  PageView,
+  CreatePageData,
+  UpdatePageData,
+  CreatePageSubmissionData,
+} from "./page";
+export {
+  pageTypeSchema,
+  pageStatusSchema,
+  GetPagesSchema,
+  CreatePageCommandSchema,
+  UpdatePageCommandSchema,
+  GetPageByIdSchema,
+  DeletePageCommandSchema,
+  ImportPageFromUrlSchema,
+  CreatePageSubmissionSchema,
+} from "./page";
+export type {
+  GetPagesInput,
+  CreatePageCommandInput,
+  UpdatePageCommandInput,
+  GetPageByIdInput,
+  DeletePageCommandInput,
+  ImportPageFromUrlInput,
+  CreatePageSubmissionInput,
+} from "./page";
+export { registerPageServices } from "./page";

@@ -19,6 +19,16 @@ enum FilePurpose {
   EXPORT
 }
 
+enum PageType {
+  LANDING
+  REDIRECT
+}
+
+enum PageStatus {
+  DRAFT
+  ACTIVE
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String
@@ -38,6 +48,7 @@ model User {
   members          Member[]
   invitations      Invitation[]
   emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  pages            Page[] @relation("PageCreatedBy")
   uploadedFiles    File[] @relation("UploadedFiles")
 
   @@map("user")
@@ -114,6 +125,7 @@ model Organization {
   members         Member[]
   invitations     Invitation[]
   emailTemplates  EmailTemplate[]
+  pages           Page[]
   files           File[]
 
   @@map("organization")
@@ -219,13 +231,43 @@ model EmailTemplate {
 }
 
 model Page {
-  id           String   @id @default(cuid())
-  path         String   @unique
-  html         String
-  content_type String?
-  enabled      Boolean  @default(true)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id             String     @id @default(cuid())
+  name           String
+  type           PageType   @default(LANDING)
+  html           String     @default("")
+  design         Json?
+  status         PageStatus @default(DRAFT)
+  captureData    Boolean    @default(false)
+  redirectUrl    String?
+  redirectPageId String?
+  redirectPage   Page?      @relation("PageRedirect", fields: [redirectPageId], references: [id])
+  redirectTarget Page[]     @relation("PageRedirect")
+  contentType    String?
+  organizationId String
+  createdById    String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User              @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  submissions    PageSubmission[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
   @@map("page")
+}
+
+model PageSubmission {
+  id        String   @id @default(cuid())
+  pageId    String
+  data      Json
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("page_submission")
 }

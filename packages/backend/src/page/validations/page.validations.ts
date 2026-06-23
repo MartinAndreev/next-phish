@@ -57,7 +57,6 @@ export const DeletePageCommandSchema = z.object({
 
 export const ImportPageFromUrlSchema = z.object({
   url: z.string().url("Must be a valid URL"),
-  includeAssets: z.boolean().default(false),
 });
 
 export const CreatePageSubmissionSchema = z.object({

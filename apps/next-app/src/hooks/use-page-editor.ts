@@ -43,6 +43,8 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     },
   });
 
+  const importMutation = trpc.page.importFromUrl.useMutation();
+
   useEffect(() => {
     if (!data) {
       return;
@@ -51,6 +53,11 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     editorHtmlRef.current = data.html;
     editorDesignRef.current = data.design;
   }, [data]);
+
+  async function handleImportFromUrl(url: string): Promise<string> {
+    const result = await importMutation.mutateAsync({ url });
+    return result.html;
+  }
 
   async function handleSubmit(values: {
     name: string;
@@ -120,11 +127,15 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     initialValues,
     editorHtmlRef,
     editorDesignRef,
+    createMutation,
+    updateMutation,
+    importMutation,
     status,
     setError,
     setSuccess,
     reset,
     handleSubmit,
+    handleImportFromUrl,
     breadcrumbItems,
     t,
     router,

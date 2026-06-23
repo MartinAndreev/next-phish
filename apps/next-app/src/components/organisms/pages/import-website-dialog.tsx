@@ -25,11 +25,11 @@ interface ImportWebsiteDialogProps {
 }
 
 export function ImportWebsiteDialog({
-  visible,
-  t,
-  onImportComplete,
-  onHide,
-}: ImportWebsiteDialogProps) {
+                                      visible,
+                                      t,
+                                      onImportComplete,
+                                      onHide,
+                                    }: ImportWebsiteDialogProps) {
   const {
     state,
     dispatch,

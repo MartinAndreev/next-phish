@@ -251,24 +251,6 @@ const customTailwind = {
       },
     }),
   },
-  dialog: {
-    root: {
-      className: "bg-brand-dark border border-white/10 rounded-2xl shadow-2xl",
-    },
-    header: {
-      className:
-        "p-3 border-b flex flex-row justify-between border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
-    },
-    footer: {
-      className: "flex justify-end gap-2 p-4 border-t border-white/10",
-    },
-    content: {
-      className: "p-6",
-    },
-    mask: {
-      className: "bg-black/50",
-    },
-  },
   // Chips
   chips: {
     root: {

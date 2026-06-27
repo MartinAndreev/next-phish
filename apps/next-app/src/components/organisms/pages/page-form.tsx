@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { FieldInputProps } from "formik";
 import { ErrorMessage, Field, Form, Formik } from "formik";
@@ -19,6 +19,7 @@ import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { selectSmall } from "@/src/components/ui/theme-constants";
 import { trpc } from "@/src/lib/trpc";
 import { ImportWebsiteDialog } from "./import-website-dialog";
+import type { Editor } from "grapesjs";
 import type { FormStatus } from "@/src/hooks/use-form-status";
 
 const GrapesEditor = dynamic(
@@ -93,12 +94,12 @@ export function PageForm({
   const [searchQuery, setSearchQuery] = useState("");
   const [pagesAutocompleteValue, setPagesAutocompleteValue] =
     useState<PageListItemView | null>(null);
+  const editorRef = useRef<Editor | null>(null);
 
   const { data: searchResults } = trpc.page.list.useQuery(
     { search: searchQuery, limit: 10 },
     {
       enabled: searchQuery.length > 0,
-      cacheTime: 0,
       staleTime: 0,
       refetchOnWindowFocus: false,
     },
@@ -110,7 +111,9 @@ export function PageForm({
 
   const handleImport = useCallback(
     async (url: string) => {
-      editorHtmlRef.current = await onImportWebsite(url);
+      const html = await onImportWebsite(url);
+      editorHtmlRef.current = html;
+      editorRef.current?.setComponents(html);
     },
     [onImportWebsite, editorHtmlRef],
   );
@@ -187,6 +190,9 @@ export function PageForm({
                     mode="page"
                     key={pageId ?? "new"}
                     initialDesign={initialDesign}
+                    onEditor={(editor) => {
+                      editorRef.current = editor;
+                    }}
                     onChange={({ html, design }) => {
                       editorHtmlRef.current = html;
                       editorDesignRef.current = design;

@@ -16,6 +16,7 @@ interface GrapesEditorProps {
   mode: EditorMode;
   initialDesign?: unknown;
   onChange: (value: { html: string; design: unknown }) => void;
+  onEditor?: (editor: Editor) => void;
   fontsApiKey?: string;
 }
 
@@ -95,6 +96,7 @@ export function GrapesEditor({
   mode,
   initialDesign,
   onChange,
+  onEditor,
   fontsApiKey,
 }: GrapesEditorProps) {
   const initializedRef = useRef(false);
@@ -115,6 +117,8 @@ export function GrapesEditor({
 
       initializedRef.current = true;
     }
+
+    onEditor?.(editor);
 
     const sync = () => {
       onChange({

@@ -22,33 +22,6 @@ interface FindByOrganizationIdInput {
   };
 }
 
-const authorSelect = {
-  id: true,
-  name: true,
-  email: true,
-} as const;
-
-const listSelect = {
-  id: true,
-  name: true,
-  type: true,
-  status: true,
-  organizationId: true,
-  createdById: true,
-  createdAt: true,
-  updatedAt: true,
-  createdBy: { select: authorSelect },
-} as const;
-
-const detailSelect = {
-  ...listSelect,
-  html: true,
-  design: true,
-  captureData: true,
-  redirectUrl: true,
-  redirectPageId: true,
-} as const;
-
 export class PageRepository {
   constructor(private readonly db: PrismaClient) {}
 
@@ -85,7 +58,7 @@ export class PageRepository {
     const [rows, total] = await Promise.all([
       this.db.page.findMany({
         where,
-        select: listSelect,
+        include: { createdBy: true },
         orderBy,
         take: input.limit,
         skip: input.offset,
@@ -99,7 +72,7 @@ export class PageRepository {
   async findById(id: string, organizationId: string): Promise<PageView | null> {
     return this.db.page.findFirst({
       where: { id, organizationId },
-      select: detailSelect,
+      include: { createdBy: true },
     }) as Promise<PageView | null>;
   }
 
@@ -119,7 +92,7 @@ export class PageRepository {
         organizationId: data.organizationId,
         createdById: data.createdById,
       },
-      select: detailSelect,
+      include: { createdBy: true },
     });
 
     return row as unknown as PageView;
@@ -162,7 +135,7 @@ export class PageRepository {
   async findByPublicId(id: string): Promise<PageView | null> {
     return this.db.page.findUnique({
       where: { id },
-      select: detailSelect,
+      include: { createdBy: true },
     }) as Promise<PageView | null>;
   }
 

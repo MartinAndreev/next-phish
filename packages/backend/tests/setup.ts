@@ -11,13 +11,23 @@ beforeAll(async () => {
 }, 60000);
 
 beforeEach(async () => {
-  await testDb.resetData();
+  if (testDb) {
+    await testDb.resetData();
+  }
 });
 
 afterAll(async () => {
-  await testDb.cleanup();
+  if (testDb) {
+    await testDb.cleanup();
+  }
 });
 
-export function getDb() {
-  return testDb.db;
+export function getPrisma() {
+  if (!testDb) throw new Error("Test database not initialized");
+  return testDb.prisma;
+}
+
+export function getFactories() {
+  if (!testDb) throw new Error("Test database not initialized");
+  return testDb.factories;
 }

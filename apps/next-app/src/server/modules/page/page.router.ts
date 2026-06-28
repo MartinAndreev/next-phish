@@ -135,12 +135,18 @@ export const pageRouter = router({
 
   listImports: activeOrganizationProcedure
     .input(
-      z.object({ limit: z.number().min(1).max(50).default(20) }).optional(),
+      z
+        .object({
+          search: z.string().optional(),
+          limit: z.number().min(1).max(50).default(20),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const handler = Container.get(ListSiteImportsQuery);
       return bus.query(handler, {
         organizationId: ctx.activeOrganizationId,
+        search: input?.search,
         limit: input?.limit,
       });
     }),

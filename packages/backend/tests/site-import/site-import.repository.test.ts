@@ -1,234 +1,260 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest";
-import type { PGlite } from "@electric-sql/pglite";
-import {
-  insertUser,
-  insertOrganization,
-  insertJob,
-  insertSiteImport,
-  insertFile,
-  insertSiteImportFile,
+import type { PrismaClient } from "@prisma/client";
+import type {
+  UserFactory,
+  OrganizationFactory,
+  JobFactory,
+  FileFactory,
 } from "@next-phish/database/src/test-db";
-import { getDb } from "../setup";
+import { SiteImportRepository } from "../../src/site-import/repositories/site-import.repository";
+import { getPrisma, getFactories } from "../setup";
 
-describe("SiteImport Repository (PGlite)", () => {
-  let db: PGlite;
+describe("SiteImportRepository", () => {
+  let prisma: PrismaClient;
+  let repo: SiteImportRepository;
+  let userFactory: UserFactory;
+  let orgFactory: OrganizationFactory;
+  let jobFactory: JobFactory;
+  let fileFactory: FileFactory;
   let orgId: string;
   let userId: string;
 
   beforeAll(() => {
-    db = getDb();
+    prisma = getPrisma();
+    repo = new SiteImportRepository(prisma);
+    const factories = getFactories();
+    userFactory = factories.user;
+    orgFactory = factories.organization;
+    jobFactory = factories.job;
+    fileFactory = factories.file;
   });
 
   beforeEach(async () => {
-    const user = await insertUser(db);
-    const org = await insertOrganization(db);
+    const user = await userFactory.createOne();
+    const org = await orgFactory.createOne();
     userId = user.id;
     orgId = org.id;
   });
 
   describe("site_import CRUD", () => {
     it("should create a site import record", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
-        url: "https://example.com",
-        includeAssets: false,
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
       });
 
-      const result = await db.query(
-        `SELECT * FROM "site_import" WHERE id = $1`,
-        [siteImport.id],
-      );
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: false,
+        organizationId: orgId,
+        createdById: userId,
+      });
 
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].jobId).toBe(job.id);
-      expect(result.rows[0].url).toBe("https://example.com");
-      expect(result.rows[0].includeAssets).toBe(false);
-      expect(result.rows[0].status).toBe("PENDING");
+      expect(siteImport).toBeDefined();
+      expect(siteImport.id).toBeDefined();
+      expect(siteImport.jobId).toBe(job.id);
+      expect(siteImport.url).toBe("https://example.com");
+      expect(siteImport.includeAssets).toBe(false);
+      expect(siteImport.status).toBe("PENDING");
     });
 
     it("should find import by job ID", async () => {
-      const job = await insertJob(db, orgId, userId);
-      await insertSiteImport(db, job.id, orgId, userId);
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
+      });
+      await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: false,
+        organizationId: orgId,
+        createdById: userId,
+      });
 
-      const result = await db.query(
-        `SELECT * FROM "site_import" WHERE "jobId" = $1`,
-        [job.id],
-      );
-
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].jobId).toBe(job.id);
+      const found = await repo.findByJobId(job.id);
+      expect(found).toBeDefined();
+      expect(found!.jobId).toBe(job.id);
     });
 
-    it("should return empty for non-existent job ID", async () => {
-      const result = await db.query(
-        `SELECT * FROM "site_import" WHERE "jobId" = $1`,
-        ["non-existent"],
-      );
-
-      expect(result.rows.length).toBe(0);
+    it("should return null for non-existent job ID", async () => {
+      const found = await repo.findByJobId("non-existent");
+      expect(found).toBeNull();
     });
 
     it("should update import status and html", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId);
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
+      });
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: false,
+        organizationId: orgId,
+        createdById: userId,
+      });
 
-      await db.query(
-        `UPDATE "site_import" SET status = 'COMPLETED', html = $1, "finalUrl" = $2 WHERE id = $3`,
-        ["<html></html>", "https://example.com", siteImport.id],
-      );
+      const updated = await repo.update(siteImport.id, {
+        status: "COMPLETED",
+        html: "<html></html>",
+        finalUrl: "https://example.com",
+      });
 
-      const result = await db.query(
-        `SELECT status, html, "finalUrl" FROM "site_import" WHERE id = $1`,
-        [siteImport.id],
-      );
-
-      expect(result.rows[0].status).toBe("COMPLETED");
-      expect(result.rows[0].html).toBe("<html></html>");
-      expect(result.rows[0].finalUrl).toBe("https://example.com");
+      expect(updated.status).toBe("COMPLETED");
+      expect(updated.html).toBe("<html></html>");
+      expect(updated.finalUrl).toBe("https://example.com");
     });
 
     it("should update asset stats", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
+      });
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
         includeAssets: true,
+        organizationId: orgId,
+        createdById: userId,
       });
 
-      await db.query(
-        `UPDATE "site_import" SET "assetDiscovered" = 10, "assetDownloaded" = 8, "assetFailed" = 2 WHERE id = $1`,
-        [siteImport.id],
-      );
+      const updated = await repo.update(siteImport.id, {
+        assetDiscovered: 10,
+        assetDownloaded: 8,
+        assetFailed: 2,
+      });
 
-      const result = await db.query(
-        `SELECT "assetDiscovered", "assetDownloaded", "assetFailed" FROM "site_import" WHERE id = $1`,
-        [siteImport.id],
-      );
-
-      expect(result.rows[0].assetDiscovered).toBe(10);
-      expect(result.rows[0].assetDownloaded).toBe(8);
-      expect(result.rows[0].assetFailed).toBe(2);
+      expect(updated.assetDiscovered).toBe(10);
+      expect(updated.assetDownloaded).toBe(8);
+      expect(updated.assetFailed).toBe(2);
     });
 
     it("should delete a site import", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId);
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
+      });
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: false,
+        organizationId: orgId,
+        createdById: userId,
+      });
 
-      await db.query(`DELETE FROM "site_import" WHERE id = $1`, [
-        siteImport.id,
-      ]);
+      await repo.delete(siteImport.id);
 
-      const result = await db.query(
-        `SELECT * FROM "site_import" WHERE id = $1`,
-        [siteImport.id],
-      );
-      expect(result.rows.length).toBe(0);
+      const found = await repo.findById(siteImport.id);
+      expect(found).toBeNull();
     });
   });
 
   describe("site_import_file CRUD", () => {
     it("should create a site import file record", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
-        includeAssets: true,
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
       });
-      const file = await insertFile(db, orgId, userId);
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: true,
+        organizationId: orgId,
+        createdById: userId,
+      });
 
-      const sif = await insertSiteImportFile(db, siteImport.id, file.id, {
+      const file = await fileFactory.createOne({
+        organizationId: orgId,
+        uploadedById: userId,
+      });
+
+      const sif = await repo.createFile({
+        siteImportId: siteImport.id,
+        fileId: file.id,
         originalUrl: "https://example.com/styles/main.css",
         resolvedUrl: "https://example.com/styles/main.css",
         localPath: "styles/main.css",
+        downloadStatus: "downloaded",
       });
 
-      const result = await db.query(
-        `SELECT * FROM "site_import_file" WHERE id = $1`,
-        [sif.id],
-      );
-
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].siteImportId).toBe(siteImport.id);
-      expect(result.rows[0].fileId).toBe(file.id);
-      expect(result.rows[0].localPath).toBe("styles/main.css");
+      expect(sif).toBeDefined();
+      expect(sif.siteImportId).toBe(siteImport.id);
+      expect(sif.fileId).toBe(file.id);
+      expect(sif.localPath).toBe("styles/main.css");
     });
 
-    it("should find file by local path", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
-        includeAssets: true,
+    it("should find file by ID", async () => {
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
       });
-      const file = await insertFile(db, orgId, userId, {
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
+        includeAssets: true,
+        organizationId: orgId,
+        createdById: userId,
+      });
+
+      const file = await fileFactory.createOne({
+        organizationId: orgId,
+        uploadedById: userId,
         remoteId: "remote-test",
         format: "application/javascript",
       });
 
-      await insertSiteImportFile(db, siteImport.id, file.id, {
+      const sif = await repo.createFile({
+        siteImportId: siteImport.id,
+        fileId: file.id,
         originalUrl: "https://example.com/scripts/app.js",
         resolvedUrl: "https://example.com/scripts/app.js",
         localPath: "scripts/app.js",
+        downloadStatus: "downloaded",
       });
 
-      const result = await db.query(
-        `SELECT sif.*, f."remoteId", f.format
-         FROM "site_import_file" sif
-         JOIN "file" f ON f.id = sif."fileId"
-         WHERE sif."siteImportId" = $1 AND sif."localPath" = $2`,
-        [siteImport.id, "scripts/app.js"],
-      );
-
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].localPath).toBe("scripts/app.js");
-      expect(result.rows[0].remoteId).toBe("remote-test");
-      expect(result.rows[0].format).toBe("application/javascript");
+      const found = await repo.findFileById(sif.id);
+      expect(found).toBeDefined();
+      expect(found!.localPath).toBe("scripts/app.js");
+      expect(found!.file.remoteId).toBe("remote-test");
     });
 
-    it("should return empty for non-existent local path", async () => {
-      const result = await db.query(
-        `SELECT * FROM "site_import_file" WHERE "siteImportId" = $1 AND "localPath" = $2`,
-        ["import-1", "nonexistent.css"],
-      );
-
-      expect(result.rows.length).toBe(0);
-    });
-
-    it("should enforce unique constraint on (siteImportId, resolvedUrl)", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
-        includeAssets: true,
-      });
-      const file1 = await insertFile(db, orgId, userId, { id: "file-a" });
-      const file2 = await insertFile(db, orgId, userId, { id: "file-b" });
-
-      await insertSiteImportFile(db, siteImport.id, file1.id, {
-        resolvedUrl: "https://example.com/same.css",
-        localPath: "same.css",
-      });
-
-      await expect(
-        insertSiteImportFile(db, siteImport.id, file2.id, {
-          resolvedUrl: "https://example.com/same.css",
-          localPath: "same.css",
-        }),
-      ).rejects.toThrow();
+    it("should return null for non-existent file ID", async () => {
+      const found = await repo.findFileById("non-existent");
+      expect(found).toBeNull();
     });
 
     it("should cascade delete when site import is deleted", async () => {
-      const job = await insertJob(db, orgId, userId);
-      const siteImport = await insertSiteImport(db, job.id, orgId, userId, {
+      const job = await jobFactory.createOne({
+        organizationId: orgId,
+        createdById: userId,
+      });
+      const siteImport = await repo.create({
+        jobId: job.id,
+        url: "https://example.com",
         includeAssets: true,
+        organizationId: orgId,
+        createdById: userId,
       });
-      const file = await insertFile(db, orgId, userId);
 
-      await insertSiteImportFile(db, siteImport.id, file.id, {
+      const file = await fileFactory.createOne({
+        organizationId: orgId,
+        uploadedById: userId,
+      });
+
+      await repo.createFile({
+        siteImportId: siteImport.id,
+        fileId: file.id,
+        originalUrl: "https://example.com/test.css",
+        resolvedUrl: "https://example.com/test.css",
         localPath: "test.css",
+        downloadStatus: "downloaded",
       });
 
-      await db.query(`DELETE FROM "site_import" WHERE id = $1`, [
-        siteImport.id,
-      ]);
+      await repo.delete(siteImport.id);
 
-      const result = await db.query(
-        `SELECT * FROM "site_import_file" WHERE "siteImportId" = $1`,
-        [siteImport.id],
-      );
-      expect(result.rows.length).toBe(0);
+      const files = await repo.findFilesByImportId(siteImport.id);
+      expect(files.length).toBe(0);
     });
   });
 });

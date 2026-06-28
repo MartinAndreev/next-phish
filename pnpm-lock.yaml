@@ -273,6 +273,12 @@ importers:
       "@electric-sql/pglite":
         specifier: ^0.5.3
         version: 0.5.3
+      "@electric-sql/pglite-socket":
+        specifier: ^0.2.6
+        version: 0.2.6(@electric-sql/pglite-age@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pg_hashids@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pg_ivm@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pg_textsearch@0.0.5(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pg_uuidv7@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pgtap@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite-pgvector@0.0.4(@electric-sql/pglite@0.5.3))(@electric-sql/pglite@0.5.3)
+      "@faker-js/faker":
+        specifier: ^10.5.0
+        version: 10.5.0
       "@types/node":
         specifier: ^24
         version: 24.13.2
@@ -1277,6 +1283,13 @@ packages:
         integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+
+  "@faker-js/faker@10.5.0":
+    resolution:
+      {
+        integrity: sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg==,
+      }
+    engines: { node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: ">=10" }
 
   "@grapesjs/react@2.0.0":
     resolution:
@@ -7367,6 +7380,8 @@ snapshots:
     dependencies:
       "@eslint/core": 0.17.0
       levn: 0.4.1
+
+  "@faker-js/faker@10.5.0": {}
 
   "@grapesjs/react@2.0.0(grapesjs@0.23.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)":
     dependencies:

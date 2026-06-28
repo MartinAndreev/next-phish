@@ -257,10 +257,16 @@ const customTailwind = {
     },
     header: {
       className:
-        "p-3 border-b flex flex-row border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+        "p-3 border-b flex flex-row justify-between border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+    },
+    footer: {
+      className: "flex justify-end gap-2 p-4 border-t border-white/10",
     },
     content: {
       className: "p-6",
+    },
+    mask: {
+      className: "bg-black/50",
     },
   },
   // Chips

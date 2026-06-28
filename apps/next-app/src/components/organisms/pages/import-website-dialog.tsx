@@ -91,9 +91,9 @@ export function ImportWebsiteDialog({
             <Formik
               initialValues={{ url: state.url }}
               validate={toFormikValidation(importSchema)}
-              onSubmit={(values) => {
+              onSubmit={async (values) => {
                 dispatch({ type: "SET_URL", url: values.url });
-                handleImport(values.url, state.includeAssets);
+                await handleImport(values.url, state.includeAssets);
               }}
             >
               {() => (

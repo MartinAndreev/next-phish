@@ -1,16 +1,14 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { health } from "./routes/health";
+import { imports } from "./routes/imports";
+import { pages } from "./routes/pages";
 
 const app = new Hono();
 
-app.get("/health", (c) => c.json({ status: "ok" }));
-
-app.get("*", async (c) => {
-  const requestPath = c.req.path;
-
-  // TODO: Page lookup by path was removed. Need a new mechanism.
-  return c.text(`Page not found: ${requestPath}`, 501);
-});
+app.route("/", health);
+app.route("/", imports);
+app.route("/", pages);
 
 const port = Number(process.env.STATIC_SERVER_PORT) || 3001;
 

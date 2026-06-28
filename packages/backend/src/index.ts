@@ -1,4 +1,5 @@
 export { initializeContainer, registerAuth, Container } from "./container";
+export type { ContainerOptions } from "./container";
 
 export {
   EmailProviderType,
@@ -153,3 +154,43 @@ export type {
   CreatePageSubmissionInput,
 } from "./page";
 export { registerPageServices } from "./page";
+
+export {
+  JobRepository,
+  JobService,
+  CreateJobCommand,
+  UpdateJobCommand,
+  GetJobByIdQuery,
+} from "./job";
+export type { JobStatus, JobView, CreateJobData, UpdateJobData } from "./job";
+export { CreateJobSchema, GetJobByIdSchema } from "./job";
+export type { CreateJobInput, GetJobByIdInput } from "./job";
+export { registerJobServices } from "./job";
+
+export {
+  SiteImportRepository,
+  SiteImportService,
+  ImportChainService,
+  CreateSiteImportCommand,
+  ProcessSiteImportCommand,
+  GetSiteImportByJobIdQuery,
+  ListSiteImportsQuery,
+} from "./site-import";
+export type {
+  ImportStatus,
+  SiteImportView,
+  SiteImportFileView,
+  ImportContext,
+  ImportHandler,
+} from "./site-import";
+export {
+  CreateSiteImportSchema,
+  GetSiteImportByJobIdSchema,
+} from "./site-import";
+export type {
+  CreateSiteImportInput,
+  GetSiteImportByJobIdInput,
+} from "./site-import";
+export { registerSiteImportServices } from "./site-import";
+
+export { R2Client } from "./storage/r2-client";

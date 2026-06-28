@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Container } from "@/src/server/container";
 import {
   MessageBus,
@@ -7,6 +8,10 @@ import {
   UpdatePageCommand,
   DeletePageCommand,
   CreatePageSubmissionCommand,
+  CreateSiteImportCommand,
+  GetSiteImportByJobIdQuery,
+  ListSiteImportsQuery,
+  GetJobByIdQuery,
   GetPagesSchema,
   GetPageByIdSchema,
   CreatePageCommandSchema,
@@ -17,9 +22,11 @@ import {
 } from "@next-phish/backend";
 import {
   activeOrganizationProcedure,
+  protectedProcedure,
   publicProcedure,
   router,
 } from "../../trpc/procedures";
+import { jobQueue } from "../../queue";
 
 const bus = Container.get(MessageBus);
 
@@ -87,19 +94,55 @@ export const pageRouter = router({
 
   importFromUrl: activeOrganizationProcedure
     .input(ImportPageFromUrlSchema)
-    .mutation(async ({ input }) => {
-      const response = await fetch(input.url, {
-        signal: AbortSignal.timeout(10000),
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(CreateSiteImportCommand);
+      const result = await bus.dispatch(handler, {
+        url: input.url,
+        includeAssets: input.includeAssets,
+        organizationId: ctx.activeOrganizationId,
+        createdById: ctx.session.user.id,
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch URL: ${response.status} ${response.statusText}`,
-        );
-      }
+      await jobQueue.add(
+        "site_import",
+        { jobId: result.jobId },
+        {
+          attempts: 1,
+          removeOnComplete: { age: 3600 },
+          removeOnFail: { age: 86400 },
+        },
+      );
 
-      const html = await response.text();
-      return { html };
+      return result;
+    }),
+
+  importStatus: protectedProcedure
+    .input(z.object({ jobId: z.string() }))
+    .query(async ({ input }) => {
+      const jobHandler = Container.get(GetJobByIdQuery);
+      const siteImportHandler = Container.get(GetSiteImportByJobIdQuery);
+
+      const [job, siteImport] = await Promise.all([
+        bus.query(jobHandler, { id: input.jobId }),
+        bus.query(siteImportHandler, { jobId: input.jobId }),
+      ]);
+
+      return {
+        job,
+        siteImport,
+      };
+    }),
+
+  listImports: activeOrganizationProcedure
+    .input(
+      z.object({ limit: z.number().min(1).max(50).default(20) }).optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const handler = Container.get(ListSiteImportsQuery);
+      return bus.query(handler, {
+        organizationId: ctx.activeOrganizationId,
+        limit: input?.limit,
+      });
     }),
 
   submit: publicProcedure

@@ -1,6 +1,7 @@
 import {
   S3Client,
   PutObjectCommand,
+  GetObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 
@@ -47,6 +48,34 @@ export class R2Client {
 
   async getPublicUrl(key: string): Promise<string> {
     return `${this.publicUrl}/${key}`;
+  }
+
+  async getObject(
+    key: string,
+  ): Promise<{ body: Buffer; contentType: string } | null> {
+    try {
+      const response = await this.s3.send(
+        new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+
+      if (!response.Body) return null;
+
+      const chunks: Uint8Array[] = [];
+      const stream = response.Body as AsyncIterable<Uint8Array>;
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+      }
+
+      return {
+        body: Buffer.concat(chunks),
+        contentType: response.ContentType || "application/octet-stream",
+      };
+    } catch {
+      return null;
+    }
   }
 
   async deleteObject(key: string): Promise<void> {

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
     "@hono/node-server": "^2",
     "hono": "^4.12.25"

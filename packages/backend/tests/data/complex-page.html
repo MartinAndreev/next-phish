@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Complex Page</title>
+    <base href="https://example.com/app/" />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-icon.png" />
+    <style>
+      body {
+        background-image: url("/images/bg.jpg");
+      }
+      .header {
+        background: url(/images/header-bg.png) no-repeat;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="background-image: url(&quot;/images/inline-bg.jpg&quot;)">
+      <img src="images/logo.svg" alt="Logo" />
+      <img
+        srcset="images/photo-300.jpg 300w, images/photo-600.jpg 600w"
+        sizes="100vw"
+        alt="Photo"
+      />
+      <video poster="/images/poster.jpg" src="/videos/intro.mp4"></video>
+      <source src="/media/backup.mp4" />
+      <form action="submit" method="post">
+        <input type="email" name="email" />
+      </form>
+    </div>
+  </body>
+</html>

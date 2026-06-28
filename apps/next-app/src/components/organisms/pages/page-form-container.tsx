@@ -19,6 +19,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     status,
     handleSubmit,
     handleImportFromUrl,
+    pollImportStatus,
+    previousImports,
     breadcrumbItems,
     t,
     router,
@@ -80,7 +82,9 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
       editorDesignRef={editorDesignRef}
       initialDesign={data?.design}
       t={t}
+      previousImports={previousImports}
       onImportWebsite={handleImportFromUrl}
+      onPollImportStatus={pollImportStatus}
       onSubmit={handleFormSubmit}
       onCancel={() => router.push("/pages")}
     />

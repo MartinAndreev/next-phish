@@ -17,9 +17,6 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
-    env:
-      PAGE_SUBMISSION_ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
-
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +48,7 @@ jobs:
           R2_ACCESS_KEY_ID=ci
           R2_SECRET_ACCESS_KEY=ci
           R2_BUCKET_NAME=ci
+          PAGE_SUBMISSION_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
           EOF
 
       - run: bash scripts/symlink-env.sh

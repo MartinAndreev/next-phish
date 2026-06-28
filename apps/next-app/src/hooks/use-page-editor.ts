@@ -43,13 +43,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     },
   });
 
-  const importMutation = trpc.page.importFromUrl.useMutation();
-
-  const { data: previousImports } = trpc.page.listImports.useQuery(
-    { limit: 10 },
-    { staleTime: 30000 },
-  );
-
   useEffect(() => {
     if (!data) {
       return;
@@ -58,29 +51,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     editorHtmlRef.current = data.html;
     editorDesignRef.current = data.design;
   }, [data]);
-
-  async function handleImportFromUrl(
-    url: string,
-    includeAssets: boolean,
-  ): Promise<string> {
-    const result = await importMutation.mutateAsync({ url, includeAssets });
-    return result.jobId;
-  }
-
-  async function pollImportStatus(jobId: string) {
-    const result = await utils.client.job.getById.query({ id: jobId });
-    return {
-      job: result
-        ? {
-            id: result.id,
-            status: result.status,
-            progress: result.progress,
-            output: result.output,
-          }
-        : null,
-      siteImport: null,
-    };
-  }
 
   async function handleSubmit(values: {
     name: string;
@@ -150,17 +120,11 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     initialValues,
     editorHtmlRef,
     editorDesignRef,
-    createMutation,
-    updateMutation,
-    importMutation,
     status,
     setError,
     setSuccess,
     reset,
     handleSubmit,
-    handleImportFromUrl,
-    pollImportStatus,
-    previousImports: previousImports ?? [],
     breadcrumbItems,
     t,
     router,

@@ -3,43 +3,36 @@ import type { ImportContext, ImportHandler } from "../types";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CheerioElement = any;
 
+function rewriteAttribute(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  $: any,
+  selector: string,
+  attribute: string,
+  urlMap: Map<string, string>,
+) {
+  $(selector).each((_: number, el: CheerioElement) => {
+    const current = $(el).attr(attribute);
+    if (current && urlMap.has(current)) {
+      $(el).attr(attribute, urlMap.get(current));
+    }
+  });
+}
+
 export class RewriteReferencesHandler implements ImportHandler {
   async handle(ctx: ImportContext, next: () => Promise<void>): Promise<void> {
     const urlMap = new Map<string, string>();
 
     for (const asset of ctx.downloadedAssets) {
-      const localUrl = `/api/imports/${ctx.siteImportId}/assets/${asset.siteImportFileId}/${encodeURIComponent(asset.localPath.split("/").pop() || "file")}`;
+      const fileName = asset.localPath.split("/").pop() || "file";
+      const localUrl = `/api/imports/${ctx.siteImportId}/assets/${asset.siteImportFileId}/${encodeURIComponent(fileName)}`;
       urlMap.set(asset.candidate.originalUrl, localUrl);
       urlMap.set(asset.candidate.resolvedUrl, localUrl);
     }
 
-    ctx.$("[src]").each((_: number, el: CheerioElement) => {
-      const current = ctx.$(el).attr("src");
-      if (current && urlMap.has(current)) {
-        ctx.$(el).attr("src", urlMap.get(current));
-      }
-    });
-
-    ctx.$("[href]").each((_: number, el: CheerioElement) => {
-      const current = ctx.$(el).attr("href");
-      if (current && urlMap.has(current)) {
-        ctx.$(el).attr("href", urlMap.get(current));
-      }
-    });
-
-    ctx.$("[poster]").each((_: number, el: CheerioElement) => {
-      const current = ctx.$(el).attr("poster");
-      if (current && urlMap.has(current)) {
-        ctx.$(el).attr("poster", urlMap.get(current));
-      }
-    });
-
-    ctx.$("[data]").each((_: number, el: CheerioElement) => {
-      const current = ctx.$(el).attr("data");
-      if (current && urlMap.has(current)) {
-        ctx.$(el).attr("data", urlMap.get(current));
-      }
-    });
+    rewriteAttribute(ctx.$, "[src]", "src", urlMap);
+    rewriteAttribute(ctx.$, "[href]", "href", urlMap);
+    rewriteAttribute(ctx.$, "[poster]", "poster", urlMap);
+    rewriteAttribute(ctx.$, "[data]", "data", urlMap);
 
     ctx.$("[srcset]").each((_: number, el: CheerioElement) => {
       const current = ctx.$(el).attr("srcset");

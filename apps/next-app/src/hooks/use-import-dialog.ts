@@ -157,23 +157,15 @@ export function useImportDialog({
     };
   }, []);
 
-  async function handleImport() {
-    if (!state.url.trim()) {
-      dispatch({
-        type: "IMPORT_ERROR",
-        error: t("pages.importWebsiteUrlRequired"),
-      });
-      return;
-    }
-
+  async function handleImport(url: string, includeAssets: boolean) {
     try {
       const result = await importMutation.mutateAsync({
-        url: state.url.trim(),
-        includeAssets: state.includeAssets,
+        url,
+        includeAssets,
       });
       dispatch({ type: "IMPORT_START", jobId: result.jobId });
 
-      if (!state.includeAssets) {
+      if (!includeAssets) {
         const job = await utils.client.job.getById.query({
           id: result.jobId,
         });

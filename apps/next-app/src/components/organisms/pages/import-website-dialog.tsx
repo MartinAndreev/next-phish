@@ -14,7 +14,7 @@ import { ImportProgressView } from "./import-progress-view";
 import { useImportDialog } from "@/src/hooks/use-import-dialog";
 
 const importSchema = z.object({
-  url: z.string().url("Must be a valid URL"),
+  url: z.url("Must be a valid URL"),
 }) as unknown as ZodCompatible;
 
 interface ImportWebsiteDialogProps {

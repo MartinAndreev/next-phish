@@ -5,38 +5,60 @@ import type {
   CreateSiteImportFileData,
 } from "../types";
 
+const siteImportSelect = {
+  id: true,
+  jobId: true,
+  url: true,
+  finalUrl: true,
+  status: true,
+  includeAssets: true,
+  html: true,
+  assetDiscovered: true,
+  assetDownloaded: true,
+  assetFailed: true,
+  assetSkipped: true,
+  organizationId: true,
+  createdById: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+const siteImportFileSelect = {
+  id: true,
+  siteImportId: true,
+  fileId: true,
+  originalUrl: true,
+  resolvedUrl: true,
+  localPath: true,
+  contentHash: true,
+  downloadStatus: true,
+  createdAt: true,
+} as const;
+
 export class SiteImportRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async findById(id: string) {
     return this.db.siteImport.findUnique({
       where: { id },
+      select: siteImportSelect,
     });
   }
 
   async findByJobId(jobId: string) {
     return this.db.siteImport.findUnique({
       where: { jobId },
+      select: siteImportSelect,
     });
   }
 
-  async listByOrganization(
-    organizationId: string,
-    search?: string,
-    limit = 20,
-  ) {
-    const where: Record<string, unknown> = {
-      organizationId,
-      status: { in: ["COMPLETED", "PARTIAL"] },
-    };
-
-    if (search) {
-      where.url = { contains: search, mode: "insensitive" };
-    }
-
+  async listByOrganization(organizationId: string, limit = 20) {
     return this.db.siteImport.findMany({
-      where,
-      include: { _count: { select: { files: true } } },
+      where: { organizationId, status: { in: ["COMPLETED", "PARTIAL"] } },
+      select: {
+        ...siteImportSelect,
+        _count: { select: { files: true } },
+      },
       orderBy: { createdAt: "desc" },
       take: limit,
     });
@@ -51,6 +73,7 @@ export class SiteImportRepository {
         organizationId: data.organizationId,
         createdById: data.createdById,
       },
+      select: siteImportSelect,
     });
   }
 
@@ -66,6 +89,7 @@ export class SiteImportRepository {
         assetFailed: data.assetFailed,
         assetSkipped: data.assetSkipped,
       },
+      select: siteImportSelect,
     });
   }
 
@@ -80,19 +104,31 @@ export class SiteImportRepository {
         contentHash: data.contentHash,
         downloadStatus: data.downloadStatus,
       },
+      select: siteImportFileSelect,
     });
   }
 
   async findFileById(id: string) {
     return this.db.siteImportFile.findUnique({
       where: { id },
-      include: { file: true },
+      select: {
+        ...siteImportFileSelect,
+        file: {
+          select: {
+            id: true,
+            remoteId: true,
+            name: true,
+            format: true,
+          },
+        },
+      },
     });
   }
 
   async findFilesByImportId(siteImportId: string) {
     return this.db.siteImportFile.findMany({
       where: { siteImportId },
+      select: siteImportFileSelect,
     });
   }
 
@@ -102,8 +138,15 @@ export class SiteImportRepository {
         createdAt: { lt: olderThan },
         job: { status: { in: ["COMPLETED", "FAILED"] } },
       },
-      include: {
-        files: { include: { file: true } },
+      select: {
+        id: true,
+        files: {
+          select: {
+            id: true,
+            fileId: true,
+            file: { select: { remoteId: true } },
+          },
+        },
       },
     });
   }

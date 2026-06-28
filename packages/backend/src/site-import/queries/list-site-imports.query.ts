@@ -5,7 +5,6 @@ import type { IQueryHandler } from "../../message-bus";
 
 interface ListSiteImportsInput {
   organizationId: string;
-  search?: string;
   limit?: number;
 }
 
@@ -18,10 +17,9 @@ export class ListSiteImportsQuery implements IQueryHandler<
     private readonly siteImportService: SiteImportService,
   ) {}
 
-  async execute({ organizationId, search, limit }: ListSiteImportsInput) {
+  async execute({ organizationId, limit }: ListSiteImportsInput) {
     const rows = await this.siteImportRepo.listByOrganization(
       organizationId,
-      search,
       limit,
     );
     return rows.map((row) => ({

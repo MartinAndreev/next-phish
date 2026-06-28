@@ -1,12 +1,28 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import type { CreateJobData, UpdateJobData } from "../types";
 
+const jobSelect = {
+  id: true,
+  type: true,
+  status: true,
+  input: true,
+  output: true,
+  progress: true,
+  organizationId: true,
+  createdById: true,
+  startedAt: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 export class JobRepository {
   constructor(private readonly db: PrismaClient) {}
 
   async findById(id: string) {
     return this.db.job.findUnique({
       where: { id },
+      select: jobSelect,
     });
   }
 
@@ -18,6 +34,7 @@ export class JobRepository {
         organizationId: data.organizationId,
         createdById: data.createdById,
       },
+      select: jobSelect,
     });
   }
 
@@ -35,6 +52,7 @@ export class JobRepository {
         startedAt: data.startedAt,
         completedAt: data.completedAt,
       },
+      select: jobSelect,
     });
   }
 }

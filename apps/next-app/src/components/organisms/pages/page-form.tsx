@@ -43,6 +43,18 @@ interface PageFormValues {
   redirectUrl: string | null;
 }
 
+interface PreviousImport {
+  id: string;
+  url: string;
+  finalUrl: string | null;
+  status: string;
+  includeAssets: boolean;
+  html: string | null;
+  assetDownloaded: number;
+  fileCount: number;
+  createdAt: Date;
+}
+
 interface PageFormProps {
   pageId?: string;
   initialValues: PageFormValues;
@@ -52,7 +64,9 @@ interface PageFormProps {
   editorDesignRef: React.MutableRefObject<unknown>;
   initialDesign?: unknown;
   t: (key: string) => string;
-  onImportWebsite: (url: string) => Promise<string>;
+  previousImports: PreviousImport[];
+  onImportWebsite: (url: string, includeAssets: boolean) => Promise<string>;
+  onPollImportStatus: (jobId: string) => Promise<unknown>;
   onSubmit: (values: PageFormValues) => Promise<void>;
   onCancel: () => void;
 }
@@ -86,7 +100,9 @@ export function PageForm({
   editorDesignRef,
   initialDesign,
   t,
+  previousImports,
   onImportWebsite,
+  onPollImportStatus,
   onSubmit,
   onCancel,
 }: PageFormProps) {
@@ -110,12 +126,18 @@ export function PageForm({
   }
 
   const handleImport = useCallback(
-    async (url: string) => {
-      const html = await onImportWebsite(url);
+    async (url: string, includeAssets: boolean) => {
+      return onImportWebsite(url, includeAssets);
+    },
+    [onImportWebsite],
+  );
+
+  const handleImportComplete = useCallback(
+    (html: string) => {
       editorHtmlRef.current = html;
       editorRef.current?.setComponents(html);
     },
-    [onImportWebsite, editorHtmlRef],
+    [editorHtmlRef],
   );
 
   return (
@@ -391,7 +413,12 @@ export function PageForm({
             <ImportWebsiteDialog
               visible={importDialogVisible}
               t={t}
+              previousImports={previousImports}
               onImport={handleImport}
+              onImportComplete={handleImportComplete}
+              onPollStatus={
+                onPollImportStatus as (jobId: string) => Promise<never>
+              }
               onHide={() => setImportDialogVisible(false)}
             />
           </Form>

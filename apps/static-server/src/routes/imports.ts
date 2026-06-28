@@ -1,20 +1,25 @@
 import { Hono } from "hono";
-import { Container, SiteImportRepository, R2Client } from "@next-phish/backend";
+import { db } from "@next-phish/database";
+import { R2Client } from "@next-phish/backend";
 
 const imports = new Hono();
+const r2 = new R2Client();
 
 imports.get("/api/imports/:importId/assets/:fileId/:fileName", async (c) => {
   const importId = c.req.param("importId");
   const fileId = c.req.param("fileId");
 
-  const siteImportRepo = Container.get(SiteImportRepository);
+  const importFile = await db.siteImportFile.findUnique({
+    where: { id: fileId },
+    include: {
+      file: { select: { remoteId: true, format: true } },
+    },
+  });
 
-  const importFile = await siteImportRepo.findFileById(fileId);
   if (!importFile || importFile.siteImportId !== importId) {
     return c.text("Not found", 404);
   }
 
-  const r2 = new R2Client();
   const object = await r2.getObject(importFile.file.remoteId);
   if (!object) {
     return c.text("File not in storage", 404);

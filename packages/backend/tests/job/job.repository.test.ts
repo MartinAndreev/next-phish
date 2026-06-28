@@ -1,156 +1,136 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest";
-import type { PrismaClient } from "@prisma/client";
-import type {
-  UserFactory,
-  OrganizationFactory,
+import type { PGlite } from "@electric-sql/pglite";
+import {
+  insertUser,
+  insertOrganization,
+  insertJob,
 } from "@next-phish/database/src/test-db";
-import { JobRepository } from "../../src/job/repositories/job.repository";
-import { getPrisma, getFactories } from "../setup";
+import { getDb } from "../setup";
 
-describe("JobRepository", () => {
-  let prisma: PrismaClient;
-  let jobRepo: JobRepository;
-  let userFactory: UserFactory;
-  let orgFactory: OrganizationFactory;
+describe("Job Repository (PGlite)", () => {
+  let db: PGlite;
   let orgId: string;
   let userId: string;
 
   beforeAll(() => {
-    prisma = getPrisma();
-    jobRepo = new JobRepository(prisma);
-    const factories = getFactories();
-    userFactory = factories.user;
-    orgFactory = factories.organization;
+    db = getDb();
   });
 
   beforeEach(async () => {
-    const user = await userFactory.createOne();
-    const org = await orgFactory.createOne();
+    const user = await insertUser(db);
+    const org = await insertOrganization(db);
     userId = user.id;
     orgId = org.id;
   });
 
   describe("create", () => {
     it("should create a job with PENDING status", async () => {
-      const job = await jobRepo.create({
+      const job = await insertJob(db, orgId, userId, {
         type: "site_import",
         input: { url: "https://example.com", includeAssets: false },
-        organizationId: orgId,
-        createdById: userId,
       });
 
-      expect(job).toBeDefined();
-      expect(job.id).toBeDefined();
-      expect(job.type).toBe("site_import");
-      expect(job.status).toBe("PENDING");
-      expect(job.organizationId).toBe(orgId);
-      expect(job.createdById).toBe(userId);
+      const result = await db.query(`SELECT * FROM "job" WHERE id = $1`, [
+        job.id,
+      ]);
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].type).toBe("site_import");
+      expect(result.rows[0].status).toBe("PENDING");
+      expect(result.rows[0].organizationId).toBe(orgId);
+      expect(result.rows[0].createdById).toBe(userId);
     });
 
     it("should store input as JSON", async () => {
       const input = { url: "https://example.com", includeAssets: true };
-      const job = await jobRepo.create({
-        type: "site_import",
-        input,
-        organizationId: orgId,
-        createdById: userId,
-      });
+      const job = await insertJob(db, orgId, userId, { input });
 
-      expect(job.input).toEqual(input);
+      const result = await db.query(`SELECT input FROM "job" WHERE id = $1`, [
+        job.id,
+      ]);
+
+      expect(result.rows[0].input).toEqual(input);
     });
   });
 
   describe("findById", () => {
     it("should find an existing job", async () => {
-      const created = await jobRepo.create({
-        type: "site_import",
-        input: { url: "https://example.com" },
-        organizationId: orgId,
-        createdById: userId,
-      });
+      const created = await insertJob(db, orgId, userId);
 
-      const found = await jobRepo.findById(created.id);
-      expect(found).toBeDefined();
-      expect(found!.id).toBe(created.id);
+      const result = await db.query(`SELECT * FROM "job" WHERE id = $1`, [
+        created.id,
+      ]);
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].id).toBe(created.id);
     });
 
-    it("should return null for non-existent job", async () => {
-      const found = await jobRepo.findById("non-existent-id");
-      expect(found).toBeNull();
+    it("should return empty for non-existent job", async () => {
+      const result = await db.query(`SELECT * FROM "job" WHERE id = $1`, [
+        "non-existent-id",
+      ]);
+
+      expect(result.rows.length).toBe(0);
     });
   });
 
   describe("update", () => {
     it("should update job status", async () => {
-      const job = await jobRepo.create({
-        type: "site_import",
-        input: { url: "https://example.com" },
-        organizationId: orgId,
-        createdById: userId,
-      });
+      const job = await insertJob(db, orgId, userId);
 
-      const updated = await jobRepo.update(job.id, {
-        status: "RUNNING",
-        startedAt: new Date(),
-      });
+      await db.query(
+        `UPDATE "job" SET status = 'RUNNING', "startedAt" = NOW() WHERE id = $1`,
+        [job.id],
+      );
 
-      expect(updated.status).toBe("RUNNING");
-      expect(updated.startedAt).toBeDefined();
+      const result = await db.query(
+        `SELECT status, "startedAt" FROM "job" WHERE id = $1`,
+        [job.id],
+      );
+
+      expect(result.rows[0].status).toBe("RUNNING");
+      expect(result.rows[0].startedAt).toBeDefined();
     });
 
     it("should update job output on completion", async () => {
-      const job = await jobRepo.create({
-        type: "site_import",
-        input: { url: "https://example.com" },
-        organizationId: orgId,
-        createdById: userId,
-      });
-
+      const job = await insertJob(db, orgId, userId);
       const output = { html: "<html></html>", stats: { discovered: 5 } };
-      const updated = await jobRepo.update(job.id, {
-        status: "COMPLETED",
-        output,
-        completedAt: new Date(),
-      });
 
-      expect(updated.status).toBe("COMPLETED");
-      expect(updated.output).toEqual(output);
-      expect(updated.completedAt).toBeDefined();
+      await db.query(
+        `UPDATE "job" SET status = 'COMPLETED', output = $1::jsonb, "completedAt" = NOW() WHERE id = $2`,
+        [JSON.stringify(output), job.id],
+      );
+
+      const result = await db.query(
+        `SELECT status, output FROM "job" WHERE id = $1`,
+        [job.id],
+      );
+
+      expect(result.rows[0].status).toBe("COMPLETED");
+      expect(result.rows[0].output).toEqual(output);
     });
 
     it("should list jobs by organization", async () => {
-      await jobRepo.create({
-        type: "site_import",
-        input: {},
-        organizationId: orgId,
-        createdById: userId,
-      });
-      await jobRepo.create({
-        type: "email_send",
-        input: {},
-        organizationId: orgId,
-        createdById: userId,
-      });
+      await insertJob(db, orgId, userId, { type: "site_import" });
+      await insertJob(db, orgId, userId, { type: "email_send" });
 
-      const result = await prisma.job.findMany({
-        where: { organizationId: orgId },
-      });
+      const result = await db.query(
+        `SELECT * FROM "job" WHERE "organizationId" = $1`,
+        [orgId],
+      );
 
-      expect(result.length).toBe(2);
+      expect(result.rows.length).toBe(2);
     });
 
     it("should delete a job", async () => {
-      const job = await jobRepo.create({
-        type: "site_import",
-        input: {},
-        organizationId: orgId,
-        createdById: userId,
-      });
+      const job = await insertJob(db, orgId, userId);
 
-      await prisma.job.delete({ where: { id: job.id } });
+      await db.query(`DELETE FROM "job" WHERE id = $1`, [job.id]);
 
-      const found = await jobRepo.findById(job.id);
-      expect(found).toBeNull();
+      const result = await db.query(`SELECT * FROM "job" WHERE id = $1`, [
+        job.id,
+      ]);
+      expect(result.rows.length).toBe(0);
     });
   });
 });

@@ -4,6 +4,7 @@ import { organizationRouter } from "../modules/organization/organization.router"
 import { emailTemplateRouter } from "../modules/email-template/email-template.router";
 import { fileRouter } from "../modules/file/file.router";
 import { pageRouter } from "../modules/page/page.router";
+import { jobRouter } from "../modules/job/job.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   emailTemplate: emailTemplateRouter,
   file: fileRouter,
   page: pageRouter,
+  job: jobRouter,
 });
 
 export type AppRouter = typeof appRouter;

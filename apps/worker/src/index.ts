@@ -1,30 +1,19 @@
 import "./container";
-import type { Job } from "bullmq";
 import { Worker } from "bullmq";
 import { Container, ProcessSiteImportCommand } from "@next-phish/backend";
 import { connection } from "./connection";
 
 console.log("Worker starting...");
 
-const jobHandlers: Record<string, (job: Job) => Promise<void>> = {
-  site_import: async (job) => {
-    const handler = Container.get(ProcessSiteImportCommand);
-    await handler.execute({ jobId: job.data.jobId });
-  },
-};
-
 const worker = new Worker(
   "jobs",
   async (job) => {
     console.log(`Processing job ${job.id} (${job.name})`);
 
-    const handler = jobHandlers[job.name];
-    if (!handler) {
-      console.warn(`No handler for job type: ${job.name}`);
-      return;
+    if (job.name === "site_import") {
+      const handler = Container.get(ProcessSiteImportCommand);
+      await handler.execute({ jobId: job.data.jobId });
     }
-
-    await handler(job);
   },
   { connection, concurrency: 5 },
 );

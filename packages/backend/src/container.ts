@@ -8,14 +8,26 @@ import {
 } from "./organization";
 import { registerEmailTemplateServices } from "./email-template";
 import { registerFileServices } from "./file";
+import { registerPageServices } from "./page";
+import { registerJobServices } from "./job";
+import { registerSiteImportServices } from "./site-import";
+import { registerEncryptionServices } from "./encryption";
 import { MessageBus } from "./message-bus";
 
-export function initializeContainer(): void {
+export interface ContainerOptions {
+  encryptionKey: string;
+}
+
+export function initializeContainer(options: ContainerOptions): void {
+  registerEncryptionServices(options.encryptionKey);
   registerEmailServices();
   registerUserServices(db);
   registerOrganizationServices(db);
   registerEmailTemplateServices(db);
   registerFileServices(db);
+  registerPageServices(db);
+  registerJobServices(db);
+  registerSiteImportServices(db);
   Container.set(MessageBus, new MessageBus(db));
 }
 

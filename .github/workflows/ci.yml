@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, master]
   push:
-    branches: [main]
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -14,41 +14,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+    name: "Build, test, typecheck, and lint"
 
-  typecheck:
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm db:generate
-      - run: pnpm typecheck
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Create CI .env
         run: |
           cat > .env <<'EOF'
@@ -67,7 +49,22 @@ jobs:
           R2_ACCESS_KEY_ID=ci
           R2_SECRET_ACCESS_KEY=ci
           R2_BUCKET_NAME=ci
+          PAGE_SUBMISSION_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
           EOF
+
       - run: bash scripts/symlink-env.sh
-      - run: pnpm db:generate
-      - run: pnpm build
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test

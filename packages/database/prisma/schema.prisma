@@ -19,6 +19,31 @@ enum FilePurpose {
   EXPORT
 }
 
+enum PageType {
+  LANDING
+  REDIRECT
+}
+
+enum PageStatus {
+  DRAFT
+  ACTIVE
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ImportStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String
@@ -38,7 +63,10 @@ model User {
   members          Member[]
   invitations      Invitation[]
   emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  pages            Page[] @relation("PageCreatedBy")
   uploadedFiles    File[] @relation("UploadedFiles")
+  jobs             Job[] @relation("JobCreatedBy")
+  siteImports      SiteImport[] @relation("SiteImportCreatedBy")
 
   @@map("user")
 }
@@ -114,7 +142,10 @@ model Organization {
   members         Member[]
   invitations     Invitation[]
   emailTemplates  EmailTemplate[]
+  pages           Page[]
   files           File[]
+  jobs            Job[]
+  siteImports     SiteImport[]
 
   @@map("organization")
 }
@@ -175,6 +206,7 @@ model File {
   uploadedBy         User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
   organization       Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   emailTemplateFiles EmailTemplateFile[]
+  siteImportFiles    SiteImportFile[]
 
   @@index([organizationId])
   @@index([uploadedById])
@@ -219,13 +251,114 @@ model EmailTemplate {
 }
 
 model Page {
-  id           String   @id @default(cuid())
-  path         String   @unique
-  html         String
-  content_type String?
-  enabled      Boolean  @default(true)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id             String     @id @default(cuid())
+  name           String
+  type           PageType   @default(LANDING)
+  html           String     @default("")
+  design         Json?
+  status         PageStatus @default(DRAFT)
+  captureData    Boolean    @default(false)
+  redirectUrl    String?
+  redirectPageId String?
+  redirectPage   Page?      @relation("PageRedirect", fields: [redirectPageId], references: [id])
+  redirectTarget Page[]     @relation("PageRedirect")
+  contentType    String?
+  organizationId String
+  createdById    String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User              @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  submissions    PageSubmission[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
   @@map("page")
+}
+
+model PageSubmission {
+  id        String   @id @default(cuid())
+  pageId    String
+  data      Json
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("page_submission")
+}
+
+model Job {
+  id             String      @id @default(cuid())
+  type           String
+  status         JobStatus   @default(PENDING)
+  input          Json
+  output         Json?
+  progress       Json?
+  organizationId String
+  createdById    String
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  siteImport   SiteImport?
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
+  @@index([type])
+  @@map("job")
+}
+
+model SiteImport {
+  id              String       @id @default(cuid())
+  jobId           String       @unique
+  url             String
+  finalUrl        String?
+  status          ImportStatus @default(PENDING)
+  includeAssets   Boolean      @default(false)
+  html            String?
+  assetDiscovered Int          @default(0)
+  assetDownloaded Int          @default(0)
+  assetFailed     Int          @default(0)
+  assetSkipped    Int          @default(0)
+  organizationId  String
+  createdById     String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  job          Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User           @relation("SiteImportCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  files        SiteImportFile[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@map("site_import")
+}
+
+model SiteImportFile {
+  id             String   @id @default(cuid())
+  siteImportId   String
+  fileId         String
+  originalUrl    String
+  resolvedUrl    String
+  localPath      String
+  contentHash    String?
+  downloadStatus String   @default("downloaded")
+  createdAt      DateTime @default(now())
+
+  siteImport SiteImport @relation(fields: [siteImportId], references: [id], onDelete: Cascade)
+  file       File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([siteImportId, resolvedUrl])
+  @@index([siteImportId])
+  @@map("site_import_file")
 }

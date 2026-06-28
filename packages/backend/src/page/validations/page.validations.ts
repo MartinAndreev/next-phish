@@ -1,0 +1,76 @@
+import { z } from "zod";
+
+export const pageTypeSchema = z.enum(["LANDING", "REDIRECT"]);
+export const pageStatusSchema = z.enum(["DRAFT", "ACTIVE"]);
+
+const sortFieldSchema = z.enum([
+  "name",
+  "type",
+  "status",
+  "createdAt",
+  "updatedAt",
+]);
+const sortOrderSchema = z.enum(["asc", "desc"]);
+
+const sortSchema = z.object({
+  field: sortFieldSchema,
+  order: sortOrderSchema,
+});
+
+export const GetPagesSchema = z.object({
+  search: z.string().optional(),
+  limit: z.number().min(1).max(100).default(50),
+  offset: z.number().min(0).default(0),
+  sort: z.array(sortSchema).optional(),
+  filters: z
+    .object({
+      status: pageStatusSchema.optional(),
+      type: pageTypeSchema.optional(),
+    })
+    .optional(),
+});
+
+const pageBaseSchema = z.object({
+  name: z.string().trim().min(1, "Page name is required"),
+  type: pageTypeSchema.default("LANDING"),
+  html: z.string().default(""),
+  design: z.unknown().nullable(),
+  status: pageStatusSchema.default("DRAFT"),
+  captureData: z.boolean().default(false),
+  redirectUrl: z.string().nullable().optional(),
+  redirectPageId: z.string().nullable().optional(),
+});
+
+export const CreatePageCommandSchema = pageBaseSchema;
+
+export const UpdatePageCommandSchema = pageBaseSchema.extend({
+  id: z.string(),
+});
+
+export const GetPageByIdSchema = z.object({
+  id: z.string(),
+});
+
+export const DeletePageCommandSchema = z.object({
+  id: z.string(),
+});
+
+export const ImportPageFromUrlSchema = z.object({
+  url: z.string().url("Must be a valid URL"),
+  includeAssets: z.boolean().default(false),
+});
+
+export const CreatePageSubmissionSchema = z.object({
+  pageId: z.string().min(1, "Page ID is required"),
+  data: z.record(z.unknown()),
+});
+
+export type GetPagesInput = z.infer<typeof GetPagesSchema>;
+export type CreatePageCommandInput = z.infer<typeof CreatePageCommandSchema>;
+export type UpdatePageCommandInput = z.infer<typeof UpdatePageCommandSchema>;
+export type GetPageByIdInput = z.infer<typeof GetPageByIdSchema>;
+export type DeletePageCommandInput = z.infer<typeof DeletePageCommandSchema>;
+export type ImportPageFromUrlInput = z.infer<typeof ImportPageFromUrlSchema>;
+export type CreatePageSubmissionInput = z.infer<
+  typeof CreatePageSubmissionSchema
+>;

@@ -7,7 +7,7 @@ type SafeParseResult =
       };
     };
 
-interface ZodCompatible {
+export interface ZodCompatible {
   safeParse(data: unknown): SafeParseResult;
 }
 

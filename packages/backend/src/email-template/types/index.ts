@@ -5,6 +5,4 @@ export type {
   EmailTemplateView,
   CreateEmailTemplateData,
   UpdateEmailTemplateData,
-  EmailTemplateListRow,
-  EmailTemplateRow,
 } from "./email-template.types";

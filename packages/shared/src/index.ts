@@ -34,3 +34,31 @@ export type {
   DeleteFileInput,
   UploadFileInput,
 } from "./schemas";
+
+export {
+  pageTypeSchema,
+  pageStatusSchema,
+  createPageSchema,
+  updatePageSchema,
+} from "./schemas";
+export type { CreatePageInput, UpdatePageInput } from "./schemas";
+
+export type {
+  PageType,
+  PageStatus,
+  PageAuthorView,
+  PageListItemView,
+  PageView,
+  CreatePageData,
+  UpdatePageData,
+  CreatePageSubmissionData,
+} from "./types";
+
+export type {
+  EmailTemplateStatus,
+  EmailTemplateAuthorView,
+  EmailTemplateListItemView,
+  EmailTemplateView,
+  CreateEmailTemplateData,
+  UpdateEmailTemplateData,
+} from "./types";

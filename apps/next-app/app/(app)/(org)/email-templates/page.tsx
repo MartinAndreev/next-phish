@@ -5,7 +5,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import type { EmailTemplateListItemView } from "@next-phish/backend";
+import type { EmailTemplateListItemView } from "@next-phish/shared";
 import { AppDataTable } from "@/src/components/molecules/data-table";
 import type {
   DataTableAction,

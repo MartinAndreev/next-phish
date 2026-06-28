@@ -1,36 +1,17 @@
-import type {
-  EmailTemplateListItemView,
-  EmailTemplateListRow,
-  EmailTemplateView,
-  EmailTemplateRow,
-} from "../types";
+import type { EmailTemplateListItemView, EmailTemplateView } from "../types";
 
 export class EmailTemplateService {
-  toListItemView(row: EmailTemplateListRow): EmailTemplateListItemView {
-    return {
-      id: row.id,
-      name: row.name,
-      tags: row.tags,
-      status: row.status,
-      organizationId: row.organizationId,
-      createdById: row.createdById,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      createdBy: row.createdBy,
-    };
+  toListItemView(row: EmailTemplateListItemView): EmailTemplateListItemView {
+    return row;
   }
 
-  toListItemViews(rows: EmailTemplateListRow[]): EmailTemplateListItemView[] {
-    return rows.map((row) => this.toListItemView(row));
+  toListItemViews(
+    rows: EmailTemplateListItemView[],
+  ): EmailTemplateListItemView[] {
+    return rows;
   }
 
-  toView(row: EmailTemplateRow): EmailTemplateView {
-    return {
-      ...this.toListItemView(row),
-      html: row.html,
-      design: row.design,
-      trackingPixel: row.trackingPixel,
-      fileIds: row.files?.map((f) => f.fileId) ?? [],
-    };
+  toView(row: EmailTemplateView): EmailTemplateView {
+    return row;
   }
 }

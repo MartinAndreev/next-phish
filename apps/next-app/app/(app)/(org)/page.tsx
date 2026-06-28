@@ -5,7 +5,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-1 items-center justify-center">
-      <p className="text-zinc-400">{t("pages.dashboardSoon")}</p>
+      <p className="text-zinc-400">{t("common.comingSoon")}</p>
     </div>
   );
 }

@@ -7,6 +7,7 @@
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
+    "test": "turbo test",
     "typecheck": "turbo typecheck",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,cjs,json,md,yml,yaml,css,scss}\"",
     "db:generate": "pnpm --filter @next-phish/database exec prisma generate",

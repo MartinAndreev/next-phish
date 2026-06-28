@@ -34,3 +34,11 @@ export type {
   DeleteFileInput,
   UploadFileInput,
 } from "./file.schema";
+
+export {
+  pageTypeSchema,
+  pageStatusSchema,
+  createPageSchema,
+  updatePageSchema,
+} from "./page.schema";
+export type { CreatePageInput, UpdatePageInput } from "./page.schema";

@@ -3,6 +3,8 @@
 import { PrimeReactProvider } from "primereact/api";
 import Tailwind from "primereact/passthrough/tailwind";
 import { twMerge } from "tailwind-merge";
+import { RadioButtonProps } from "primereact/radiobutton";
+import { AutoCompleteProps } from "primereact/autocomplete";
 
 function classNames(
   ...args: (string | boolean | undefined | null | Record<string, unknown>)[]
@@ -210,7 +212,63 @@ const customTailwind = {
       className: "text-zinc-400 px-4 py-2.5",
     },
   },
-
+  checkbox: {
+    input: { className: "h-4 w-4 hidden" },
+    box: {
+      className: "h-4 w-4 rounded border border-white/10 bg-white/5",
+    },
+    icon: { className: "text-cyan-400 text-xs" },
+  },
+  radiobutton: {
+    input: { className: "h-4 w-4 hidden" },
+    box: {
+      className:
+        "h-4 w-4 rounded-full border border-white/10 bg-white/5 flex items-center justify-center",
+    },
+    icon: ({ props }: { props: RadioButtonProps }) => ({
+      className: classNames(
+        "rounded-full w-2 h-2",
+        props?.checked ? "bg-cyan-400" : "text-white/50",
+      ),
+    }),
+  },
+  autocomplete: {
+    ...Tailwind.autocomplete,
+    input: ({ props }: { props: AutoCompleteProps }) => ({
+      root: {
+        className: classNames(
+          "m-0",
+          "w-full",
+          "transition-colors duration-200 appearance-none rounded-lg",
+          { "rounded-tr-none rounded-br-none": props.dropdown },
+          {
+            "font-sans text-base text-gray-700 dark:text-white/80 bg-white dark:bg-gray-900 p-2 text-xs border border-gray-300 dark:border-blue-900/40 focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] hover:border-blue-500 focus:outline-none":
+              !props.multiple,
+            "font-sans text-base text-gray-700 dark:text-white/80 border-0 outline-none bg-transparent m-0 p-0 shadow-none rounded-none w-full":
+              props.multiple,
+          },
+        ),
+      },
+    }),
+  },
+  dialog: {
+    root: {
+      className: "bg-brand-dark border border-white/10 rounded-2xl shadow-2xl",
+    },
+    header: {
+      className:
+        "p-3 border-b flex flex-row justify-between border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+    },
+    footer: {
+      className: "flex justify-end gap-2 p-4 border-t border-white/10",
+    },
+    content: {
+      className: "p-6",
+    },
+    mask: {
+      className: "bg-black/50",
+    },
+  },
   // Chips
   chips: {
     root: {
@@ -537,7 +595,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
     <PrimeReactProvider
       value={{
         unstyled: true,
-        pt: customTailwind,
+        pt: customTailwind as never,
         ptOptions: {
           mergeSections: true,
           mergeProps: true,

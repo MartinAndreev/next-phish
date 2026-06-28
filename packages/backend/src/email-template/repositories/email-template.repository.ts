@@ -1,10 +1,21 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type {
   CreateEmailTemplateData,
-  EmailTemplateListRow,
-  EmailTemplateRow,
+  EmailTemplateListItemView,
+  EmailTemplateView,
   UpdateEmailTemplateData,
 } from "../types";
+
+interface EmailTemplateFileRef {
+  fileId: string;
+}
+
+interface EmailTemplatePrismaRow extends EmailTemplateListItemView {
+  html: string;
+  design: unknown;
+  trackingPixel: boolean;
+  files: EmailTemplateFileRef[];
+}
 
 interface FindByOrganizationIdInput {
   search?: string;
@@ -59,7 +70,7 @@ export class EmailTemplateRepository {
   async findByOrganizationId(
     organizationId: string,
     input: FindByOrganizationIdInput,
-  ): Promise<{ rows: EmailTemplateListRow[]; total: number }> {
+  ): Promise<{ rows: EmailTemplateListItemView[]; total: number }> {
     const where: Record<string, unknown> = { organizationId };
 
     if (input.search) {
@@ -88,22 +99,29 @@ export class EmailTemplateRepository {
       this.db.emailTemplate.count({ where }),
     ]);
 
-    return { rows: rows as EmailTemplateListRow[], total };
+    return { rows: rows as EmailTemplateListItemView[], total };
   }
 
   async findById(
     id: string,
     organizationId: string,
-  ): Promise<EmailTemplateRow | null> {
-    return this.db.emailTemplate.findFirst({
+  ): Promise<EmailTemplateView | null> {
+    const row = (await this.db.emailTemplate.findFirst({
       where: { id, organizationId },
       select: detailSelect,
-    }) as Promise<EmailTemplateRow | null>;
+    })) as EmailTemplatePrismaRow | null;
+
+    if (!row) return null;
+
+    return {
+      ...row,
+      fileIds: row.files?.map((f) => f.fileId) ?? [],
+    };
   }
 
-  async create(data: CreateEmailTemplateData): Promise<EmailTemplateRow> {
+  async create(data: CreateEmailTemplateData): Promise<EmailTemplateView> {
     const { fileIds, ...rest } = data;
-    const row = await this.db.emailTemplate.create({
+    const row = (await this.db.emailTemplate.create({
       data: {
         ...rest,
         design: this.toInputJsonValue(rest.design),
@@ -112,16 +130,19 @@ export class EmailTemplateRepository {
         },
       },
       select: detailSelect,
-    });
+    })) as unknown as EmailTemplatePrismaRow;
 
-    return row as unknown as EmailTemplateRow;
+    return {
+      ...row,
+      fileIds: row.files?.map((f) => f.fileId) ?? [],
+    };
   }
 
   async update(
     id: string,
     organizationId: string,
     data: UpdateEmailTemplateData,
-  ): Promise<EmailTemplateRow> {
+  ): Promise<EmailTemplateView> {
     const { fileIds, ...rest } = data;
     const result = await this.db.emailTemplate.updateMany({
       where: { id, organizationId },

@@ -19,6 +19,9 @@
     "@prisma/client": "^6"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.3",
+    "@electric-sql/pglite-socket": "^0.2.6",
+    "@faker-js/faker": "^10.5.0",
     "@types/node": "^24",
     "prisma": "^6",
     "typescript": "^6"

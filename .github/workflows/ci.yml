@@ -16,9 +16,10 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    name: "Build, test, typecheck, and lint"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: pnpm/action-setup@v4
 

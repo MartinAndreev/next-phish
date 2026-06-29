@@ -16,15 +16,16 @@ import {
   organizationMemberProcedure,
   router,
 } from "../../trpc/procedures";
+import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
-const writeProcedure = createPermissionProcedure({
-  organizations: ["write"],
-});
+const writeProcedure = createPermissionProcedure(
+  toRouterPermissions("organizations", "write"),
+);
 
 const readProcedureNoOrg = createPermissionProcedure(
-  { organizations: ["read"] },
+  toRouterPermissions("organizations", "read"),
   { requireOrganization: false },
 );
 

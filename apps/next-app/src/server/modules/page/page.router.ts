@@ -26,16 +26,17 @@ import {
   router,
 } from "../../trpc/procedures";
 import { jobQueue } from "../../queue";
+import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
-const readProcedure = createPermissionProcedure({
-  pages: ["read"],
-});
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("pages", "read"),
+);
 
-const writeProcedure = createPermissionProcedure({
-  pages: ["write"],
-});
+const writeProcedure = createPermissionProcedure(
+  toRouterPermissions("pages", "write"),
+);
 
 export const pageRouter = router({
   list: readProcedure.input(GetPagesSchema).query(async ({ ctx, input }) => {

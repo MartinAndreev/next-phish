@@ -42,3 +42,17 @@ export {
   updatePageSchema,
 } from "./page.schema";
 export type { CreatePageInput, UpdatePageInput } from "./page.schema";
+
+export {
+  mcpListSchema,
+  mcpIdWithOrgSchema,
+  mcpCreateOrganizationSchema,
+  mcpDeleteOrganizationSchema,
+  mcpCreateEmailTemplateSchema,
+  mcpUpdateEmailTemplateSchema,
+  mcpCreatePageSchema,
+  mcpUpdatePageSchema,
+  mcpImportPageFromUrlSchema,
+  mcpListFilesSchema,
+  mcpGetJobStatusSchema,
+} from "./mcp.schema";

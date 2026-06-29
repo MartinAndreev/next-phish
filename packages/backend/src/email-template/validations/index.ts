@@ -1,5 +1,5 @@
+export { emailTemplateStatusSchema } from "@next-phish/shared";
 export {
-  emailTemplateStatusSchema,
   GetEmailTemplatesSchema,
   CreateEmailTemplateCommandSchema,
   UpdateEmailTemplateCommandSchema,

@@ -5,12 +5,13 @@ import {
   GetJobByIdSchema,
 } from "@next-phish/backend";
 import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
-const readProcedure = createPermissionProcedure({
-  jobs: ["read"],
-});
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("jobs", "read"),
+);
 
 export const jobRouter = router({
   getById: readProcedure.input(GetJobByIdSchema).query(async ({ input }) => {

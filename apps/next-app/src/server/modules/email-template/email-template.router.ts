@@ -13,16 +13,17 @@ import {
   DeleteEmailTemplateCommandSchema,
 } from "@next-phish/backend";
 import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
-const readProcedure = createPermissionProcedure({
-  "email-templates": ["read"],
-});
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("email-templates", "read"),
+);
 
-const writeProcedure = createPermissionProcedure({
-  "email-templates": ["write"],
-});
+const writeProcedure = createPermissionProcedure(
+  toRouterPermissions("email-templates", "write"),
+);
 
 export const emailTemplateRouter = router({
   list: readProcedure

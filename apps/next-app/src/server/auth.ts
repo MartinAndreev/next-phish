@@ -20,6 +20,7 @@ import {
 import { nextCookies } from "better-auth/next-js";
 import { apiKey } from "@better-auth/api-key";
 import { db } from "@next-phish/database";
+import { ac, owner, admin, member } from "./auth/permissions";
 
 const email = Container.get<IEmailService>(EMAIL_SERVICE_TOKEN);
 
@@ -117,6 +118,8 @@ export const auth = betterAuth({
       },
     }),
     organization({
+      ac,
+      roles: { owner, admin, member },
       async sendInvitationEmail(data) {
         const inviteLink = `${process.env.APP_URL}/accept-invitation/${data.id}`;
         await email.send({

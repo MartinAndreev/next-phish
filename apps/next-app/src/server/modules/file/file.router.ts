@@ -9,16 +9,17 @@ import {
   ListFilesSchema,
 } from "@next-phish/backend";
 import { createPermissionProcedure, router } from "../../trpc/procedures";
+import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
-const readProcedure = createPermissionProcedure({
-  files: ["read"],
-});
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("files", "read"),
+);
 
-const writeProcedure = createPermissionProcedure({
-  files: ["write"],
-});
+const writeProcedure = createPermissionProcedure(
+  toRouterPermissions("files", "write"),
+);
 
 export const fileRouter = router({
   uploadFile: writeProcedure

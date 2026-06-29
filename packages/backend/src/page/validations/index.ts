@@ -1,6 +1,5 @@
+export { pageTypeSchema, pageStatusSchema } from "@next-phish/shared";
 export {
-  pageTypeSchema,
-  pageStatusSchema,
   GetPagesSchema,
   CreatePageCommandSchema,
   UpdatePageCommandSchema,

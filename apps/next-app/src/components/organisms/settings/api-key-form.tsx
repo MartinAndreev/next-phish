@@ -17,6 +17,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { PERMISSION_GROUPS, TIME_WINDOW_OPTIONS } from "@next-phish/shared";
 
 interface Organization {
   id: string;
@@ -41,29 +42,6 @@ interface CreateApiKeyPresentationProps {
   organizations: Organization[];
 }
 
-const PERMISSION_GROUPS = [
-  {
-    resource: "organizations",
-    read: "read:organizations",
-    write: "write:organizations",
-  },
-  {
-    resource: "email-templates",
-    read: "read:email-templates",
-    write: "write:email-templates",
-  },
-  { resource: "pages", read: "read:pages", write: "write:pages" },
-  { resource: "files", read: "read:files", write: "write:files" },
-  { resource: "jobs", read: "read:jobs", write: null },
-];
-
-const TIME_WINDOW_OPTIONS = [
-  { label: "1 minute", value: 60000 },
-  { label: "10 minutes", value: 600000 },
-  { label: "1 hour", value: 3600000 },
-  { label: "1 day", value: 86400000 },
-];
-
 export function ApiKeyForm({
   visible,
   onHide,
@@ -73,6 +51,15 @@ export function ApiKeyForm({
   const t = useTranslation();
   const { values, setFieldValue, isSubmitting } =
     useFormikContext<CreateApiKeyValues>();
+
+  const timeWindowOptions = useMemo(
+    () =>
+      TIME_WINDOW_OPTIONS.map((opt) => ({
+        label: t(opt.translationKey),
+        value: opt.value,
+      })),
+    [t],
+  );
 
   const orgOptions = useMemo(
     () => organizations.map((org) => ({ label: org.name, value: org.id })),
@@ -189,12 +176,13 @@ export function ApiKeyForm({
                       <Checkbox
                         inputId={`perm-${group.write}`}
                         checked={!!values.permissions[group.write]}
-                        onChange={() =>
+                        onChange={() => {
+                          const writeKey = group.write!;
                           setFieldValue(
-                            `permissions.${group.write}`,
-                            !values.permissions[group.write],
-                          )
-                        }
+                            `permissions.${writeKey}`,
+                            !values.permissions[writeKey],
+                          );
+                        }}
                       />
                       <label
                         htmlFor={`perm-${group.write}`}
@@ -259,7 +247,7 @@ export function ApiKeyForm({
                 <Dropdown
                   pt={selectSmall}
                   value={values.rateLimitTimeWindow}
-                  options={TIME_WINDOW_OPTIONS}
+                  options={timeWindowOptions}
                   onChange={(e) =>
                     setFieldValue("rateLimitTimeWindow", e.value)
                   }

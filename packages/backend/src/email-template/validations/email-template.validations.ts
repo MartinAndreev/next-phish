@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-export const emailTemplateStatusSchema = z.enum(["DRAFT", "ACTIVE"]);
+import { emailTemplateStatusSchema } from "@next-phish/shared";
 
 const sortFieldSchema = z.enum(["name", "status", "createdAt", "updatedAt"]);
 const sortOrderSchema = z.enum(["asc", "desc"]);

@@ -1,7 +1,5 @@
 import { z } from "zod";
-
-export const pageTypeSchema = z.enum(["LANDING", "REDIRECT"]);
-export const pageStatusSchema = z.enum(["DRAFT", "ACTIVE"]);
+import { pageTypeSchema, pageStatusSchema } from "@next-phish/shared";
 
 const sortFieldSchema = z.enum([
   "name",

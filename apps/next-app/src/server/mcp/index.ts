@@ -1,7 +1,19 @@
 import { createMcpHandler } from "mcp-handler";
 import { createServerCallerWithOrg } from "@/src/server/trpc/server";
 import { auth } from "@/src/server/auth";
-import { z } from "zod";
+import {
+  mcpCreateOrganizationSchema,
+  mcpDeleteOrganizationSchema,
+  mcpListSchema,
+  mcpIdWithOrgSchema,
+  mcpCreateEmailTemplateSchema,
+  mcpUpdateEmailTemplateSchema,
+  mcpCreatePageSchema,
+  mcpUpdatePageSchema,
+  mcpImportPageFromUrlSchema,
+  mcpListFilesSchema,
+  mcpGetJobStatusSchema,
+} from "@next-phish/shared";
 
 const redisHost = process.env.REDIS_HOST || "localhost";
 const redisPort = process.env.REDIS_PORT || "6379";
@@ -20,7 +32,7 @@ function registerTools(
     "list_organizations",
     {
       description: "List all organizations the user belongs to",
-      inputSchema: z.object({}),
+      inputSchema: mcpListSchema,
     },
     async () => {
       const { caller } = await getCaller();
@@ -35,7 +47,7 @@ function registerTools(
     "get_organization",
     {
       description: "Get organization details by ID",
-      inputSchema: z.object({ organizationId: z.string() }),
+      inputSchema: mcpIdWithOrgSchema,
     },
     async ({ organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -50,7 +62,7 @@ function registerTools(
     "create_organization",
     {
       description: "Create a new organization",
-      inputSchema: z.object({ name: z.string(), slug: z.string() }),
+      inputSchema: mcpCreateOrganizationSchema,
     },
     async ({ name, slug }) => {
       const { caller } = await getCaller();
@@ -65,7 +77,7 @@ function registerTools(
     "delete_organization",
     {
       description: "Delete an organization by ID",
-      inputSchema: z.object({ organizationId: z.string() }),
+      inputSchema: mcpDeleteOrganizationSchema,
     },
     async ({ organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -80,14 +92,7 @@ function registerTools(
     "list_email_templates",
     {
       description: "List email templates in an organization.",
-      inputSchema: z.object({
-        organizationId: z
-          .string()
-          .describe("The organization ID to list templates for."),
-        search: z.string().optional(),
-        limit: z.number().min(1).max(100).optional(),
-        offset: z.number().min(0).optional(),
-      }),
+      inputSchema: mcpListSchema,
     },
     async ({ organizationId, ...input }) => {
       const { caller } = await getCaller(organizationId);
@@ -105,10 +110,7 @@ function registerTools(
     "get_email_template",
     {
       description: "Get email template by ID.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-      }),
+      inputSchema: mcpIdWithOrgSchema,
     },
     async ({ id, organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -124,15 +126,7 @@ function registerTools(
     {
       description:
         "Create a new email template. Provide HTML content — the visual editor design is generated automatically.",
-      inputSchema: z.object({
-        organizationId: z.string().describe("The organization ID."),
-        name: z.string(),
-        html: z.string().describe("The HTML content of the email template."),
-        tags: z.array(z.string()).optional(),
-        status: z.enum(["DRAFT", "ACTIVE"]).optional(),
-        trackingPixel: z.boolean().optional(),
-        fileIds: z.array(z.string()).optional(),
-      }),
+      inputSchema: mcpCreateEmailTemplateSchema,
     },
     async (input) => {
       const { caller } = await getCaller(input.organizationId);
@@ -148,19 +142,7 @@ function registerTools(
     {
       description:
         "Update an existing email template. Provide HTML content — the visual editor design is generated automatically.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-        name: z.string().optional(),
-        html: z
-          .string()
-          .optional()
-          .describe("The HTML content of the email template."),
-        tags: z.array(z.string()).optional(),
-        status: z.enum(["DRAFT", "ACTIVE"]).optional(),
-        trackingPixel: z.boolean().optional(),
-        fileIds: z.array(z.string()).optional(),
-      }),
+      inputSchema: mcpUpdateEmailTemplateSchema,
     },
     async (input) => {
       const { caller } = await getCaller(input.organizationId);
@@ -180,10 +162,7 @@ function registerTools(
     "delete_email_template",
     {
       description: "Delete an email template by ID.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-      }),
+      inputSchema: mcpIdWithOrgSchema,
     },
     async ({ id, organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -198,12 +177,7 @@ function registerTools(
     "list_pages",
     {
       description: "List pages in an organization.",
-      inputSchema: z.object({
-        organizationId: z.string().describe("The organization ID."),
-        search: z.string().optional(),
-        limit: z.number().min(1).max(100).optional(),
-        offset: z.number().min(0).optional(),
-      }),
+      inputSchema: mcpListSchema,
     },
     async ({ organizationId, ...input }) => {
       const { caller } = await getCaller(organizationId);
@@ -218,10 +192,7 @@ function registerTools(
     "get_page",
     {
       description: "Get page by ID.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-      }),
+      inputSchema: mcpIdWithOrgSchema,
     },
     async ({ id, organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -236,15 +207,7 @@ function registerTools(
     "create_page",
     {
       description: "Create a new page.",
-      inputSchema: z.object({
-        organizationId: z.string().describe("The organization ID."),
-        name: z.string(),
-        type: z.enum(["LANDING", "REDIRECT"]).optional(),
-        html: z.string().optional(),
-        status: z.enum(["DRAFT", "ACTIVE"]).optional(),
-        captureData: z.boolean().optional(),
-        redirectUrl: z.string().optional(),
-      }),
+      inputSchema: mcpCreatePageSchema,
     },
     async (input) => {
       const { caller } = await getCaller(input.organizationId);
@@ -259,16 +222,7 @@ function registerTools(
     "update_page",
     {
       description: "Update an existing page.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-        name: z.string().optional(),
-        type: z.enum(["LANDING", "REDIRECT"]).optional(),
-        html: z.string().optional(),
-        status: z.enum(["DRAFT", "ACTIVE"]).optional(),
-        captureData: z.boolean().optional(),
-        redirectUrl: z.string().optional(),
-      }),
+      inputSchema: mcpUpdatePageSchema,
     },
     async (input) => {
       const { caller } = await getCaller(input.organizationId);
@@ -286,10 +240,7 @@ function registerTools(
     "delete_page",
     {
       description: "Delete a page by ID.",
-      inputSchema: z.object({
-        id: z.string(),
-        organizationId: z.string().describe("The organization ID."),
-      }),
+      inputSchema: mcpIdWithOrgSchema,
     },
     async ({ id, organizationId }) => {
       const { caller } = await getCaller(organizationId);
@@ -304,11 +255,7 @@ function registerTools(
     "import_page_from_url",
     {
       description: "Import a page from a URL.",
-      inputSchema: z.object({
-        organizationId: z.string().describe("The organization ID."),
-        url: z.string().url(),
-        includeAssets: z.boolean().optional(),
-      }),
+      inputSchema: mcpImportPageFromUrlSchema,
     },
     async (input) => {
       const { caller } = await getCaller(input.organizationId);
@@ -323,11 +270,7 @@ function registerTools(
     "list_files",
     {
       description: "List uploaded files in an organization.",
-      inputSchema: z.object({
-        organizationId: z.string().describe("The organization ID."),
-        purpose: z.enum(["EMAIL_ATTACHMENT", "IMPORT", "EXPORT"]).optional(),
-        emailTemplateId: z.string().optional(),
-      }),
+      inputSchema: mcpListFilesSchema,
     },
     async ({ organizationId, ...input }) => {
       const { caller } = await getCaller(organizationId);
@@ -342,7 +285,7 @@ function registerTools(
     "get_job_status",
     {
       description: "Get background job status.",
-      inputSchema: z.object({ jobId: z.string() }),
+      inputSchema: mcpGetJobStatusSchema,
     },
     async ({ jobId }) => {
       const { caller } = await getCaller();

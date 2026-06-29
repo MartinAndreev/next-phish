@@ -8,12 +8,20 @@ import {
   DeleteFileSchema,
   ListFilesSchema,
 } from "@next-phish/backend";
-import { activeOrganizationProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 
 const bus = Container.get(MessageBus);
 
+const readProcedure = createPermissionProcedure({
+  files: ["read"],
+});
+
+const writeProcedure = createPermissionProcedure({
+  files: ["write"],
+});
+
 export const fileRouter = router({
-  uploadFile: activeOrganizationProcedure
+  uploadFile: writeProcedure
     .input(UploadFileSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(UploadFileCommand);
@@ -29,22 +37,18 @@ export const fileRouter = router({
       });
     }),
 
-  list: activeOrganizationProcedure
-    .input(ListFilesSchema)
-    .query(async ({ ctx, input }) => {
-      const handler = Container.get(ListFilesQuery);
-      return bus.query(handler, {
-        ...input,
-        organizationId: ctx.activeOrganizationId,
-      });
-    }),
+  list: readProcedure.input(ListFilesSchema).query(async ({ ctx, input }) => {
+    const handler = Container.get(ListFilesQuery);
+    return bus.query(handler, {
+      ...input,
+      organizationId: ctx.activeOrganizationId,
+    });
+  }),
 
-  delete: activeOrganizationProcedure
-    .input(DeleteFileSchema)
-    .mutation(async ({ input }) => {
-      const handler = Container.get(DeleteFileCommand);
-      return bus.dispatch(handler, {
-        id: input.id,
-      });
-    }),
+  delete: writeProcedure.input(DeleteFileSchema).mutation(async ({ input }) => {
+    const handler = Container.get(DeleteFileCommand);
+    return bus.dispatch(handler, {
+      id: input.id,
+    });
+  }),
 });

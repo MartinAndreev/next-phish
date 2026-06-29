@@ -10,7 +10,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n";
-import { CreateApiKeyContainer } from "./create-api-key-container";
+import { ApiKeyFormContainer } from "./api-key-form-container";
 import { ApiKeyCreatedModal } from "./api-key-created-modal";
 
 interface ApiKey {
@@ -22,6 +22,7 @@ interface ApiKey {
   expiresAt: Date | null;
   createdAt: Date;
   requestCount: number;
+  rateLimitEnabled: boolean;
   rateLimitMax: number | null;
 }
 
@@ -95,6 +96,7 @@ export function ApiKeyList() {
   );
 
   const usageTemplate = useCallback((row: ApiKey) => {
+    if (!row.rateLimitEnabled) return "—";
     if (!row.rateLimitMax) return `${row.requestCount}`;
     return `${row.requestCount} / ${row.rateLimitMax}`;
   }, []);
@@ -177,7 +179,7 @@ export function ApiKeyList() {
         </DataTable>
       )}
 
-      <CreateApiKeyContainer
+      <ApiKeyFormContainer
         visible={createDialogVisible}
         onHide={() => setCreateDialogVisible(false)}
         onCreated={handleCreated}

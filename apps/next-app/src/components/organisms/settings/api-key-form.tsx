@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Form, Field, ErrorMessage, useFormikContext } from "formik";
+import {
+  Form,
+  Field,
+  ErrorMessage,
+  useFormikContext,
+  type FieldInputProps,
+} from "formik";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -23,6 +29,9 @@ interface CreateApiKeyValues {
   organizationIds: string[];
   permissions: Record<string, boolean>;
   expiresInDays: number | null;
+  rateLimitEnabled: boolean;
+  rateLimitMax: number | null;
+  rateLimitTimeWindow: number | null;
 }
 
 interface CreateApiKeyPresentationProps {
@@ -48,7 +57,14 @@ const PERMISSION_GROUPS = [
   { resource: "jobs", read: "read:jobs", write: null },
 ];
 
-export function CreateApiKeyPresentation({
+const TIME_WINDOW_OPTIONS = [
+  { label: "1 minute", value: 60000 },
+  { label: "10 minutes", value: 600000 },
+  { label: "1 hour", value: 3600000 },
+  { label: "1 day", value: 86400000 },
+];
+
+export function ApiKeyForm({
   visible,
   onHide,
   error,
@@ -205,6 +221,53 @@ export function CreateApiKeyPresentation({
             onChange={(e) => setFieldValue("expiresInDays", e.value)}
             className="w-full"
           />
+        </div>
+
+        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Checkbox
+              inputId="rateLimitEnabled"
+              checked={values.rateLimitEnabled}
+              onChange={() =>
+                setFieldValue("rateLimitEnabled", !values.rateLimitEnabled)
+              }
+            />
+            <label
+              htmlFor="rateLimitEnabled"
+              className="text-sm font-medium text-zinc-300"
+            >
+              {t("apiKeys.rateLimit")}
+            </label>
+          </div>
+
+          {values.rateLimitEnabled && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-zinc-400">
+                  {t("apiKeys.maxRequests")}
+                </label>
+                <Field name="rateLimitMax">
+                  {({ field }: { field: FieldInputProps<string> }) => (
+                    <InputText size="small" {...field} className="w-full" />
+                  )}
+                </Field>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-zinc-400">
+                  {t("apiKeys.timeWindow")}
+                </label>
+                <Dropdown
+                  pt={selectSmall}
+                  value={values.rateLimitTimeWindow}
+                  options={TIME_WINDOW_OPTIONS}
+                  onChange={(e) =>
+                    setFieldValue("rateLimitTimeWindow", e.value)
+                  }
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {error && <FormMessage variant="error">{error}</FormMessage>}

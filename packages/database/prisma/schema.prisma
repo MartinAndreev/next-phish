@@ -385,7 +385,7 @@ model Apikey {
   createdAt           DateTime  @db.Timestamptz(3)
   updatedAt           DateTime  @db.Timestamptz(3)
   permissions         String?
-  metadata            Json?
+  metadata            String?
 
   @@map("api_key")
 }

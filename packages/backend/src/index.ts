@@ -195,9 +195,11 @@ export { registerSiteImportServices } from "./site-import";
 
 export {
   ApiKeyService,
+  CreateApiKeyCommand,
   RevokeOrgApiKeysCommand,
   registerApiKeyServices,
+  registerApiKeyAuth,
 } from "./api-key";
-export type { RevokeOrgApiKeysData } from "./api-key";
+export type { CreateApiKeyData, RevokeOrgApiKeysData } from "./api-key";
 
 export { R2Client } from "./storage/r2-client";

@@ -12,12 +12,20 @@ import {
   UpdateEmailTemplateCommandSchema,
   DeleteEmailTemplateCommandSchema,
 } from "@next-phish/backend";
-import { activeOrganizationProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 
 const bus = Container.get(MessageBus);
 
+const readProcedure = createPermissionProcedure({
+  "email-templates": ["read"],
+});
+
+const writeProcedure = createPermissionProcedure({
+  "email-templates": ["write"],
+});
+
 export const emailTemplateRouter = router({
-  list: activeOrganizationProcedure
+  list: readProcedure
     .input(GetEmailTemplatesSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetEmailTemplatesQuery);
@@ -27,7 +35,7 @@ export const emailTemplateRouter = router({
       });
     }),
 
-  getById: activeOrganizationProcedure
+  getById: readProcedure
     .input(GetEmailTemplateByIdSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetEmailTemplateByIdQuery);
@@ -37,7 +45,7 @@ export const emailTemplateRouter = router({
       });
     }),
 
-  create: activeOrganizationProcedure
+  create: writeProcedure
     .input(CreateEmailTemplateCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(CreateEmailTemplateCommand);
@@ -48,7 +56,7 @@ export const emailTemplateRouter = router({
       });
     }),
 
-  update: activeOrganizationProcedure
+  update: writeProcedure
     .input(UpdateEmailTemplateCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(UpdateEmailTemplateCommand);
@@ -67,7 +75,7 @@ export const emailTemplateRouter = router({
       });
     }),
 
-  delete: activeOrganizationProcedure
+  delete: writeProcedure
     .input(DeleteEmailTemplateCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(DeleteEmailTemplateCommand);

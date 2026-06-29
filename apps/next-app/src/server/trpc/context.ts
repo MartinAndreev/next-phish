@@ -6,6 +6,7 @@ export interface Context {
   session: Awaited<ReturnType<typeof auth.api.getSession>>;
   headers: Headers;
   userId: string;
+  apiKey?: string;
 }
 
 export async function createContext(): Promise<Context> {
@@ -38,17 +39,23 @@ export async function createContextWithHeaders(
     });
   }
 
-  return { session, headers: requestHeaders, userId: session.user.id };
+  const apiKey = requestHeaders.get("x-api-key") ?? undefined;
+
+  return {
+    session,
+    headers: requestHeaders,
+    userId: session.user.id,
+    apiKey,
+  };
 }
 
 export async function validateOrganizationAccess(
   ctx: Context,
   organizationId: string,
 ): Promise<string> {
-  const apiKey = ctx.headers.get("x-api-key");
-  if (apiKey) {
+  if (ctx.apiKey) {
     const result = await auth.api.verifyApiKey({
-      body: { key: apiKey },
+      body: { key: ctx.apiKey },
     });
 
     if (!result.valid || !result.key) {

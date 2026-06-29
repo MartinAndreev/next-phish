@@ -1,5 +1,21 @@
-import { Prisma } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
+
+function parseMetadata(metadata: unknown): Record<string, unknown> | null {
+  if (metadata == null) return null;
+  if (typeof metadata === "object") return metadata as Record<string, unknown>;
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      if (typeof parsed === "string") {
+        return JSON.parse(parsed);
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 export class ApiKeyService {
   constructor(private readonly db: PrismaClient) {}
@@ -13,7 +29,7 @@ export class ApiKeyService {
     });
 
     for (const key of apiKeys) {
-      const metadata = key.metadata as Record<string, unknown> | null;
+      const metadata = parseMetadata(key.metadata);
       const orgIds = metadata?.organizations as string[] | undefined;
 
       if (!orgIds || orgIds.length === 0) {
@@ -30,14 +46,14 @@ export class ApiKeyService {
           data: { enabled: false },
         });
       } else {
-        const updatedMetadata: Prisma.InputJsonValue = {
+        const updatedMetadata = {
           ...metadata,
           organizations: updatedOrgIds,
         };
         await this.db.apikey.update({
           where: { id: key.id },
           data: {
-            metadata: updatedMetadata,
+            metadata: JSON.stringify(updatedMetadata),
           },
         });
       }

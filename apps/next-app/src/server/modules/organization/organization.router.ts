@@ -12,15 +12,24 @@ import {
   GetOrganizationMembersSchema,
 } from "@next-phish/backend";
 import {
-  protectedProcedure,
+  createPermissionProcedure,
   organizationMemberProcedure,
   router,
 } from "../../trpc/procedures";
 
 const bus = Container.get(MessageBus);
 
+const writeProcedure = createPermissionProcedure({
+  organizations: ["write"],
+});
+
+const readProcedureNoOrg = createPermissionProcedure(
+  { organizations: ["read"] },
+  { requireOrganization: false },
+);
+
 export const organizationRouter = router({
-  list: protectedProcedure
+  list: readProcedureNoOrg
     .input(GetUserOrganizationsSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetUserOrganizationsQuery);
@@ -48,7 +57,7 @@ export const organizationRouter = router({
       });
     }),
 
-  create: protectedProcedure
+  create: writeProcedure
     .input(CreateOrganizationCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(CreateOrganizationCommand);
@@ -59,7 +68,7 @@ export const organizationRouter = router({
       });
     }),
 
-  delete: protectedProcedure
+  delete: writeProcedure
     .input(z.object({ organizationId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(DeleteOrganizationCommand);

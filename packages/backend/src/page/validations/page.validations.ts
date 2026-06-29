@@ -34,7 +34,7 @@ const pageBaseSchema = z.object({
   name: z.string().trim().min(1, "Page name is required"),
   type: pageTypeSchema.default("LANDING"),
   html: z.string().default(""),
-  design: z.unknown().nullable(),
+  design: z.unknown().default({}),
   status: pageStatusSchema.default("DRAFT"),
   captureData: z.boolean().default(false),
   redirectUrl: z.string().nullable().optional(),

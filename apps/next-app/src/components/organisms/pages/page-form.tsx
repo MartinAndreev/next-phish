@@ -32,7 +32,8 @@ interface PageFormProps {
   breadcrumbItems: Array<{ label: string; url?: string }>;
   editorHtmlRef: React.MutableRefObject<string>;
   editorDesignRef: React.MutableRefObject<unknown>;
-  initialDesign?: unknown;
+  initialDesign?: object;
+  initialHtml?: string;
   t: (key: string) => string;
   onSubmit: (values: PageFormValues) => Promise<void>;
   onCancel: () => void;
@@ -48,6 +49,7 @@ export function PageForm({
   editorHtmlRef,
   editorDesignRef,
   initialDesign,
+  initialHtml,
   t,
   onSubmit,
   onCancel,
@@ -103,6 +105,7 @@ export function PageForm({
                 <PageEditorSection
                   pageId={pageId}
                   initialDesign={initialDesign}
+                  initialHtml={initialHtml}
                   editorHtmlRef={editorHtmlRef}
                   editorDesignRef={editorDesignRef}
                   onEditorRef={handleEditorRef}

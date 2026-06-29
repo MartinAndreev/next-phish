@@ -12,6 +12,7 @@ import { registerPageServices } from "./page";
 import { registerJobServices } from "./job";
 import { registerSiteImportServices } from "./site-import";
 import { registerEncryptionServices } from "./encryption";
+import { registerApiKeyServices, registerApiKeyAuth } from "./api-key";
 import { MessageBus } from "./message-bus";
 
 export interface ContainerOptions {
@@ -28,13 +29,17 @@ export function initializeContainer(options: ContainerOptions): void {
   registerPageServices(db);
   registerJobServices(db);
   registerSiteImportServices(db);
+  registerApiKeyServices(db);
   Container.set(MessageBus, new MessageBus(db));
 }
 
 export function registerAuth(
-  auth: Parameters<typeof registerOrganizationAuth>[0],
+  auth: Parameters<typeof registerOrganizationAuth>[0] & {
+    api: Parameters<typeof registerApiKeyAuth>[0]["api"];
+  },
 ): void {
   registerOrganizationAuth(auth);
+  registerApiKeyAuth(auth);
 }
 
 export { Container };

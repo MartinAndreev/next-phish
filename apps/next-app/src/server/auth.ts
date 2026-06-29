@@ -3,6 +3,7 @@ import {
   Container,
   EMAIL_SERVICE_TOKEN,
   OrganizationRepository,
+  RevokeOrgApiKeysCommand,
   registerAuth,
   renderTemplate,
 } from "@next-phish/backend";
@@ -17,9 +18,19 @@ import {
   emailOTP,
 } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
+import { apiKey } from "@better-auth/api-key";
 import { db } from "@next-phish/database";
 
 const email = Container.get<IEmailService>(EMAIL_SERVICE_TOKEN);
+
+const patRateLimitMax = parseInt(
+  process.env.PAT_RATE_LIMIT_MAX_REQUESTS ?? "1000",
+  10,
+);
+const patRateLimitWindow = parseInt(
+  process.env.PAT_RATE_LIMIT_TIME_WINDOW ?? "3600000",
+  10,
+);
 
 export const auth = betterAuth({
   database: prismaAdapter(db, { provider: "postgresql" }),
@@ -117,6 +128,27 @@ export const auth = betterAuth({
             inviteLink,
           }),
         });
+      },
+      organizationHooks: {
+        afterRemoveMember: async ({ user, organization }) => {
+          const command = Container.get(RevokeOrgApiKeysCommand);
+          await command.execute({
+            userId: user.id,
+            organizationId: organization.id,
+          });
+        },
+      },
+    }),
+    apiKey({
+      defaultPrefix: "pat_",
+      references: "user",
+      enableMetadata: true,
+      enableSessionForAPIKeys: true,
+      apiKeyHeaders: "x-api-key",
+      rateLimit: {
+        enabled: true,
+        maxRequests: patRateLimitMax,
+        timeWindow: patRateLimitWindow,
       },
     }),
     nextCookies(),

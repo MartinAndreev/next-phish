@@ -12,21 +12,30 @@ import {
   GetOrganizationMembersSchema,
 } from "@next-phish/backend";
 import {
-  protectedProcedure,
+  createPermissionProcedure,
   organizationMemberProcedure,
   router,
 } from "../../trpc/procedures";
 
 const bus = Container.get(MessageBus);
 
+const writeProcedure = createPermissionProcedure({
+  organizations: ["write"],
+});
+
+const readProcedureNoOrg = createPermissionProcedure(
+  { organizations: ["read"] },
+  { requireOrganization: false },
+);
+
 export const organizationRouter = router({
-  list: protectedProcedure
+  list: readProcedureNoOrg
     .input(GetUserOrganizationsSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetUserOrganizationsQuery);
       return bus.query(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
       });
     }),
 
@@ -34,7 +43,7 @@ export const organizationRouter = router({
     const handler = Container.get(GetOrganizationByIdQuery);
     return bus.query(handler, {
       id: input.organizationId,
-      userId: ctx.session.user.id,
+      userId: ctx.userId,
     });
   }),
 
@@ -44,22 +53,22 @@ export const organizationRouter = router({
       const handler = Container.get(GetOrganizationMembersQuery);
       return bus.query(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
       });
     }),
 
-  create: protectedProcedure
+  create: writeProcedure
     .input(CreateOrganizationCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(CreateOrganizationCommand);
       return bus.dispatch(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
         headers: ctx.headers,
       });
     }),
 
-  delete: protectedProcedure
+  delete: writeProcedure
     .input(z.object({ organizationId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(DeleteOrganizationCommand);

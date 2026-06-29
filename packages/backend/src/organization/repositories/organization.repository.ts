@@ -123,4 +123,16 @@ export class OrganizationRepository {
 
     return { rows: rows as MemberView[], total };
   }
+
+  async countByUserIdAndOrgIds(
+    userId: string,
+    organizationIds: string[],
+  ): Promise<number> {
+    return this.db.member.count({
+      where: {
+        userId,
+        organizationId: { in: organizationIds },
+      },
+    });
+  }
 }

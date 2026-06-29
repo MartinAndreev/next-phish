@@ -7,8 +7,8 @@ import {
   formatMessage,
   resolveMessage,
   type TranslationFunction,
+  type Messages,
 } from "./shared";
-import type { Messages } from "./messages";
 
 interface I18nContextValue {
   locale: Locale;

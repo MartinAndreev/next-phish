@@ -150,6 +150,79 @@ organisms/reset-password/
 └── index.ts
 ```
 
+### Container / Presentation split
+
+Complex interactive components (dialogs, multi-step forms, data-driven UIs) must be split into two files:
+
+- **`container.tsx`** — owns the business logic. Wraps the presentation with `<Formik>`, calls tRPC mutations, handles navigation, manages error/success state via `useFormStatus`. It passes simple props down (e.g. `error`, `isLoading`).
+- **`presentation.tsx`** — pure rendering. Uses `useFormikContext()` to read form state and render fields. Receives display-only props from the container (error strings, loading flags). No API calls, no navigation logic.
+
+The container wraps the presentation inside `<Formik>`, so the presentation can call `useFormikContext()` directly:
+
+```tsx
+// container.tsx
+"use client";
+
+import { Formik } from "formik";
+import { toFormikValidation } from "@/src/lib/to-formik-validation";
+import { useFormStatus } from "@/src/hooks/use-form-status";
+import { MyPresentation } from "./presentation";
+
+export function MyContainer() {
+  const { status, setError } = useFormStatus();
+
+  async function handleSubmit(values: MyValues) {
+    const { error } = await doSomething(values);
+    if (error) setError(error);
+  }
+
+  return (
+    <Formik
+      initialValues={{ field: "" }}
+      validate={toFormikValidation(mySchema)}
+      onSubmit={handleSubmit}
+    >
+      <MyPresentation error={status.type === "error" ? status.message : ""} />
+    </Formik>
+  );
+}
+```
+
+```tsx
+// presentation.tsx
+"use client";
+
+import { Form, Field, ErrorMessage, useFormikContext } from "formik";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { FormMessage } from "@/src/components/atoms/form-message";
+
+interface MyPresentationProps {
+  error: string;
+}
+
+export function MyPresentation({ error }: MyPresentationProps) {
+  const { isSubmitting } = useFormikContext();
+
+  return (
+    <Form>
+      <Field as={InputText} name="field" />
+      <ErrorMessage name="field" component="p" />
+      {error && <FormMessage variant="error">{error}</FormMessage>}
+      <Button type="submit" loading={isSubmitting} />
+    </Form>
+  );
+}
+```
+
+Rules:
+
+- The container **owns** the `<Formik>` wrapper — the presentation never creates one.
+- The presentation **reads** form state via `useFormikContext()` — it never holds its own form state.
+- Keep props between container and presentation minimal: `error`, `isLoading`, visibility flags, callbacks for close/submit.
+- If the component is simple (a single input, a toggle), skip the split — only use this pattern when the logic is non-trivial.
+- Large presentations can be split into smaller sub-components (e.g. `permissions-field.tsx`, `expiration-field.tsx`). The main `presentation.tsx` composes them. Each sub-component can still use `useFormikContext()` since it's rendered inside the `<Formik>` tree.
+
 ## Client-Side Data Fetching
 
 ### Use tRPC + React Query

@@ -25,9 +25,7 @@ interface FindByOrganizationIdInput {
 export class PageRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private toNullableJson(value: unknown): any {
-    if (value === null) return Prisma.JsonNull;
+  private toInputJsonValue(value: unknown): Prisma.InputJsonValue {
     return value as Prisma.InputJsonValue;
   }
 
@@ -82,9 +80,7 @@ export class PageRepository {
         name: data.name,
         type: data.type,
         html: data.html,
-        design: data.design
-          ? this.toNullableJson(data.design)
-          : Prisma.JsonNull,
+        design: this.toInputJsonValue(data.design ?? {}),
         status: data.status,
         captureData: data.captureData,
         redirectUrl: data.redirectUrl,
@@ -109,9 +105,7 @@ export class PageRepository {
         name: data.name,
         type: data.type,
         html: data.html,
-        design: data.design
-          ? this.toNullableJson(data.design)
-          : Prisma.JsonNull,
+        design: this.toInputJsonValue(data.design ?? {}),
         status: data.status,
         captureData: data.captureData,
         redirectUrl: data.redirectUrl,

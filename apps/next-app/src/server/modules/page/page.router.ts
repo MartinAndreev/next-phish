@@ -21,8 +21,7 @@ import {
   CreatePageSubmissionSchema,
 } from "@next-phish/backend";
 import {
-  activeOrganizationProcedure,
-  protectedProcedure,
+  createPermissionProcedure,
   publicProcedure,
   router,
 } from "../../trpc/procedures";
@@ -30,18 +29,24 @@ import { jobQueue } from "../../queue";
 
 const bus = Container.get(MessageBus);
 
-export const pageRouter = router({
-  list: activeOrganizationProcedure
-    .input(GetPagesSchema)
-    .query(async ({ ctx, input }) => {
-      const handler = Container.get(GetPagesQuery);
-      return bus.query(handler, {
-        ...input,
-        organizationId: ctx.activeOrganizationId,
-      });
-    }),
+const readProcedure = createPermissionProcedure({
+  pages: ["read"],
+});
 
-  getById: activeOrganizationProcedure
+const writeProcedure = createPermissionProcedure({
+  pages: ["write"],
+});
+
+export const pageRouter = router({
+  list: readProcedure.input(GetPagesSchema).query(async ({ ctx, input }) => {
+    const handler = Container.get(GetPagesQuery);
+    return bus.query(handler, {
+      ...input,
+      organizationId: ctx.activeOrganizationId,
+    });
+  }),
+
+  getById: readProcedure
     .input(GetPageByIdSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetPageByIdQuery);
@@ -51,18 +56,18 @@ export const pageRouter = router({
       });
     }),
 
-  create: activeOrganizationProcedure
+  create: writeProcedure
     .input(CreatePageCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(CreatePageCommand);
       return bus.dispatch(handler, {
         ...input,
         organizationId: ctx.activeOrganizationId,
-        createdById: ctx.session.user.id,
+        createdById: ctx.userId,
       });
     }),
 
-  update: activeOrganizationProcedure
+  update: writeProcedure
     .input(UpdatePageCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(UpdatePageCommand);
@@ -82,7 +87,7 @@ export const pageRouter = router({
       });
     }),
 
-  delete: activeOrganizationProcedure
+  delete: writeProcedure
     .input(DeletePageCommandSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(DeletePageCommand);
@@ -92,7 +97,7 @@ export const pageRouter = router({
       });
     }),
 
-  importFromUrl: activeOrganizationProcedure
+  importFromUrl: writeProcedure
     .input(ImportPageFromUrlSchema)
     .mutation(async ({ ctx, input }) => {
       const handler = Container.get(CreateSiteImportCommand);
@@ -100,7 +105,7 @@ export const pageRouter = router({
         url: input.url,
         includeAssets: input.includeAssets,
         organizationId: ctx.activeOrganizationId,
-        createdById: ctx.session.user.id,
+        createdById: ctx.userId,
       });
 
       await jobQueue.add(
@@ -116,7 +121,7 @@ export const pageRouter = router({
       return result;
     }),
 
-  importStatus: protectedProcedure
+  importStatus: readProcedure
     .input(z.object({ jobId: z.string() }))
     .query(async ({ input }) => {
       const jobHandler = Container.get(GetJobByIdQuery);
@@ -133,7 +138,7 @@ export const pageRouter = router({
       };
     }),
 
-  listImports: activeOrganizationProcedure
+  listImports: readProcedure
     .input(
       z
         .object({

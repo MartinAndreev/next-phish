@@ -4,15 +4,17 @@ import {
   GetJobByIdQuery,
   GetJobByIdSchema,
 } from "@next-phish/backend";
-import { protectedProcedure, router } from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 
 const bus = Container.get(MessageBus);
 
+const readProcedure = createPermissionProcedure({
+  jobs: ["read"],
+});
+
 export const jobRouter = router({
-  getById: protectedProcedure
-    .input(GetJobByIdSchema)
-    .query(async ({ input }) => {
-      const handler = Container.get(GetJobByIdQuery);
-      return bus.query(handler, { id: input.id });
-    }),
+  getById: readProcedure.input(GetJobByIdSchema).query(async ({ input }) => {
+    const handler = Container.get(GetJobByIdQuery);
+    return bus.query(handler, { id: input.id });
+  }),
 });

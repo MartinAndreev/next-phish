@@ -1,10 +1,21 @@
 import { DEFAULT_LOCALE, type Locale } from "./config";
-import { messages, type Messages } from "./messages";
+
+export interface Messages {
+  [key: string]: string | Messages;
+}
 
 type TranslationParams = Record<string, string | number>;
 
+import enMessages from "./locales/en.json";
+import bgMessages from "./locales/bg.json";
+
+const allMessages: Record<Locale, Messages> = {
+  en: enMessages,
+  bg: bgMessages,
+};
+
 export function getMessages(locale: Locale): Messages {
-  return messages[locale] ?? messages[DEFAULT_LOCALE];
+  return allMessages[locale] ?? allMessages[DEFAULT_LOCALE];
 }
 
 export function resolveMessage(messagesObject: Messages, key: string): string {

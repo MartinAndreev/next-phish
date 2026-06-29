@@ -77,7 +77,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
       breadcrumbItems={breadcrumbItems}
       editorHtmlRef={editorHtmlRef}
       editorDesignRef={editorDesignRef}
-      initialDesign={data?.design}
+      initialDesign={data?.design as object | undefined}
+      initialHtml={data?.html}
       t={t}
       onSubmit={handleFormSubmit}
       onCancel={() => router.push("/pages")}

@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.6.22",
     "@grapesjs/react": "^2.0.0",
     "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
@@ -18,7 +19,7 @@
     "@tanstack/react-query": "^5.101.0",
     "@trpc/react-query": "^11.13.0",
     "@trpc/server": "^11.13.0",
-    "better-auth": "^1.6.19",
+    "better-auth": "^1.6.22",
     "bullmq": "^5.78.1",
     "chart.js": "^4.5.1",
     "formik": "^2.4.9",
@@ -29,6 +30,7 @@
     "grapesjs-preset-newsletter": "^1.0.2",
     "grapesjs-style-gradient": "^3.0.3",
     "ioredis": "5.10.1",
+    "mcp-handler": "^1.1.0",
     "next": "^16.2.9",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.8",

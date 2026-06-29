@@ -44,7 +44,7 @@ export const emailTemplateRouter = router({
       return bus.dispatch(handler, {
         ...input,
         organizationId: ctx.activeOrganizationId,
-        createdById: ctx.session.user.id,
+        createdById: ctx.userId,
       });
     }),
 

@@ -4,6 +4,7 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { GeneralTab } from "./general-tab";
 import { SecurityTab } from "./security-tab";
 import { NotificationsTab } from "./notifications-tab";
+import { ApiKeyList } from "./api-key-list";
 import { useTranslation } from "@/src/lib/i18n";
 
 interface SettingsContainerProps {
@@ -29,6 +30,9 @@ export function SettingsContainer({ user }: SettingsContainerProps) {
       </TabPanel>
       <TabPanel header={t("settings.security")} leftIcon="pi pi-shield mr-2">
         <SecurityTab user={user} />
+      </TabPanel>
+      <TabPanel header={t("settings.apiKeys")} leftIcon="pi pi-key mr-2">
+        <ApiKeyList />
       </TabPanel>
       <TabPanel header={t("settings.notifications")} leftIcon="pi pi-bell mr-2">
         <NotificationsTab />

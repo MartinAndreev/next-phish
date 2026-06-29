@@ -26,7 +26,7 @@ export const organizationRouter = router({
       const handler = Container.get(GetUserOrganizationsQuery);
       return bus.query(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
       });
     }),
 
@@ -34,7 +34,7 @@ export const organizationRouter = router({
     const handler = Container.get(GetOrganizationByIdQuery);
     return bus.query(handler, {
       id: input.organizationId,
-      userId: ctx.session.user.id,
+      userId: ctx.userId,
     });
   }),
 
@@ -44,7 +44,7 @@ export const organizationRouter = router({
       const handler = Container.get(GetOrganizationMembersQuery);
       return bus.query(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
       });
     }),
 
@@ -54,7 +54,7 @@ export const organizationRouter = router({
       const handler = Container.get(CreateOrganizationCommand);
       return bus.dispatch(handler, {
         ...input,
-        userId: ctx.session.user.id,
+        userId: ctx.userId,
         headers: ctx.headers,
       });
     }),

@@ -78,6 +78,7 @@ export function EmailTemplateFormContainer({
       editorHtmlRef={editorHtmlRef}
       editorDesignRef={editorDesignRef}
       initialDesign={data?.design}
+      initialHtml={data?.html}
       t={t}
       onUpload={handleUpload}
       onRemove={handleRemove}

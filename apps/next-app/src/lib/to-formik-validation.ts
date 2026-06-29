@@ -3,7 +3,10 @@ type SafeParseResult =
   | {
       success: false;
       error: {
-        issues: Array<{ path: Array<string | number>; message: string }>;
+        issues: Array<{
+          path: Array<string | number | symbol>;
+          message: string;
+        }>;
       };
     };
 
@@ -20,8 +23,10 @@ export function toFormikValidation(
 
     const errors: Record<string, string> = {};
     for (const issue of result.error.issues) {
-      const path = issue.path.join(".");
-      if (!errors[path]) {
+      const path = issue.path
+        .filter((p): p is string | number => typeof p !== "symbol")
+        .join(".");
+      if (path && !errors[path]) {
         errors[path] = issue.message;
       }
     }

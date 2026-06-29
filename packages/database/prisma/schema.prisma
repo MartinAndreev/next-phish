@@ -45,28 +45,28 @@ enum ImportStatus {
 }
 
 model User {
-  id               String    @id @default(cuid())
+  id               String   @id @default(cuid())
   name             String
-  email            String    @unique
-  emailVerified    Boolean   @default(false)
+  email            String   @unique
+  emailVerified    Boolean  @default(false)
   image            String?
-  twoFactorEnabled Boolean   @default(false)
-  role             String    @default("user")
+  twoFactorEnabled Boolean  @default(false)
+  role             String   @default("user")
   timezone         String?
   language         String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  sessions         Session[]
-  accounts         Account[]
-  twoFactor        TwoFactor?
-  members          Member[]
-  invitations      Invitation[]
-  emailTemplates   EmailTemplate[] @relation("EmailTemplateCreatedBy")
-  pages            Page[] @relation("PageCreatedBy")
-  uploadedFiles    File[] @relation("UploadedFiles")
-  jobs             Job[] @relation("JobCreatedBy")
-  siteImports      SiteImport[] @relation("SiteImportCreatedBy")
+  sessions       Session[]
+  accounts       Account[]
+  twoFactor      TwoFactor?
+  members        Member[]
+  invitations    Invitation[]
+  emailTemplates EmailTemplate[] @relation("EmailTemplateCreatedBy")
+  pages          Page[]          @relation("PageCreatedBy")
+  uploadedFiles  File[]          @relation("UploadedFiles")
+  jobs           Job[]           @relation("JobCreatedBy")
+  siteImports    SiteImport[]    @relation("SiteImportCreatedBy")
 
   @@map("user")
 }
@@ -139,13 +139,13 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members         Member[]
-  invitations     Invitation[]
-  emailTemplates  EmailTemplate[]
-  pages           Page[]
-  files           File[]
-  jobs            Job[]
-  siteImports     SiteImport[]
+  members        Member[]
+  invitations    Invitation[]
+  emailTemplates EmailTemplate[]
+  pages          Page[]
+  files          File[]
+  jobs           Job[]
+  siteImports    SiteImport[]
 
   @@map("organization")
 }
@@ -192,19 +192,19 @@ model Setting {
 }
 
 model File {
-  id             String       @id @default(cuid())
+  id             String      @id @default(cuid())
   remoteId       String
   name           String
   size           Int
   format         String
-  purpose        FilePurpose  @default(EMAIL_ATTACHMENT)
+  purpose        FilePurpose @default(EMAIL_ATTACHMENT)
   organizationId String?
   uploadedById   String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  uploadedBy         User?              @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
-  organization       Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  uploadedBy         User?               @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   emailTemplateFiles EmailTemplateFile[]
   siteImportFiles    SiteImportFile[]
 
@@ -215,10 +215,10 @@ model File {
 }
 
 model EmailTemplateFile {
-  id              String         @id @default(cuid())
+  id              String   @id @default(cuid())
   emailTemplateId String
   fileId          String
-  createdAt       DateTime       @default(now())
+  createdAt       DateTime @default(now())
 
   emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade)
   file          File          @relation(fields: [fileId], references: [id], onDelete: Cascade)
@@ -240,8 +240,8 @@ model EmailTemplate {
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
-  organization Organization          @relation(references: [id], fields: [organizationId], onDelete: Cascade)
-  createdBy    User                  @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+  organization Organization        @relation(references: [id], fields: [organizationId], onDelete: Cascade)
+  createdBy    User                @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
   files        EmailTemplateFile[]
 
   @@index([organizationId])
@@ -268,9 +268,9 @@ model Page {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy      User              @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  submissions    PageSubmission[]
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  submissions  PageSubmission[]
 
   @@index([organizationId])
   @@index([createdById])
@@ -293,9 +293,9 @@ model PageSubmission {
 }
 
 model Job {
-  id             String      @id @default(cuid())
+  id             String    @id @default(cuid())
   type           String
-  status         JobStatus   @default(PENDING)
+  status         JobStatus @default(PENDING)
   input          Json
   output         Json?
   progress       Json?
@@ -303,8 +303,8 @@ model Job {
   createdById    String
   startedAt      DateTime?
   completedAt    DateTime?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdBy    User         @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
@@ -334,9 +334,9 @@ model SiteImport {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  job          Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User           @relation("SiteImportCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  job          Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation("SiteImportCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   files        SiteImportFile[]
 
   @@index([organizationId])
@@ -361,4 +361,31 @@ model SiteImportFile {
   @@unique([siteImportId, resolvedUrl])
   @@index([siteImportId])
   @@map("site_import_file")
+}
+
+model Apikey {
+  id                  String    @id @unique
+  configId            String
+  name                String?
+  start               String?
+  prefix              String?
+  key                 String
+  referenceId         String
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime? @db.Timestamptz(3)
+  enabled             Boolean?
+  rateLimitEnabled    Boolean?
+  rateLimitTimeWindow Int?
+  rateLimitMax        Int?
+  requestCount        Int?
+  remaining           Int?
+  lastRequest         DateTime? @db.Timestamptz(3)
+  expiresAt           DateTime? @db.Timestamptz(3)
+  createdAt           DateTime  @db.Timestamptz(3)
+  updatedAt           DateTime  @db.Timestamptz(3)
+  permissions         String?
+  metadata            Json?
+
+  @@map("api_key")
 }

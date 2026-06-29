@@ -49,6 +49,7 @@ interface EmailTemplateFormProps {
   editorHtmlRef: React.MutableRefObject<string>;
   editorDesignRef: React.MutableRefObject<unknown>;
   initialDesign?: unknown;
+  initialHtml?: string;
   t: (key: string) => string;
   onUpload: (file: File) => Promise<void>;
   onRemove: (fileId: string) => Promise<void>;
@@ -75,6 +76,7 @@ export function EmailTemplateForm({
   editorHtmlRef,
   editorDesignRef,
   initialDesign,
+  initialHtml,
   t,
   onUpload,
   onRemove,
@@ -218,7 +220,8 @@ export function EmailTemplateForm({
                   <GrapesEditor
                     mode="email"
                     key={templateId ?? "new"}
-                    initialDesign={initialDesign}
+                    initialDesign={initialDesign as object}
+                    initialHtml={initialHtml}
                     onChange={({ html, design }) => {
                       editorHtmlRef.current = html;
                       editorDesignRef.current = design;
@@ -263,13 +266,19 @@ export function EmailTemplateForm({
                     />
                   </div>
 
-                  {status.type === "error" && (
-                    <FormMessage variant="error">{status.message}</FormMessage>
-                  )}
-                  {status.type === "success" && (
-                    <FormMessage variant="success">
-                      {status.message}
-                    </FormMessage>
+                  {["error", "success"].includes(status.type) && (
+                    <div className="mt-3">
+                      {status.type === "error" && (
+                        <FormMessage variant="error">
+                          {status.message}
+                        </FormMessage>
+                      )}
+                      {status.type === "success" && (
+                        <FormMessage variant="success">
+                          {status.message}
+                        </FormMessage>
+                      )}
+                    </div>
                   )}
                 </section>
               </div>

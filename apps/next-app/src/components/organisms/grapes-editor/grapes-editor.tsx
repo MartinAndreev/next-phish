@@ -14,7 +14,8 @@ export type EditorMode = "email" | "page";
 
 interface GrapesEditorProps {
   mode: EditorMode;
-  initialDesign?: unknown;
+  initialDesign?: object;
+  initialHtml?: string;
   onChange: (value: { html: string; design: unknown }) => void;
   onEditor?: (editor: Editor) => void;
   fontsApiKey?: string;
@@ -95,6 +96,7 @@ function getPluginsConfig(mode: EditorMode, fontsApiKey?: string) {
 export function GrapesEditor({
   mode,
   initialDesign,
+  initialHtml,
   onChange,
   onEditor,
   fontsApiKey,
@@ -107,10 +109,12 @@ export function GrapesEditor({
 
   function handleEditor(editor: Editor) {
     if (!initializedRef.current) {
-      if (initialDesign) {
+      if (initialDesign && Object.keys(initialDesign).length > 0) {
         editor.loadProjectData(
           initialDesign as Parameters<Editor["loadProjectData"]>[0],
         );
+      } else if (initialHtml) {
+        editor.setComponents(initialHtml);
       } else {
         editor.setComponents(defaultContent);
       }

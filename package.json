@@ -11,6 +11,7 @@
     "typecheck": "turbo typecheck",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,cjs,json,md,yml,yaml,css,scss}\"",
     "db:generate": "pnpm --filter @next-phish/database exec prisma generate",
+    "db:format": "pnpm --filter @next-phish/database exec prisma format",
     "db:migrate": "pnpm --filter @next-phish/database exec prisma migrate dev",
     "db:migrate:create": "pnpm --filter @next-phish/database exec prisma migrate dev --create-only",
     "db:migrate:deploy": "pnpm --filter @next-phish/database exec prisma migrate deploy",

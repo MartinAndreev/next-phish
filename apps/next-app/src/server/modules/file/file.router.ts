@@ -24,7 +24,7 @@ export const fileRouter = router({
         format: input.format,
         purpose: input.purpose,
         organizationId: ctx.activeOrganizationId,
-        uploadedById: ctx.session.user.id,
+        uploadedById: ctx.userId,
         body: input.data,
       });
     }),

@@ -17,7 +17,8 @@ const GrapesEditor = dynamic(
 
 interface PageEditorSectionProps {
   pageId?: string;
-  initialDesign?: unknown;
+  initialDesign?: object;
+  initialHtml?: string;
   editorHtmlRef: React.MutableRefObject<string>;
   editorDesignRef: React.MutableRefObject<unknown>;
   onEditorRef: (editor: Editor) => void;
@@ -27,6 +28,7 @@ interface PageEditorSectionProps {
 export function PageEditorSection({
   pageId,
   initialDesign,
+  initialHtml,
   editorHtmlRef,
   editorDesignRef,
   onEditorRef,
@@ -46,6 +48,7 @@ export function PageEditorSection({
         mode="page"
         key={pageId ?? "new"}
         initialDesign={initialDesign}
+        initialHtml={initialHtml}
         onEditor={onEditorRef}
         onChange={({ html, design }) => {
           editorHtmlRef.current = html;

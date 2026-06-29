@@ -5,6 +5,7 @@ import { emailTemplateRouter } from "../modules/email-template/email-template.ro
 import { fileRouter } from "../modules/file/file.router";
 import { pageRouter } from "../modules/page/page.router";
 import { jobRouter } from "../modules/job/job.router";
+import { apiKeyRouter } from "../modules/api-key/api-key.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   file: fileRouter,
   page: pageRouter,
   job: jobRouter,
+  apiKey: apiKeyRouter,
 });
 
 export type AppRouter = typeof appRouter;

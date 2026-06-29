@@ -58,7 +58,7 @@ export const pageRouter = router({
       return bus.dispatch(handler, {
         ...input,
         organizationId: ctx.activeOrganizationId,
-        createdById: ctx.session.user.id,
+        createdById: ctx.userId,
       });
     }),
 
@@ -100,7 +100,7 @@ export const pageRouter = router({
         url: input.url,
         includeAssets: input.includeAssets,
         organizationId: ctx.activeOrganizationId,
-        createdById: ctx.session.user.id,
+        createdById: ctx.userId,
       });
 
       await jobQueue.add(

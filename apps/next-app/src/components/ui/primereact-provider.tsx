@@ -159,10 +159,10 @@ const customTailwind = {
     labelContainer: {
       className: "overflow-hidden flex flex-auto cursor-pointer",
     },
-    label: { className: "text-white/80 px-3 py-2 text-sm" },
+    label: { className: "text-white/80 px-2 text-sm" },
     token: {
       className:
-        "py-1 px-2 mr-2 bg-white/10 text-white/80 rounded-full inline-flex items-center",
+        "px-2 mr-2 bg-white/10 text-white/80 rounded-full inline-flex items-center bg-[image:var(--brand-gradient)]",
     },
     removeTokenIcon: { className: "ml-1 text-zinc-400 hover:text-white" },
     trigger: {
@@ -171,7 +171,7 @@ const customTailwind = {
     dropdownIcon: { className: "w-4 h-4" },
     header: {
       className:
-        "p-3 border-b border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+        "p-3 flex justify-between border-b border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
     },
     panel: {
       className: "bg-brand-dark border border-white/10 rounded-xl shadow-lg",
@@ -195,8 +195,7 @@ const customTailwind = {
     checkboxContainer: { className: "mr-2" },
     checkbox: {
       root: {
-        className:
-          "inline-flex items-center justify-center w-5 h-5 rounded border border-white/10 bg-white/5",
+        className: "inline-flex items-center justify-center w-5 h-5",
       },
       icon: { className: "text-cyan-400 text-xs" },
     },
@@ -213,7 +212,13 @@ const customTailwind = {
     },
   },
   checkbox: {
-    input: { className: "h-4 w-4 hidden" },
+    root: {
+      className: "relative",
+    },
+    input: {
+      className:
+        "h-4 w-4 appearance-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer",
+    },
     box: {
       className: "h-4 w-4 rounded border border-white/10 bg-white/5",
     },
@@ -485,7 +490,7 @@ const customTailwind = {
           "transition duration-200 ease-in-out",
           "focus:outline-none focus:outline-offset-0",
           {
-            "text-white bg-brand-aqua border border-brand-aqua hover:bg-brand-blue hover:border-brand-blue focus:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(30,216,240,0.5)]":
+            "text-white bg-brand-aqua border border-brand-aqua hover:bg-brand-blue hover:border-brand-blue focus:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(30,216,240,0.5)] bg-[image:var(--brand-gradient)]":
               !props.link &&
               props.severity === null &&
               !props.text &&

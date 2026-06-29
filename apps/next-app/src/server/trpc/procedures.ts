@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Container } from "@/src/server/container";
 import { OrganizationRepository } from "@next-phish/backend";
 import type { Context } from "./context";
+import { getOrganizationId } from "./context";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -11,13 +12,8 @@ const t = initTRPC.context<Context>().create({
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
+
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  if (!ctx.session) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "You must be logged in to access this resource",
-    });
-  }
   return next({
     ctx: {
       ...ctx,
@@ -39,7 +35,7 @@ export const organizationMemberProcedure = protectedProcedure
       });
     }
 
-    const member = org.members.find((m) => m.userId === ctx.session.user.id);
+    const member = org.members.find((m) => m.userId === ctx.userId);
 
     if (!member) {
       throw new TRPCError({
@@ -49,27 +45,17 @@ export const organizationMemberProcedure = protectedProcedure
     }
 
     return next({
-      ctx: { ...ctx, member },
+      ctx: { ...ctx },
     });
   });
 
-export const activeOrganizationProcedure = protectedProcedure.use(
-  async ({ ctx, next }) => {
-    const activeOrganizationId = (
-      ctx.session as typeof ctx.session & {
-        session?: { activeOrganizationId?: string | null };
-      }
-    ).session?.activeOrganizationId;
-
-    if (!activeOrganizationId) {
-      throw new TRPCError({
-        code: "PRECONDITION_FAILED",
-        message: "You must select an active organization",
-      });
-    }
-
+export const activeOrganizationProcedure = protectedProcedure
+  .input(z.object({ organizationId: z.string().optional() }).optional())
+  .use(async ({ ctx, input, next }) => {
     const orgRepo = Container.get(OrganizationRepository);
-    const org = await orgRepo.findById(activeOrganizationId);
+    const organizationId = await getOrganizationId(ctx, input?.organizationId);
+
+    const org = await orgRepo.findById(organizationId);
 
     if (!org) {
       throw new TRPCError({
@@ -78,7 +64,7 @@ export const activeOrganizationProcedure = protectedProcedure.use(
       });
     }
 
-    const member = org.members.find((m) => m.userId === ctx.session.user.id);
+    const member = org.members.find((m) => m.userId === ctx.userId);
 
     if (!member) {
       throw new TRPCError({
@@ -88,7 +74,6 @@ export const activeOrganizationProcedure = protectedProcedure.use(
     }
 
     return next({
-      ctx: { ...ctx, activeOrganizationId, member },
+      ctx: { ...ctx, activeOrganizationId: organizationId },
     });
-  },
-);
+  });

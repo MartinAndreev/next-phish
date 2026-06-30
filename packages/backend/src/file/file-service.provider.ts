@@ -11,6 +11,7 @@ export function registerFileServices(db: PrismaClient): void {
   const fileRepo = new FileRepository(db);
   const fileService = new FileService();
 
+  Container.set(R2Client, r2);
   Container.set(FileRepository, fileRepo);
   Container.set(FileService, fileService);
   Container.set(

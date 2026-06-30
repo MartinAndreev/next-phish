@@ -21,6 +21,7 @@
     "ejs": "^3",
     "nodemailer": "^6",
     "typedi": "^0.10",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3"
   },
   "devDependencies": {

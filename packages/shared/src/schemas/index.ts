@@ -56,3 +56,17 @@ export {
   mcpListFilesSchema,
   mcpGetJobStatusSchema,
 } from "./mcp.schema";
+
+export {
+  targetGroupStatusSchema,
+  targetGroupUserSchema,
+  createTargetGroupSchema,
+  updateTargetGroupSchema,
+  importTargetGroupUsersSchema,
+} from "./target-group.schema";
+export type {
+  CreateTargetGroupInput,
+  UpdateTargetGroupInput,
+  ImportTargetGroupUsersInput,
+  TargetGroupUserInput,
+} from "./target-group.schema";

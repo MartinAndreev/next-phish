@@ -6,6 +6,7 @@ import { fileRouter } from "../modules/file/file.router";
 import { pageRouter } from "../modules/page/page.router";
 import { jobRouter } from "../modules/job/job.router";
 import { apiKeyRouter } from "../modules/api-key/api-key.router";
+import { targetGroupRouter } from "../modules/target-group/target-group.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +16,6 @@ export const appRouter = router({
   page: pageRouter,
   job: jobRouter,
   apiKey: apiKeyRouter,
+  targetGroup: targetGroupRouter,
 });
-
 export type AppRouter = typeof appRouter;

@@ -1,6 +1,5 @@
 "use client";
 
-import type { KeyboardEvent } from "react";
 import { RadioButton } from "primereact/radiobutton";
 import { FileUpload } from "primereact/fileupload";
 import { useTranslation } from "@/src/lib/i18n";
@@ -20,77 +19,57 @@ export function ImportUsersForm({
 }: ImportUsersFormProps) {
   const t = useTranslation();
 
-  function handleKeyDown(
-    e: KeyboardEvent<HTMLDivElement>,
-    targetMode: "insert" | "upsert",
-  ) {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onModeChange(targetMode);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h4 className="mb-3 text-sm font-medium text-zinc-300">
           {t("targetGroups.importMode")}
         </h4>
-        <div className="flex flex-col gap-3" role="radiogroup">
-          <div
-            role="radio"
-            tabIndex={0}
-            aria-checked={mode === "insert"}
-            className={`cursor-pointer rounded-lg border p-4 ${
+        <div className="flex flex-col gap-3">
+          <label
+            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 ${
               mode === "insert"
                 ? "border-brand-blue bg-brand-blue/10"
                 : "border-[#1C2945] bg-brand-navy/50"
             }`}
-            onClick={() => onModeChange("insert")}
-            onKeyDown={(e) => handleKeyDown(e, "insert")}
           >
-            <div className="flex items-center gap-3">
-              <RadioButton
-                checked={mode === "insert"}
-                onChange={() => onModeChange("insert")}
-              />
-              <div>
-                <p className="font-medium text-white">
-                  {t("targetGroups.importModeInsert")}
-                </p>
-                <p className="text-xs text-zinc-400">
-                  {t("targetGroups.importModeInsertHint")}
-                </p>
-              </div>
+            <RadioButton
+              inputId="mode-insert"
+              name="importMode"
+              checked={mode === "insert"}
+              onChange={() => onModeChange("insert")}
+            />
+            <div>
+              <p className="font-medium text-white">
+                {t("targetGroups.importModeInsert")}
+              </p>
+              <p className="text-xs text-zinc-400">
+                {t("targetGroups.importModeInsertHint")}
+              </p>
             </div>
-          </div>
-          <div
-            role="radio"
-            tabIndex={0}
-            aria-checked={mode === "upsert"}
-            className={`cursor-pointer rounded-lg border p-4 ${
+          </label>
+          <label
+            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 ${
               mode === "upsert"
                 ? "border-brand-blue bg-brand-blue/10"
                 : "border-[#1C2945] bg-brand-navy/50"
             }`}
-            onClick={() => onModeChange("upsert")}
-            onKeyDown={(e) => handleKeyDown(e, "upsert")}
           >
-            <div className="flex items-center gap-3">
-              <RadioButton
-                checked={mode === "upsert"}
-                onChange={() => onModeChange("upsert")}
-              />
-              <div>
-                <p className="font-medium text-white">
-                  {t("targetGroups.importModeUpsert")}
-                </p>
-                <p className="text-xs text-zinc-400">
-                  {t("targetGroups.importModeUpsertHint")}
-                </p>
-              </div>
+            <RadioButton
+              inputId="mode-upsert"
+              name="importMode"
+              checked={mode === "upsert"}
+              onChange={() => onModeChange("upsert")}
+            />
+            <div>
+              <p className="font-medium text-white">
+                {t("targetGroups.importModeUpsert")}
+              </p>
+              <p className="text-xs text-zinc-400">
+                {t("targetGroups.importModeUpsertHint")}
+              </p>
             </div>
-          </div>
+          </label>
         </div>
       </div>
 

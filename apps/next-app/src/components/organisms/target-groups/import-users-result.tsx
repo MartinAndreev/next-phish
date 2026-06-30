@@ -3,6 +3,7 @@
 import { ProgressBar } from "primereact/progressbar";
 import { Badge } from "primereact/badge";
 import { useTranslation } from "@/src/lib/i18n";
+import { ImportStatsGrid } from "./import-stats-grid";
 
 interface ImportProgress {
   total: number;
@@ -43,7 +44,14 @@ export function ImportUsersResult({
               }
               showValue
             />
-            <StatsGrid progress={progress} />
+            <ImportStatsGrid
+              total={progress.total}
+              processed={progress.processed}
+              inserted={progress.inserted}
+              updated={progress.updated}
+              skipped={progress.skipped}
+              errors={progress.errors}
+            />
           </>
         )}
       </div>
@@ -71,7 +79,14 @@ export function ImportUsersResult({
       </div>
       {progress && (
         <>
-          <StatsGrid progress={progress} />
+          <ImportStatsGrid
+            total={progress.total}
+            processed={progress.processed}
+            inserted={progress.inserted}
+            updated={progress.updated}
+            skipped={progress.skipped}
+            errors={progress.errors}
+          />
           {progress.validationErrors &&
             progress.validationErrors.length > 0 && (
               <div>
@@ -92,73 +107,6 @@ export function ImportUsersResult({
             )}
         </>
       )}
-    </div>
-  );
-}
-
-function StatsGrid({
-  progress,
-}: {
-  progress: Pick<
-    ImportProgress,
-    "total" | "processed" | "inserted" | "updated" | "skipped" | "errors"
-  >;
-}) {
-  const t = useTranslation();
-
-  return (
-    <div className="grid grid-cols-2 gap-3 text-sm">
-      {progress.total > 0 && (
-        <>
-          <StatItem
-            label={t("targetGroups.importTotal")}
-            value={progress.total}
-          />
-          <StatItem
-            label={t("targetGroups.importProcessed")}
-            value={progress.processed}
-          />
-        </>
-      )}
-      <StatItem
-        label={t("targetGroups.importInserted")}
-        value={progress.inserted}
-        color="text-brand-cyan"
-      />
-      <StatItem
-        label={t("targetGroups.importUpdated")}
-        value={progress.updated}
-        color="text-brand-blue"
-      />
-      {progress.skipped > 0 && (
-        <StatItem
-          label={t("targetGroups.importSkipped")}
-          value={progress.skipped}
-          color="text-zinc-400"
-        />
-      )}
-      <StatItem
-        label={t("targetGroups.importErrors")}
-        value={progress.errors}
-        color="text-red-400"
-      />
-    </div>
-  );
-}
-
-function StatItem({
-  label,
-  value,
-  color = "text-white",
-}: {
-  label: string;
-  value: number;
-  color?: string;
-}) {
-  return (
-    <div>
-      <span className="text-zinc-400">{label}: </span>
-      <span className={color}>{value}</span>
     </div>
   );
 }

@@ -73,14 +73,24 @@ export function TargetGroupForm({
       createMutation.mutate({
         name: values.name,
         status: values.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
-        users: values.users
-          .filter((u) => u.email && u.firstName && u.lastName)
-          .map((u) => ({
-            email: u.email,
-            firstName: u.firstName,
-            lastName: u.lastName,
-            position: u.position || undefined,
-          })),
+        users: values.users.reduce<
+          Array<{
+            email: string;
+            firstName: string;
+            lastName: string;
+            position?: string;
+          }>
+        >((acc, u) => {
+          if (u.email && u.firstName && u.lastName) {
+            acc.push({
+              email: u.email,
+              firstName: u.firstName,
+              lastName: u.lastName,
+              position: u.position || undefined,
+            });
+          }
+          return acc;
+        }, []),
       });
     }
   }

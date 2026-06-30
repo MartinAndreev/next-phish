@@ -8,10 +8,15 @@ import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
 import { TargetGroupFormPresentation } from "./target-group-form-presentation";
-import {
-  createTargetGroupSchema,
-  updateTargetGroupSchema,
-} from "@next-phish/shared";
+import { createTargetGroupSchema } from "@next-phish/shared";
+
+interface FormUser {
+  _key: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  position: string;
+}
 
 interface TargetGroupFormProps {
   mode?: "create" | "edit";
@@ -56,12 +61,7 @@ export function TargetGroupForm({
   async function handleSubmit(values: {
     name: string;
     status: string;
-    users: Array<{
-      email: string;
-      firstName: string;
-      lastName: string;
-      position?: string;
-    }>;
+    users: FormUser[];
   }) {
     if (mode === "edit" && groupId) {
       updateMutation.mutate({
@@ -73,27 +73,28 @@ export function TargetGroupForm({
       createMutation.mutate({
         name: values.name,
         status: values.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
-        users: values.users.filter((u) => u.email && u.firstName && u.lastName),
+        users: values.users
+          .filter((u) => u.email && u.firstName && u.lastName)
+          .map((u) => ({
+            email: u.email,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            position: u.position || undefined,
+          })),
       });
     }
   }
 
   const isEdit = mode === "edit";
-  const schema = isEdit ? updateTargetGroupSchema : createTargetGroupSchema;
 
   return (
     <Formik
       initialValues={{
         name: initialName,
         status: initialStatus,
-        users: [] as Array<{
-          email: string;
-          firstName: string;
-          lastName: string;
-          position: string;
-        }>,
+        users: [] as FormUser[],
       }}
-      validate={toFormikValidation(schema)}
+      validate={toFormikValidation(createTargetGroupSchema)}
       onSubmit={handleSubmit}
       enableReinitialize
     >

@@ -5,6 +5,10 @@ export {
   CreateTargetGroupCommandSchema,
   UpdateTargetGroupCommandSchema,
   DeleteTargetGroupCommandSchema,
+  RemoveUserSchema,
+  AddUserSchema,
+  ImportUsersSchema,
+  ImportProgressSchema,
   ImportTargetGroupUsersCommandSchema,
 } from "./target-group.validations";
 export type {
@@ -14,5 +18,9 @@ export type {
   CreateTargetGroupCommandInput,
   UpdateTargetGroupCommandInput,
   DeleteTargetGroupCommandInput,
+  RemoveUserInput,
+  AddUserInput,
+  ImportUsersInput,
+  ImportProgressInput,
   ImportTargetGroupUsersCommandInput,
 } from "./target-group.validations";

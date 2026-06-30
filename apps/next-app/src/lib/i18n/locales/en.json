@@ -421,6 +421,7 @@
     "importInserted": "Inserted",
     "importUpdated": "Updated",
     "importErrors": "Errors",
+    "importSkipped": "Skipped",
     "importValidationErrors": "Validation errors",
     "importDone": "Done",
     "firstName": "First name",

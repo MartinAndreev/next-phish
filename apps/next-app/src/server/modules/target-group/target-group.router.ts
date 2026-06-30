@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { tracked } from "@trpc/server";
 import { Container } from "@/src/server/container";
 import {
@@ -15,6 +14,10 @@ import {
   CreateTargetGroupCommandSchema,
   UpdateTargetGroupCommandSchema,
   DeleteTargetGroupCommandSchema,
+  RemoveUserSchema,
+  AddUserSchema,
+  ImportUsersSchema,
+  ImportProgressSchema,
   JobRepository,
   CreateJobCommand,
   TargetGroupRepository,
@@ -24,7 +27,7 @@ import {
   protectedProcedure,
   router,
 } from "../../trpc/procedures";
-import { jobQueue } from "../../queue";
+import { importQueue } from "../../queue";
 import { toRouterPermissions } from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
@@ -101,41 +104,24 @@ export const targetGroupRouter = router({
     }),
 
   removeUser: writeProcedure
-    .input(z.object({ id: z.string(), targetGroupId: z.string() }))
+    .input(RemoveUserSchema)
     .mutation(async ({ input }) => {
       const repo = Container.get(TargetGroupRepository);
       return repo.deleteUser(input.id, input.targetGroupId);
     }),
 
-  addUser: writeProcedure
-    .input(
-      z.object({
-        targetGroupId: z.string(),
-        email: z.string().email(),
-        firstName: z.string().trim().min(1),
-        lastName: z.string().trim().min(1),
-        position: z.string().trim().optional(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const repo = Container.get(TargetGroupRepository);
-      return repo.addUser(input.targetGroupId, {
-        email: input.email,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        position: input.position,
-      });
-    }),
+  addUser: writeProcedure.input(AddUserSchema).mutation(async ({ input }) => {
+    const repo = Container.get(TargetGroupRepository);
+    return repo.addUser(input.targetGroupId, {
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      position: input.position,
+    });
+  }),
 
   importUsers: writeProcedure
-    .input(
-      z.object({
-        targetGroupId: z.string(),
-        mode: z.enum(["insert", "upsert"]),
-        file: z.string(),
-        fileName: z.string(),
-      }),
-    )
+    .input(ImportUsersSchema)
     .mutation(async ({ ctx, input }) => {
       const jobHandler = Container.get(CreateJobCommand);
       const job = await bus.dispatch(jobHandler, {
@@ -143,14 +129,14 @@ export const targetGroupRouter = router({
         input: {
           targetGroupId: input.targetGroupId,
           mode: input.mode,
-          file: input.file,
+          fileId: input.fileId,
           fileName: input.fileName,
         },
         organizationId: ctx.activeOrganizationId,
         createdById: ctx.userId,
       });
 
-      await jobQueue.add(
+      await importQueue.add(
         "target_group_import",
         { jobId: job.id },
         {
@@ -164,7 +150,7 @@ export const targetGroupRouter = router({
     }),
 
   onImportProgress: protectedProcedure
-    .input(z.object({ jobId: z.string() }))
+    .input(ImportProgressSchema)
     .subscription(async function* (opts) {
       const jobRepo = Container.get(JobRepository);
       let lastProgressJson: string | null = null;
@@ -187,7 +173,7 @@ export const targetGroupRouter = router({
           return;
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     }),
 });

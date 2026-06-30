@@ -6,8 +6,15 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
-import type { TargetGroupUserInput } from "@next-phish/shared";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+
+interface FormUser {
+  _key: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  position: string;
+}
 
 interface TargetGroupFormPresentationProps {
   error: string;
@@ -22,7 +29,7 @@ export function TargetGroupFormPresentation({
   const { values, setFieldValue } = useFormikContext<{
     name: string;
     status: string;
-    users: TargetGroupUserInput[];
+    users: FormUser[];
   }>();
 
   const statusOptions = [
@@ -34,7 +41,13 @@ export function TargetGroupFormPresentation({
   function addUser() {
     const newUsers = [
       ...values.users,
-      { email: "", firstName: "", lastName: "", position: "" },
+      {
+        _key: crypto.randomUUID(),
+        email: "",
+        firstName: "",
+        lastName: "",
+        position: "",
+      },
     ];
     setFieldValue("users", newUsers);
   }
@@ -95,9 +108,9 @@ export function TargetGroupFormPresentation({
           )}
 
           <div className="flex flex-col gap-3">
-            {values.users.map((_, index) => (
+            {values.users.map((user, index) => (
               <div
-                key={index}
+                key={user._key}
                 className="grid grid-cols-1 gap-3 rounded-lg border border-[#1C2945] bg-brand-navy/50 p-4 md:grid-cols-4"
               >
                 <div>

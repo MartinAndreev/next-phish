@@ -14,11 +14,15 @@ import {
   ImportTargetGroupUsersCommand,
 } from "./commands";
 import { JobRepository } from "../job";
+import { FileRepository } from "../file/repositories";
+import { R2Client } from "../storage/r2-client";
 
 export function registerTargetGroupServices(db: PrismaClient): void {
   const targetGroupRepo = new TargetGroupRepository(db);
   const targetGroupService = new TargetGroupService();
   const jobRepo = Container.get(JobRepository);
+  const fileRepo = Container.get(FileRepository);
+  const r2 = Container.get(R2Client);
 
   Container.set(TargetGroupRepository, targetGroupRepo);
   Container.set(TargetGroupService, targetGroupService);
@@ -48,6 +52,6 @@ export function registerTargetGroupServices(db: PrismaClient): void {
   );
   Container.set(
     ImportTargetGroupUsersCommand,
-    new ImportTargetGroupUsersCommand(jobRepo, targetGroupRepo),
+    new ImportTargetGroupUsersCommand(jobRepo, targetGroupRepo, fileRepo, r2),
   );
 }

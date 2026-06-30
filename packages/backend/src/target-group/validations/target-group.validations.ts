@@ -57,10 +57,34 @@ export const DeleteTargetGroupCommandSchema = z.object({
   id: z.string(),
 });
 
+export const RemoveUserSchema = z.object({
+  id: z.string(),
+  targetGroupId: z.string(),
+});
+
+export const AddUserSchema = z.object({
+  targetGroupId: z.string(),
+  email: z.string().email(),
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim().min(1),
+  position: z.string().trim().optional(),
+});
+
+export const ImportUsersSchema = z.object({
+  targetGroupId: z.string(),
+  mode: z.enum(["insert", "upsert"]),
+  fileId: z.string(),
+  fileName: z.string(),
+});
+
+export const ImportProgressSchema = z.object({
+  jobId: z.string(),
+});
+
 export const ImportTargetGroupUsersCommandSchema = z.object({
   targetGroupId: z.string(),
   mode: z.enum(["insert", "upsert"]),
-  file: z.string(),
+  fileId: z.string(),
   fileName: z.string(),
 });
 
@@ -78,6 +102,10 @@ export type UpdateTargetGroupCommandInput = z.infer<
 export type DeleteTargetGroupCommandInput = z.infer<
   typeof DeleteTargetGroupCommandSchema
 >;
+export type RemoveUserInput = z.infer<typeof RemoveUserSchema>;
+export type AddUserInput = z.infer<typeof AddUserSchema>;
+export type ImportUsersInput = z.infer<typeof ImportUsersSchema>;
+export type ImportProgressInput = z.infer<typeof ImportProgressSchema>;
 export type ImportTargetGroupUsersCommandInput = z.infer<
   typeof ImportTargetGroupUsersCommandSchema
 >;

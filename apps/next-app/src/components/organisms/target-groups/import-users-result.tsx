@@ -9,6 +9,7 @@ interface ImportProgress {
   processed: number;
   inserted: number;
   updated: number;
+  skipped: number;
   errors: number;
   currentBatch: number;
   totalBatches: number;
@@ -78,8 +79,11 @@ export function ImportUsersResult({
                   {t("targetGroups.importValidationErrors")}
                 </h4>
                 <div className="max-h-40 overflow-y-auto rounded-lg border border-[#1C2945] bg-brand-navy/50 p-3">
-                  {progress.validationErrors.map((err, i) => (
-                    <p key={i} className="text-xs text-red-400">
+                  {progress.validationErrors.map((err) => (
+                    <p
+                      key={`${err.row}-${err.field}`}
+                      className="text-xs text-red-400"
+                    >
                       Row {err.row}: {err.field} - {err.message}
                     </p>
                   ))}
@@ -97,7 +101,7 @@ function StatsGrid({
 }: {
   progress: Pick<
     ImportProgress,
-    "total" | "processed" | "inserted" | "updated" | "errors"
+    "total" | "processed" | "inserted" | "updated" | "skipped" | "errors"
   >;
 }) {
   const t = useTranslation();
@@ -126,6 +130,13 @@ function StatsGrid({
         value={progress.updated}
         color="text-brand-blue"
       />
+      {progress.skipped > 0 && (
+        <StatItem
+          label={t("targetGroups.importSkipped")}
+          value={progress.skipped}
+          color="text-zinc-400"
+        />
+      )}
       <StatItem
         label={t("targetGroups.importErrors")}
         value={progress.errors}

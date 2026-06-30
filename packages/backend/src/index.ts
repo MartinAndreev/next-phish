@@ -231,6 +231,10 @@ export {
   CreateTargetGroupCommandSchema,
   UpdateTargetGroupCommandSchema,
   DeleteTargetGroupCommandSchema,
+  RemoveUserSchema,
+  AddUserSchema,
+  ImportUsersSchema,
+  ImportProgressSchema,
   ImportTargetGroupUsersCommandSchema,
 } from "./target-group";
 export type {
@@ -240,6 +244,10 @@ export type {
   CreateTargetGroupCommandInput,
   UpdateTargetGroupCommandInput,
   DeleteTargetGroupCommandInput,
+  RemoveUserInput,
+  AddUserInput,
+  ImportUsersInput,
+  ImportProgressInput,
   ImportTargetGroupUsersCommandInput,
 } from "./target-group";
 export { registerTargetGroupServices } from "./target-group";

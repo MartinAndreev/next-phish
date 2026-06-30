@@ -27,6 +27,10 @@ export {
   CreateTargetGroupCommandSchema,
   UpdateTargetGroupCommandSchema,
   DeleteTargetGroupCommandSchema,
+  RemoveUserSchema,
+  AddUserSchema,
+  ImportUsersSchema,
+  ImportProgressSchema,
   ImportTargetGroupUsersCommandSchema,
 } from "./validations";
 export type {
@@ -36,6 +40,10 @@ export type {
   CreateTargetGroupCommandInput,
   UpdateTargetGroupCommandInput,
   DeleteTargetGroupCommandInput,
+  RemoveUserInput,
+  AddUserInput,
+  ImportUsersInput,
+  ImportProgressInput,
   ImportTargetGroupUsersCommandInput,
 } from "./validations";
 export { registerTargetGroupServices } from "./target-group-service.provider";

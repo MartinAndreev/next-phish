@@ -21,6 +21,7 @@ interface ImportProgressData {
     processed: number;
     inserted: number;
     updated: number;
+    skipped: number;
     errors: number;
     currentBatch: number;
     totalBatches: number;
@@ -38,14 +39,23 @@ export function ImportUsersDialog({
   const [mode, setMode] = useState<"insert" | "upsert">("insert");
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
+  const uploadMutation = trpc.file.uploadFile.useMutation();
   const importMutation = trpc.targetGroup.importUsers.useMutation({
     onSuccess: (data) => setJobId(data.jobId),
   });
 
   const { data: progressData } = trpc.job.getById.useQuery(
     { id: jobId! },
-    { enabled: !!jobId, refetchInterval: jobId ? 500 : undefined },
+    {
+      enabled: !!jobId,
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        if (status === "COMPLETED" || status === "FAILED") return false;
+        return 5000;
+      },
+    },
   );
 
   const progress = progressData?.progress as
@@ -65,20 +75,31 @@ export function ImportUsersDialog({
     if (isDone) utils.targetGroup.invalidate();
   }, [isDone, utils.targetGroup]);
 
-  function handleImport() {
+  async function handleImport() {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(",")[1];
-      if (!base64) return;
+
+    setIsUploading(true);
+    try {
+      const buffer = await file.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString("base64");
+
+      const uploaded = await uploadMutation.mutateAsync({
+        name: file.name,
+        size: file.size,
+        format: file.type || "application/octet-stream",
+        purpose: "IMPORT",
+        data: base64,
+      });
+
       importMutation.mutate({
         targetGroupId,
         mode,
-        file: base64,
+        fileId: uploaded.id,
         fileName: file.name,
       });
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function handleClose() {
@@ -109,7 +130,7 @@ export function ImportUsersDialog({
           label={t("targetGroups.importStart")}
           icon="pi pi-upload"
           disabled={!file}
-          loading={importMutation.isPending}
+          loading={isUploading || importMutation.isPending}
           onClick={handleImport}
           className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
         />

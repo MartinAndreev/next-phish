@@ -9,6 +9,15 @@ import { getOrganizationId } from "./context";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
+  sse: {
+    ping: {
+      enabled: true,
+      intervalMs: 2_000,
+    },
+    client: {
+      reconnectAfterInactivityMs: 5_000,
+    },
+  },
 });
 
 export const router = t.router;

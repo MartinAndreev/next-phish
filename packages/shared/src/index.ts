@@ -78,6 +78,30 @@ export {
 } from "./schemas";
 
 export {
+  targetGroupStatusSchema,
+  targetGroupUserSchema,
+  createTargetGroupSchema,
+  updateTargetGroupSchema,
+  importTargetGroupUsersSchema,
+} from "./schemas";
+export type {
+  CreateTargetGroupInput,
+  UpdateTargetGroupInput,
+  ImportTargetGroupUsersInput,
+  TargetGroupUserInput,
+} from "./schemas";
+
+export type {
+  TargetGroupStatus,
+  TargetGroupUserView,
+  TargetGroupAuthorView,
+  TargetGroupListItemView,
+  TargetGroupView,
+  CreateTargetGroupData,
+  UpdateTargetGroupData,
+} from "./types";
+
+export {
   PERMISSION_GROUPS,
   toBetterAuthStatements,
   toRouterPermissions,

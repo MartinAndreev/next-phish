@@ -13,6 +13,7 @@ import { registerJobServices } from "./job";
 import { registerSiteImportServices } from "./site-import";
 import { registerEncryptionServices } from "./encryption";
 import { registerApiKeyServices, registerApiKeyAuth } from "./api-key";
+import { registerTargetGroupServices } from "./target-group";
 import { MessageBus } from "./message-bus";
 
 export interface ContainerOptions {
@@ -30,6 +31,7 @@ export function initializeContainer(options: ContainerOptions): void {
   registerJobServices(db);
   registerSiteImportServices(db);
   registerApiKeyServices(db);
+  registerTargetGroupServices(db);
   Container.set(MessageBus, new MessageBus(db));
 }
 

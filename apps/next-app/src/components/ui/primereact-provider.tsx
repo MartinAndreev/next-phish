@@ -46,6 +46,17 @@ const customTailwind = {
     submenuHeader: { className: "hidden" },
     separator: { className: "border-0" },
   },
+  fileupload: {
+    ...Tailwind.fileupload,
+    basicButton: {
+      className: classNames(
+        "rounded-md px-2 py-1 text-sm items-center cursor-pointer inline-flex overflow-hidden relative select-none text-center align-bottom",
+        "transition duration-200 ease-in-out",
+        "focus:outline-none focus:outline-offset-0",
+        "text-white bg-brand-aqua border border-brand-aqua hover:bg-brand-blue hover:border-brand-blue focus:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(30,216,240,0.5)] bg-[image:var(--brand-gradient)]",
+      ),
+    },
+  },
 
   // Breadcrumb
   breadcrumb: {
@@ -295,7 +306,6 @@ const customTailwind = {
         "text-white/80 text-xs py-1 px-2 bg-[image:var(--brand-gradient)] rounded-lg flex items-center gap-2 transition-colors items-center",
     },
   },
-
   // DataTable
   datatable: {
     root: {

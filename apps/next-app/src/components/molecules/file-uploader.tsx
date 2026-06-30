@@ -8,12 +8,14 @@ interface FileUploaderProps {
   onUpload: (file: File) => Promise<void>;
   accept?: string;
   maxFileSize?: number;
+  mode?: "basic" | "advanced" | undefined;
 }
 
 export function FileUploader({
   onUpload,
   accept,
   maxFileSize,
+  mode = "advanced",
 }: FileUploaderProps) {
   const t = useTranslation();
 
@@ -34,7 +36,7 @@ export function FileUploader({
 
   return (
     <FileUpload
-      mode="advanced"
+      mode={mode}
       customUpload
       auto
       multiple

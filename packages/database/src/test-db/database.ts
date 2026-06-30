@@ -9,6 +9,7 @@ import { JobFactory } from "./job.factory";
 import { SiteImportFactory } from "./site-import.factory";
 import { FileFactory } from "./file.factory";
 import { SiteImportFileFactory } from "./site-import-file.factory";
+import { TargetGroupFactory } from "./target-group.factory";
 
 export interface TestDatabase {
   prisma: PrismaClient;
@@ -19,6 +20,7 @@ export interface TestDatabase {
     siteImport: SiteImportFactory;
     file: FileFactory;
     siteImportFile: SiteImportFileFactory;
+    targetGroup: TargetGroupFactory;
   };
   cleanup: () => Promise<void>;
   resetData: () => Promise<void>;
@@ -76,6 +78,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       siteImport: new SiteImportFactory(prisma),
       file: new FileFactory(prisma),
       siteImportFile: new SiteImportFileFactory(prisma),
+      targetGroup: new TargetGroupFactory(prisma),
     },
     async cleanup() {
       await prisma.$disconnect();
@@ -83,6 +86,8 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await db.close();
     },
     async resetData() {
+      await prisma.targetGroupUser.deleteMany();
+      await prisma.targetGroup.deleteMany();
       await prisma.siteImportFile.deleteMany();
       await prisma.siteImport.deleteMany();
       await prisma.job.deleteMany();

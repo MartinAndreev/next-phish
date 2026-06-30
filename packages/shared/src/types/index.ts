@@ -17,3 +17,13 @@ export type {
   CreateEmailTemplateData,
   UpdateEmailTemplateData,
 } from "./email-template.types";
+
+export type {
+  TargetGroupStatus,
+  TargetGroupUserView,
+  TargetGroupAuthorView,
+  TargetGroupListItemView,
+  TargetGroupView,
+  CreateTargetGroupData,
+  UpdateTargetGroupData,
+} from "./target-group.types";

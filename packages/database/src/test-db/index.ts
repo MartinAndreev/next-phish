@@ -5,5 +5,6 @@ export { JobFactory } from "./job.factory";
 export { SiteImportFactory } from "./site-import.factory";
 export { FileFactory } from "./file.factory";
 export { SiteImportFileFactory } from "./site-import-file.factory";
+export { TargetGroupFactory } from "./target-group.factory";
 export { createTestDatabase } from "./database";
 export type { TestDatabase } from "./database";

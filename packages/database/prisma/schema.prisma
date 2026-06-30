@@ -44,6 +44,12 @@ enum ImportStatus {
   FAILED
 }
 
+enum TargetGroupStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
 model User {
   id               String   @id @default(cuid())
   name             String
@@ -67,6 +73,7 @@ model User {
   uploadedFiles  File[]          @relation("UploadedFiles")
   jobs           Job[]           @relation("JobCreatedBy")
   siteImports    SiteImport[]    @relation("SiteImportCreatedBy")
+  targetGroups   TargetGroup[]   @relation("TargetGroupCreatedBy")
 
   @@map("user")
 }
@@ -146,6 +153,7 @@ model Organization {
   files          File[]
   jobs           Job[]
   siteImports    SiteImport[]
+  targetGroups   TargetGroup[]
 
   @@map("organization")
 }
@@ -361,6 +369,43 @@ model SiteImportFile {
   @@unique([siteImportId, resolvedUrl])
   @@index([siteImportId])
   @@map("site_import_file")
+}
+
+model TargetGroup {
+  id             String            @id @default(cuid())
+  name           String
+  status         TargetGroupStatus @default(DRAFT)
+  organizationId String
+  createdById    String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User              @relation("TargetGroupCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  users        TargetGroupUser[]
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([status])
+  @@map("target_group")
+}
+
+model TargetGroupUser {
+  id            String   @id @default(cuid())
+  targetGroupId String
+  email         String
+  firstName     String
+  lastName      String
+  position      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  targetGroup TargetGroup @relation(fields: [targetGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([targetGroupId, email])
+  @@index([targetGroupId])
+  @@index([email])
+  @@map("target_group_user")
 }
 
 model Apikey {

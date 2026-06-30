@@ -203,3 +203,43 @@ export {
 export type { CreateApiKeyData, RevokeOrgApiKeysData } from "./api-key";
 
 export { R2Client } from "./storage/r2-client";
+
+export {
+  TargetGroupRepository,
+  TargetGroupService,
+  GetTargetGroupsQuery,
+  GetTargetGroupByIdQuery,
+  GetTargetGroupUsersQuery,
+  CreateTargetGroupCommand,
+  UpdateTargetGroupCommand,
+  DeleteTargetGroupCommand,
+  ImportTargetGroupUsersCommand,
+} from "./target-group";
+export type {
+  TargetGroupStatus,
+  TargetGroupUserView,
+  TargetGroupAuthorView,
+  TargetGroupListItemView,
+  TargetGroupView,
+  CreateTargetGroupData,
+  UpdateTargetGroupData,
+} from "./target-group";
+export {
+  GetTargetGroupsSchema,
+  GetTargetGroupByIdSchema,
+  GetTargetGroupUsersSchema,
+  CreateTargetGroupCommandSchema,
+  UpdateTargetGroupCommandSchema,
+  DeleteTargetGroupCommandSchema,
+  ImportTargetGroupUsersCommandSchema,
+} from "./target-group";
+export type {
+  GetTargetGroupsInput,
+  GetTargetGroupByIdInput,
+  GetTargetGroupUsersInput,
+  CreateTargetGroupCommandInput,
+  UpdateTargetGroupCommandInput,
+  DeleteTargetGroupCommandInput,
+  ImportTargetGroupUsersCommandInput,
+} from "./target-group";
+export { registerTargetGroupServices } from "./target-group";

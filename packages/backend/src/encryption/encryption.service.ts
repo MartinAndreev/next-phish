@@ -58,4 +58,12 @@ export class EncryptionService {
 
     return JSON.parse(decrypted.toString("utf-8"));
   }
+
+  encryptSecret(secret: string): EncryptedPayload {
+    return this.encrypt({ value: secret });
+  }
+
+  decryptSecret(payload: EncryptedPayload): string {
+    return this.decrypt(payload).value as string;
+  }
 }

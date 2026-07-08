@@ -1,5 +1,5 @@
 import { MailSendingProfileService } from "../services";
-import type { MailSendingProfileView } from "../services";
+import type { MailSendingProfileView } from "../types";
 import type { ICommandHandler } from "../../message-bus";
 import type {
   CreateMailSendingProfileInput,

@@ -8,6 +8,7 @@ import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
 import { SendingProfileFormPresentation } from "./sending-profile-form-presentation";
+import type { MailProviderType } from "@next-phish/backend";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -53,9 +54,8 @@ function valuesFromProfile(profile: {
 }): ProfileFormValues {
   const config: Record<string, string> = {};
   for (const [key, value] of Object.entries(profile.providerConfig)) {
-    if (typeof value === "string") {
-      config[key] = value;
-    }
+    if (value === null || value === undefined) continue;
+    config[key] = typeof value === "string" ? value : String(value);
   }
   return {
     name: profile.name,
@@ -115,22 +115,26 @@ export function SendingProfileFormContainer({
     : defaultFormValues();
 
   async function handleSubmit(values: ProfileFormValues) {
-    const payload = {
-      name: values.name,
-      providerType: values.providerType,
-      fromName: values.fromName,
-      fromEmail: values.fromEmail,
-      replyToEmail: values.replyToEmail || undefined,
-      isDefault: values.isDefault,
-      providerConfig: values.providerConfig,
-    };
-
     if (profileId) {
-      updateMutation.mutate({ id: profileId, ...payload });
+      updateMutation.mutate({
+        id: profileId,
+        name: values.name,
+        fromName: values.fromName,
+        fromEmail: values.fromEmail,
+        replyToEmail: values.replyToEmail || undefined,
+        isDefault: values.isDefault,
+        providerConfig: values.providerConfig,
+      });
     } else {
-      createMutation.mutate(
-        payload as Parameters<typeof createMutation.mutate>[0],
-      );
+      createMutation.mutate({
+        name: values.name,
+        providerType: values.providerType as MailProviderType,
+        fromName: values.fromName,
+        fromEmail: values.fromEmail,
+        replyToEmail: values.replyToEmail || undefined,
+        isDefault: values.isDefault,
+        providerConfig: values.providerConfig,
+      });
     }
   }
 

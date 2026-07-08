@@ -1,4 +1,4 @@
-export type { MailSendingProfileView } from "./services";
+export type { MailSendingProfileView } from "./types";
 
 export { MailProviderType } from "./providers/mail-provider.types";
 export type {

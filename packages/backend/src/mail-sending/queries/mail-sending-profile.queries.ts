@@ -1,7 +1,5 @@
-import {
-  MailSendingProfileService,
-  type MailSendingProfileView,
-} from "../services";
+import { MailSendingProfileService } from "../services";
+import type { MailSendingProfileView } from "../types";
 import { MailSendingProfileRepository } from "../repositories";
 import type { IQueryHandler } from "../../message-bus";
 import type {

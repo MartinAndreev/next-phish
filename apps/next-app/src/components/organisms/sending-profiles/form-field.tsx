@@ -1,7 +1,6 @@
 "use client";
 
-import { Field, ErrorMessage } from "formik";
-import type { ComponentType } from "react";
+import { Field, ErrorMessage, useFormikContext } from "formik";
 import { InputText } from "primereact/inputtext";
 
 const errorCls = "mt-1 text-xs text-red-400";
@@ -12,7 +11,6 @@ interface FormFieldProps {
   placeholder?: string;
   type?: string;
   autoComplete?: string;
-  as?: ComponentType<Record<string, unknown>>;
   className?: string;
 }
 
@@ -22,22 +20,27 @@ export function FormField({
   placeholder,
   type,
   autoComplete,
-  as: asComponent,
   className,
 }: FormFieldProps) {
+  const { errors, touched, submitCount } =
+    useFormikContext<Record<string, unknown>>();
+  const hasError = Boolean(errors[name] && (touched[name] || submitCount > 0));
+
   return (
     <div>
       <label className="mb-2 block text-sm font-medium text-zinc-300">
         {label}
       </label>
       <Field
-        as={asComponent ?? InputText}
+        as={InputText}
         name={name}
         size="small"
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={className ?? "w-full"}
+        className={[className ?? "w-full", hasError ? "border-red-500/50" : ""]
+          .join(" ")
+          .trim()}
       />
       <ErrorMessage name={name} component="p" className={errorCls} />
     </div>

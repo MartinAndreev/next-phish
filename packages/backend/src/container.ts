@@ -1,4 +1,5 @@
 import { Container } from "typedi";
+import type { Redis } from "ioredis";
 import { db } from "@next-phish/database";
 import { registerEmailServices } from "./email";
 import { registerUserServices } from "./user";
@@ -14,10 +15,12 @@ import { registerSiteImportServices } from "./site-import";
 import { registerEncryptionServices } from "./encryption";
 import { registerApiKeyServices, registerApiKeyAuth } from "./api-key";
 import { registerTargetGroupServices } from "./target-group";
+import { registerMailSendingServices } from "./mail-sending";
 import { MessageBus } from "./message-bus";
 
 export interface ContainerOptions {
   encryptionKey: string;
+  redis?: Redis;
 }
 
 export function initializeContainer(options: ContainerOptions): void {
@@ -32,6 +35,9 @@ export function initializeContainer(options: ContainerOptions): void {
   registerSiteImportServices(db);
   registerApiKeyServices(db);
   registerTargetGroupServices(db);
+  if (options.redis) {
+    registerMailSendingServices(db, options.redis);
+  }
   Container.set(MessageBus, new MessageBus(db));
 }
 

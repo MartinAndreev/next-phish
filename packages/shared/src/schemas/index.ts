@@ -55,6 +55,8 @@ export {
   mcpImportPageFromUrlSchema,
   mcpListFilesSchema,
   mcpGetJobStatusSchema,
+  mcpCreateSendingProfileSchema,
+  mcpUpdateSendingProfileSchema,
 } from "./mcp.schema";
 
 export {
@@ -70,3 +72,6 @@ export type {
   ImportTargetGroupUsersInput,
   TargetGroupUserInput,
 } from "./target-group.schema";
+
+export { sendingProfileFormSchema } from "./sending-profile.schema";
+export type { SendingProfileFormValues } from "./sending-profile.schema";

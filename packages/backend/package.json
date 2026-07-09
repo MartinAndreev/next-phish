@@ -19,6 +19,7 @@
     "@prisma/client": "^6.19.3",
     "cheerio": "^1.2.0",
     "ejs": "^3",
+    "ioredis": "^5",
     "nodemailer": "^6",
     "typedi": "^0.10",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",

@@ -86,3 +86,36 @@ export const mcpListFilesSchema = listFilesSchema.extend({
 export const mcpGetJobStatusSchema = z.object({
   jobId: z.string(),
 });
+
+export const mcpCreateSendingProfileSchema = z.object({
+  organizationId,
+  name: z.string().trim().min(1),
+  providerType: z.enum([
+    "SMTP",
+    "MICROSOFT_GRAPH",
+    "AWS_SES",
+    "SENDGRID",
+    "MAILGUN",
+    "POSTMARK",
+    "RESEND",
+    "GENERAL_API",
+  ]),
+  fromName: z.string().trim().min(1),
+  fromEmail: z.string().email(),
+  replyToEmail: z.string().email().optional(),
+  headers: z.record(z.string()).optional(),
+  providerConfig: z.record(z.unknown()),
+  isDefault: z.boolean().optional(),
+});
+
+export const mcpUpdateSendingProfileSchema = z.object({
+  id: z.string(),
+  organizationId,
+  name: z.string().trim().min(1).optional(),
+  fromName: z.string().trim().min(1).optional(),
+  fromEmail: z.string().email().optional(),
+  replyToEmail: z.string().email().optional().nullable(),
+  headers: z.record(z.string()).optional().nullable(),
+  providerConfig: z.record(z.unknown()).optional(),
+  isDefault: z.boolean().optional(),
+});

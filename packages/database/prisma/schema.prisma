@@ -50,6 +50,17 @@ enum TargetGroupStatus {
   ARCHIVED
 }
 
+enum MailProviderType {
+  SMTP
+  MICROSOFT_GRAPH
+  AWS_SES
+  SENDGRID
+  MAILGUN
+  POSTMARK
+  RESEND
+  GENERAL_API
+}
+
 model User {
   id               String   @id @default(cuid())
   name             String
@@ -154,6 +165,7 @@ model Organization {
   jobs           Job[]
   siteImports    SiteImport[]
   targetGroups   TargetGroup[]
+  mailSendingProfiles MailSendingProfile[]
 
   @@map("organization")
 }
@@ -406,6 +418,27 @@ model TargetGroupUser {
   @@index([targetGroupId])
   @@index([email])
   @@map("target_group_user")
+}
+
+model MailSendingProfile {
+  id             String           @id @default(cuid())
+  organizationId String
+  name           String
+  providerType   MailProviderType
+  fromName       String
+  fromEmail      String
+  replyToEmail   String?
+  headers        Json?            @default("{}")
+  providerConfig Json
+  isDefault      Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([providerType])
+  @@map("mail_sending_profile")
 }
 
 model Apikey {

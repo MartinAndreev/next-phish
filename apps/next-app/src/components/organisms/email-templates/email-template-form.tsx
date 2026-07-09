@@ -1,18 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import type { FieldInputProps } from "formik";
+import { Formik, Form } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Chips } from "primereact/chips";
 import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { Tooltip } from "primereact/tooltip";
 import { createEmailTemplateSchema } from "@next-phish/shared";
-import { errorClassName } from "@/src/components/atoms/form-message.styles";
+import { FormField } from "@/src/components/molecules/form-field";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { selectSmall } from "@/src/components/ui/theme-constants";
@@ -121,26 +119,11 @@ export function EmailTemplateForm({
                 <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5 shadow-[0_20px_45px_rgba(2,11,29,0.28)]">
                   <div className="grid gap-5 md:grid-cols-3">
                     <div className="space-y-2 md:col-span-3">
-                      <label
-                        htmlFor="name"
-                        className="block text-sm font-medium text-zinc-100"
-                      >
-                        {t("emailTemplates.name")}
-                      </label>
-                      <Field name="name">
-                        {({ field }: { field: FieldInputProps<string> }) => (
-                          <InputText
-                            id="name"
-                            size="small"
-                            {...field}
-                            className={inputClassName}
-                          />
-                        )}
-                      </Field>
-                      <ErrorMessage
+                      <FormField
                         name="name"
-                        component="p"
-                        className={`${errorClassName} mt-2`}
+                        label={t("emailTemplates.name")}
+                        placeholder="Enter template name"
+                        inputClassName={inputClassName}
                       />
                     </div>
 

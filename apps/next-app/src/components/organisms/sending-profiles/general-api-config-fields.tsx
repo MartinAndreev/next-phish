@@ -4,7 +4,7 @@ import { Field, ErrorMessage, useFormikContext } from "formik";
 import { Dropdown } from "primereact/dropdown";
 import { useTranslation } from "@/src/lib/i18n";
 import { selectSmall } from "@/src/components/ui/theme-constants";
-import { FormField } from "./form-field";
+import { FormField } from "@/src/components/molecules/form-field";
 
 const errorCls = "mt-1 text-xs text-red-400";
 

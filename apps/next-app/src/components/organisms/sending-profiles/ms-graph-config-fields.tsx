@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from "@/src/lib/i18n";
-import { FormField } from "./form-field";
+import { FormField } from "@/src/components/molecules/form-field";
 
 export function MsGraphConfigFields() {
   const t = useTranslation();

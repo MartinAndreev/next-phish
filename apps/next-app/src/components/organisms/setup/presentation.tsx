@@ -3,9 +3,9 @@
 import { useRef } from "react";
 import { Form, Field, ErrorMessage, useFormikContext } from "formik";
 import type { FieldInputProps } from "formik";
-import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { FormField } from "@/src/components/molecules/form-field";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useTranslation } from "@/src/lib/i18n";
@@ -33,54 +33,24 @@ export function SetupPresentation({ error }: SetupPresentationProps) {
   return (
     <Form ref={formRef} className="flex flex-col gap-5">
       <div className="space-y-2">
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-zinc-100"
-        >
-          {t("common.name")}
-        </label>
-        <Field name="name">
-          {({ field }: { field: FieldInputProps<string> }) => (
-            <InputText
-              size="small"
-              id="name"
-              {...field}
-              invalid={Boolean(
-                errors.name && (touched.name || submitCount > 0),
-              )}
-              className={inputClassName}
-              placeholder="Admin"
-            />
-          )}
-        </Field>
+        <FormField
+          name="name"
+          label={t("common.name")}
+          placeholder="Admin"
+          inputClassName={inputClassName}
+        />
         <p className="text-xs text-zinc-400 mt-2">{t("setup.nameHint")}</p>
-        <ErrorMessage name="name" component="p" className={errorClassName} />
       </div>
 
       <div className="space-y-2">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-zinc-100"
-        >
-          {t("common.email")}
-        </label>
-        <Field name="email">
-          {({ field }: { field: FieldInputProps<string> }) => (
-            <InputText
-              size="small"
-              id="email"
-              {...field}
-              type="email"
-              invalid={Boolean(
-                errors.email && (touched.email || submitCount > 0),
-              )}
-              className={inputClassName}
-              placeholder="admin@example.com"
-            />
-          )}
-        </Field>
+        <FormField
+          name="email"
+          label={t("common.email")}
+          type="email"
+          placeholder="admin@example.com"
+          inputClassName={inputClassName}
+        />
         <p className="text-xs text-zinc-400 mt-2">{t("setup.emailHint")}</p>
-        <ErrorMessage name="email" component="p" className={errorClassName} />
       </div>
 
       <div className="grid grid-cols-2 gap-5">

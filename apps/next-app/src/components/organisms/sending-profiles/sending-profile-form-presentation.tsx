@@ -149,13 +149,13 @@ export function SendingProfileFormPresentation({
           }: {
             field: {
               value: boolean;
-              onChange: (e: { checked: boolean }) => void;
+              onChange: (val: boolean) => void;
               name: string;
             };
           }) => (
             <InputSwitch
               checked={field.value}
-              onChange={(e) => field.onChange({ checked: e.value })}
+              onChange={(e) => field.onChange(e.value)}
               inputId={field.name}
             />
           )}

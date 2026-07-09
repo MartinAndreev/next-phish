@@ -10,15 +10,15 @@ type ProfileFormValues = {
   providerConfig: Record<string, string>;
 };
 
-const AUTH_METHOD_OPTIONS = [
-  { label: "sendingProfiles.generalAuthBearer", value: "bearer" },
-  { label: "sendingProfiles.generalAuthHeader", value: "header" },
-];
-
 export function GeneralApiConfigFields() {
   const t = useTranslation();
   const { values } = useFormikContext<ProfileFormValues>();
   const authMethod = values.providerConfig?.authMethod ?? "";
+
+  const authMethodOptions = [
+    { label: t("sendingProfiles.generalAuthBearer"), value: "bearer" },
+    { label: t("sendingProfiles.generalAuthHeader"), value: "header" },
+  ];
 
   return (
     <>
@@ -55,7 +55,7 @@ export function GeneralApiConfigFields() {
           as={Dropdown}
           pt={selectSmall}
           name="providerConfig.authMethod"
-          options={AUTH_METHOD_OPTIONS}
+          options={authMethodOptions}
           className="w-full"
         />
       </div>

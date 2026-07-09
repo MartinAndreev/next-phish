@@ -1,7 +1,6 @@
 "use client";
 
 import { Field } from "formik";
-import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { useTranslation } from "@/src/lib/i18n";
 import { FormField } from "./form-field";
@@ -15,30 +14,10 @@ export function SmtpConfigFields() {
         name="providerConfig.host"
         label={t("sendingProfiles.smptHost")}
       />
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.smtpPort")}
-        </label>
-        <Field name="providerConfig.port">
-          {({
-            field,
-          }: {
-            field: {
-              value: string;
-              onChange: (e: { value: number | null }) => void;
-              name: string;
-            };
-          }) => (
-            <InputNumber
-              value={field.value ? Number(field.value) : null}
-              onValueChange={(e) => field.onChange({ value: e.value ?? null })}
-              name={field.name}
-              inputClassName="h-8 w-full !rounded-lg !border !border-white/10 !bg-brand-dark !text-white/80"
-              className="w-full"
-            />
-          )}
-        </Field>
-      </div>
+      <FormField
+        name="providerConfig.port"
+        label={t("sendingProfiles.smtpPort")}
+      />
       <FormField
         name="providerConfig.username"
         label={t("sendingProfiles.smtpUsername")}

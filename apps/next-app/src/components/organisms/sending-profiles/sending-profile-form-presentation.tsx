@@ -7,7 +7,7 @@ import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
 import { MAIL_PROVIDER_TYPES } from "@next-phish/shared";
 import { selectSmall } from "@/src/components/ui/theme-constants";
-import { FormField } from "./form-field";
+import { FormField } from "@/src/components/molecules/form-field";
 import { SmtpConfigFields } from "./smtp-config-fields";
 import { MsGraphConfigFields } from "./ms-graph-config-fields";
 import { AwsSesConfigFields } from "./aws-ses-config-fields";

@@ -1,6 +1,7 @@
 "use client";
 
 import { Field, ErrorMessage, useFormikContext } from "formik";
+import type { FieldInputProps } from "formik";
 import { InputText } from "primereact/inputtext";
 
 const errorCls = "mt-1 text-xs text-red-400";
@@ -12,6 +13,8 @@ interface FormFieldProps {
   type?: string;
   autoComplete?: string;
   className?: string;
+  inputClassName?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function FormField({
@@ -21,6 +24,8 @@ export function FormField({
   type,
   autoComplete,
   className,
+  inputClassName,
+  onChange,
 }: FormFieldProps) {
   const { errors, touched, submitCount } =
     useFormikContext<Record<string, unknown>>();
@@ -34,17 +39,24 @@ export function FormField({
       >
         {label}
       </label>
-      <Field
-        as={InputText}
-        id={name}
-        name={name}
-        size="small"
-        type={type}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        className={`w-full ${className ?? ""}`}
-        invalid={hasError}
-      />
+      <Field name={name}>
+        {({ field }: { field: FieldInputProps<string> }) => (
+          <InputText
+            {...field}
+            id={name}
+            size="small"
+            type={type}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            className={`w-full ${inputClassName ?? ""} ${className ?? ""}`}
+            invalid={hasError}
+            onChange={(e) => {
+              field.onChange(e);
+              onChange?.(e);
+            }}
+          />
+        )}
+      </Field>
       <ErrorMessage name={name} component="p" className={errorCls} />
     </div>
   );

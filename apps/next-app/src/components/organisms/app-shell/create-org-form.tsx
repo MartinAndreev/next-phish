@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import type { FieldInputProps } from "formik";
-import { InputText } from "primereact/inputtext";
+import { Formik, Form } from "formik";
 import { Button } from "primereact/button";
+import { FormField } from "@/src/components/molecules/form-field";
 import { FormMessage } from "@/src/components/atoms/form-message";
-import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { createOrganizationSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SlugField } from "@/src/components/atoms/slug-field";
@@ -47,37 +45,18 @@ export function CreateOrgForm({
     >
       {({ setFieldValue, values }) => (
         <Form className="flex flex-col gap-4 mt-5">
-          <div className="space-y-2">
-            <label
-              htmlFor="org-name"
-              className="block text-sm font-medium text-zinc-100"
-            >
-              {t("organizations.organizationName")}
-            </label>
-            <Field name="name">
-              {({ field }: { field: FieldInputProps<string> }) => (
-                <InputText
-                  size="small"
-                  id="org-name"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    const newSlug = slugify(e.target.value);
-                    if (!values.slug || values.slug === slugify(values.name)) {
-                      setFieldValue("slug", newSlug);
-                    }
-                  }}
-                  className={inputClassName}
-                  placeholder="Acme Security"
-                />
-              )}
-            </Field>
-            <ErrorMessage
-              name="name"
-              component="p"
-              className={`${errorClassName} mt-2`}
-            />
-          </div>
+          <FormField
+            name="name"
+            label={t("organizations.organizationName")}
+            placeholder="Acme Security"
+            inputClassName={inputClassName}
+            onChange={(e) => {
+              const newSlug = slugify(e.target.value);
+              if (!values.slug || values.slug === slugify(values.name)) {
+                setFieldValue("slug", newSlug);
+              }
+            }}
+          />
 
           <SlugField onStatusChange={setSlugStatus} />
 

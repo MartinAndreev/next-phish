@@ -1,7 +1,6 @@
 "use client";
 
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import type { FieldInputProps } from "formik";
+import { Formik, Form } from "formik";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
@@ -9,8 +8,8 @@ import { authClient } from "@/src/lib/auth-client";
 import { updateProfileSchema } from "@next-phish/shared";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { SUPPORTED_LANGUAGES } from "@/src/lib/constants";
+import { FormField } from "@/src/components/molecules/form-field";
 import { FormMessage } from "@/src/components/atoms/form-message";
-import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { selectSmall } from "@/src/components/ui/theme-constants";
 import { useRouter } from "next/navigation";
@@ -82,30 +81,12 @@ export function GeneralTab({ user }: GeneralTabProps) {
     >
       {({ isSubmitting, setFieldValue, values }) => (
         <Form className="flex flex-col gap-5 max-w-lg">
-          <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-zinc-100"
-            >
-              {t("common.name")}
-            </label>
-            <Field name="name">
-              {({ field }: { field: FieldInputProps<string> }) => (
-                <InputText
-                  size="small"
-                  id="name"
-                  {...field}
-                  className={inputClassName}
-                  placeholder="Your name"
-                />
-              )}
-            </Field>
-            <ErrorMessage
-              name="name"
-              component="p"
-              className={errorClassName}
-            />
-          </div>
+          <FormField
+            name="name"
+            label={t("common.name")}
+            placeholder="Your name"
+            inputClassName={inputClassName}
+          />
 
           <div className="space-y-2">
             <label

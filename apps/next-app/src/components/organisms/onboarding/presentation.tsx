@@ -1,12 +1,10 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { Form, Field, ErrorMessage, useFormikContext } from "formik";
-import type { FieldInputProps } from "formik";
-import { InputText } from "primereact/inputtext";
+import { Form, useFormikContext } from "formik";
 import { Button } from "primereact/button";
+import { FormField } from "@/src/components/molecules/form-field";
 import { FormMessage } from "@/src/components/atoms/form-message";
-import { errorClassName } from "@/src/components/atoms/form-message.styles";
 import { SlugField } from "@/src/components/atoms/slug-field";
 import { slugify } from "@/src/lib/slugify";
 import { useTranslation } from "@/src/lib/i18n";
@@ -26,7 +24,7 @@ interface OnboardingValues {
 export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
   const t = useTranslation();
   const formRef = useRef<HTMLFormElement>(null);
-  const { errors, touched, submitCount, isSubmitting, values, setFieldValue } =
+  const { isSubmitting, values, setFieldValue } =
     useFormikContext<OnboardingValues>();
   const [slugStatus, setSlugStatus] = useState<
     "idle" | "checking" | "available" | "taken"
@@ -55,27 +53,12 @@ export function OnboardingPresentation({ error }: OnboardingPresentationProps) {
 
       <Form ref={formRef} className="flex flex-col gap-5">
         <div className="space-y-2">
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-zinc-100"
-          >
-            {t("onboarding.organizationName")}
-          </label>
-          <Field name="name">
-            {({ field }: { field: FieldInputProps<string> }) => (
-              <InputText
-                size="small"
-                id="name"
-                {...field}
-                invalid={Boolean(
-                  errors.name && (touched.name || submitCount > 0),
-                )}
-                className={inputClassName}
-                placeholder="Acme Security"
-              />
-            )}
-          </Field>
-          <ErrorMessage name="name" component="p" className={errorClassName} />
+          <FormField
+            name="name"
+            label={t("onboarding.organizationName")}
+            placeholder="Acme Security"
+            inputClassName={inputClassName}
+          />
         </div>
 
         <SlugField onStatusChange={setSlugStatus} />

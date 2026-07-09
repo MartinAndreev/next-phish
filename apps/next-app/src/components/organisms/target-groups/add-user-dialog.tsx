@@ -1,9 +1,9 @@
 "use client";
 
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
+import { FormField } from "@/src/components/molecules/form-field";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
@@ -60,54 +60,29 @@ export function AddUserDialog({
       >
         {({ isSubmitting }) => (
           <Form className="flex flex-col gap-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-zinc-300">
-                {t("targetGroups.email")} *
-              </label>
-              <Field
-                as={InputText}
-                size="small"
-                name="email"
-                type="email"
-                className="w-full"
-              />
-            </div>
+            <FormField
+              name="email"
+              label={`${t("targetGroups.email")} *`}
+              type="email"
+              placeholder="you@example.com"
+            />
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">
-                  {t("targetGroups.firstName")} *
-                </label>
-                <Field
-                  as={InputText}
-                  size="small"
-                  name="firstName"
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-300">
-                  {t("targetGroups.lastName")} *
-                </label>
-                <Field
-                  as={InputText}
-                  size="small"
-                  name="lastName"
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-zinc-300">
-                {t("targetGroups.position")}
-              </label>
-              <Field
-                as={InputText}
-                size="small"
-                name="position"
-                placeholder={t("targetGroups.positionPlaceholder")}
-                className="w-full"
+              <FormField
+                name="firstName"
+                label={`${t("targetGroups.firstName")} *`}
+                placeholder="John"
+              />
+              <FormField
+                name="lastName"
+                label={`${t("targetGroups.lastName")} *`}
+                placeholder="Doe"
               />
             </div>
+            <FormField
+              name="position"
+              label={t("targetGroups.position")}
+              placeholder={t("targetGroups.positionPlaceholder")}
+            />
             <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"

@@ -3,11 +3,13 @@
 import { Formik, Form } from "formik";
 import { Button } from "primereact/button";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
 import { SendingProfileFormPresentation } from "./sending-profile-form-presentation";
+import { TestEmailDialog } from "./test-email-dialog";
 import type { MailProviderType } from "@next-phish/backend";
 import { z } from "zod";
 
@@ -86,7 +88,7 @@ function serializeProviderConfig(
   return result;
 }
 
-function formatValidationError(err: unknown): string {
+export function formatValidationError(err: unknown): string {
   if (!err || typeof err !== "object") return "An unexpected error occurred";
 
   const anyErr = err as Record<string, unknown>;
@@ -110,6 +112,7 @@ export function SendingProfileFormContainer({
   const router = useRouter();
   const utils = trpc.useUtils();
   const { status, setError } = useFormStatus();
+  const [showTestDialog, setShowTestDialog] = useState(false);
 
   const { data: profile, isLoading } = trpc.mailSending.getById.useQuery(
     { id: profileId ?? "" },
@@ -178,37 +181,57 @@ export function SendingProfileFormContainer({
   const isEdit = Boolean(profileId);
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validate={toFormikValidation(formSchema)}
-      onSubmit={handleSubmit}
-      enableReinitialize
-    >
-      {({ isSubmitting }) => (
-        <Form className="flex flex-col gap-6">
-          <SendingProfileFormPresentation
-            error={status.type === "error" ? status.message : ""}
-            isEdit={isEdit}
-          />
+    <>
+      <Formik
+        initialValues={initialValues}
+        validate={toFormikValidation(formSchema)}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ isSubmitting, isValid }) => (
+          <Form className="flex flex-col gap-6">
+            <SendingProfileFormPresentation
+              error={status.type === "error" ? status.message : ""}
+              isEdit={isEdit}
+            />
 
-          <div className="flex justify-end gap-3">
-            <Button
-              size="small"
-              type="button"
-              label={t("common.cancel")}
-              severity="secondary"
-              onClick={() => router.push("/sending-profiles")}
-            />
-            <Button
-              size="small"
-              type="submit"
-              label={isEdit ? t("common.saveChanges") : t("common.create")}
-              loading={isSubmitting}
-              className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
-            />
-          </div>
-        </Form>
+            <div className="flex justify-end gap-3">
+              <Button
+                size="small"
+                type="button"
+                label={t("common.cancel")}
+                severity="secondary"
+                onClick={() => router.push("/sending-profiles")}
+              />
+              {isEdit && (
+                <Button
+                  size="small"
+                  type="button"
+                  label={t("sendingProfiles.testEmailSend")}
+                  outlined
+                  disabled={!isValid}
+                  onClick={() => setShowTestDialog(true)}
+                />
+              )}
+              <Button
+                size="small"
+                type="submit"
+                label={isEdit ? t("common.saveChanges") : t("common.create")}
+                loading={isSubmitting}
+                className="rounded-xl border-0 bg-(image:--brand-gradient) px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(41,184,255,0.25)]"
+              />
+            </div>
+          </Form>
+        )}
+      </Formik>
+
+      {isEdit && profileId && (
+        <TestEmailDialog
+          profileId={profileId}
+          visible={showTestDialog}
+          onHide={() => setShowTestDialog(false)}
+        />
       )}
-    </Formik>
+    </>
   );
 }

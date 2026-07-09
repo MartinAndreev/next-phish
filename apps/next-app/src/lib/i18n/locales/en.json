@@ -486,7 +486,15 @@
     "generalAuthMethod": "Auth method",
     "generalAuthBearer": "Bearer token",
     "generalAuthHeader": "Custom header",
-    "generalAuthHeaderName": "Header name"
+    "generalAuthHeaderName": "Header name",
+    "testEmailLabel": "Send test email",
+    "testEmailPlaceholder": "recipient@example.com",
+    "testEmailSend": "Send test",
+    "testEmailSending": "Sending...",
+    "testEmailSuccess": "Test email sent successfully",
+    "testEmailError": "Failed to send test email",
+    "testEmailDescription": "Enter an email address to send a test message and verify this sending profile is configured correctly.",
+    "testEmailRecipient": "Recipient email"
   },
   "consent": {
     "badge": "Authorization",

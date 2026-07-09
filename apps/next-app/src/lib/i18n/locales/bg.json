@@ -429,7 +429,15 @@
     "generalAuthMethod": "Метод за удостоверяване",
     "generalAuthBearer": "Bearer токен",
     "generalAuthHeader": "Потребителски хедър",
-    "generalAuthHeaderName": "Име на хедър"
+    "generalAuthHeaderName": "Име на хедър",
+    "testEmailLabel": "Изпрати тестов имейл",
+    "testEmailPlaceholder": "recipient@example.com",
+    "testEmailSend": "Изпрати тест",
+    "testEmailSending": "Изпращане...",
+    "testEmailSuccess": "Тестовият имейл е изпратен успешно",
+    "testEmailError": "Неуспешно изпращане на тестов имейл",
+    "testEmailDescription": "Въведете имейл адрес, за да изпратите тестово съобщение и да потвърдите, че профилът е конфигуриран правилно.",
+    "testEmailRecipient": "Получател"
   },
   "consent": {
     "badge": "Оторизация",

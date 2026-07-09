@@ -38,9 +38,8 @@ export function FormField({
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={[className ?? "w-full", hasError ? "border-red-500/50" : ""]
-          .join(" ")
-          .trim()}
+        className={`w-full ${className ?? ""}`}
+        invalid={hasError}
       />
       <ErrorMessage name={name} component="p" className={errorCls} />
     </div>

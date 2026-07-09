@@ -68,6 +68,41 @@ function valuesFromProfile(profile: {
   };
 }
 
+function serializeProviderConfig(
+  config: Record<string, string>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(config)) {
+    if (value === "true") {
+      result[key] = true;
+    } else if (value === "false") {
+      result[key] = false;
+    } else if (/^\d+$/.test(value)) {
+      result[key] = Number(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function formatValidationError(err: unknown): string {
+  if (!err || typeof err !== "object") return "An unexpected error occurred";
+
+  const anyErr = err as Record<string, unknown>;
+
+  const data = anyErr.data as Record<string, unknown> | undefined;
+  const issues = data?.zodError as
+    | Array<{ message: string; path: Array<string | number> }>
+    | undefined;
+
+  if (issues?.length) {
+    return issues.map((issue) => issue.message).join("; ");
+  }
+
+  return String(anyErr.message ?? "An unexpected error occurred");
+}
+
 export function SendingProfileFormContainer({
   profileId,
 }: SendingProfileFormContainerProps) {
@@ -86,7 +121,7 @@ export function SendingProfileFormContainer({
       utils.mailSending.list.invalidate();
       router.push("/sending-profiles");
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(formatValidationError(err)),
   });
 
   const updateMutation = trpc.mailSending.update.useMutation({
@@ -97,7 +132,7 @@ export function SendingProfileFormContainer({
       }
       router.push("/sending-profiles");
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => setError(formatValidationError(err)),
   });
 
   if (profileId && isLoading) {
@@ -115,6 +150,8 @@ export function SendingProfileFormContainer({
     : defaultFormValues();
 
   async function handleSubmit(values: ProfileFormValues) {
+    const config = serializeProviderConfig(values.providerConfig);
+
     if (profileId) {
       updateMutation.mutate({
         id: profileId,
@@ -123,7 +160,7 @@ export function SendingProfileFormContainer({
         fromEmail: values.fromEmail,
         replyToEmail: values.replyToEmail || undefined,
         isDefault: values.isDefault,
-        providerConfig: values.providerConfig,
+        providerConfig: config,
       });
     } else {
       createMutation.mutate({
@@ -133,7 +170,7 @@ export function SendingProfileFormContainer({
         fromEmail: values.fromEmail,
         replyToEmail: values.replyToEmail || undefined,
         isDefault: values.isDefault,
-        providerConfig: values.providerConfig,
+        providerConfig: config,
       });
     }
   }

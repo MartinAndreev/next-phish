@@ -1,12 +1,10 @@
 "use client";
 
-import { Field, ErrorMessage } from "formik";
+import { Field } from "formik";
 import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { useTranslation } from "@/src/lib/i18n";
 import { FormField } from "./form-field";
-
-const errorCls = "mt-1 text-xs text-red-400";
 
 export function SmtpConfigFields() {
   const t = useTranslation();
@@ -40,11 +38,6 @@ export function SmtpConfigFields() {
             />
           )}
         </Field>
-        <ErrorMessage
-          name="providerConfig.port"
-          component="p"
-          className={errorCls}
-        />
       </div>
       <FormField
         name="providerConfig.username"

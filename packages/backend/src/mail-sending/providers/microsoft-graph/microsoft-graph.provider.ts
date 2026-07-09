@@ -6,7 +6,7 @@ import type {
   SendMailResult,
   SendTestMailInput,
 } from "../mail-provider.types";
-import type { MailProvider } from "../mail-provider.interface";
+import { BaseMailProvider } from "../base-mail-provider";
 import {
   MicrosoftGraphProviderConfigSchema,
   type MicrosoftGraphProviderConfig,
@@ -34,7 +34,7 @@ const TOKEN_ENDPOINT = "https://login.microsoftonline.com";
 const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
 const SCOPE = "https://graph.microsoft.com/.default";
 
-export class MicrosoftGraphProvider implements MailProvider<MicrosoftGraphProviderConfig> {
+export class MicrosoftGraphProvider extends BaseMailProvider<MicrosoftGraphProviderConfig> {
   readonly type = MailProviderType.MICROSOFT_GRAPH;
   readonly capabilities = GRAPH_CAPABILITIES;
   readonly configSchema = MicrosoftGraphProviderConfigSchema;

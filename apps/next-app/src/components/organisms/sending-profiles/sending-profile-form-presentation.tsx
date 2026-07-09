@@ -5,6 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
+import { MailProviderType } from "@next-phish/backend";
 import { selectSmall } from "@/src/components/ui/theme-constants";
 import { FormField } from "./form-field";
 import { SmtpConfigFields } from "./smtp-config-fields";
@@ -31,16 +32,10 @@ type ProfileFormValues = {
   providerConfig: Record<string, string>;
 };
 
-const PROVIDER_OPTIONS = [
-  { label: "SMTP", value: "SMTP" },
-  { label: "Microsoft Graph", value: "MICROSOFT_GRAPH" },
-  { label: "AWS SES", value: "AWS_SES" },
-  { label: "SendGrid", value: "SENDGRID" },
-  { label: "Mailgun", value: "MAILGUN" },
-  { label: "Postmark", value: "POSTMARK" },
-  { label: "Resend", value: "RESEND" },
-  { label: "General API", value: "GENERAL_API" },
-];
+const PROVIDER_OPTIONS = Object.values(MailProviderType).map((value) => ({
+  label: value,
+  value,
+}));
 
 function ProviderConfigFields({ providerType }: { providerType: string }) {
   switch (providerType) {
@@ -81,13 +76,17 @@ export function SendingProfileFormPresentation({
         />
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="providerType"
+            className="mb-2 block text-sm font-medium text-zinc-300"
+          >
             {t("sendingProfiles.providerType")}
           </label>
           <Field
             as={Dropdown}
             pt={selectSmall}
             name="providerType"
+            inputId="providerType"
             options={PROVIDER_OPTIONS}
             className="w-full"
           />

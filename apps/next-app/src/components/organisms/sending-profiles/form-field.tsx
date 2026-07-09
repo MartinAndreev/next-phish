@@ -28,11 +28,15 @@ export function FormField({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-zinc-300">
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-medium text-zinc-300"
+      >
         {label}
       </label>
       <Field
         as={InputText}
+        id={name}
         name={name}
         size="small"
         type={type}

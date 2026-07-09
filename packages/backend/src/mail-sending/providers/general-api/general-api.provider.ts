@@ -4,9 +4,8 @@ import type {
   MailProviderCapabilities,
   SendMailInput,
   SendMailResult,
-  SendTestMailInput,
 } from "../mail-provider.types";
-import type { MailProvider } from "../mail-provider.interface";
+import { BaseMailProvider } from "../base-mail-provider";
 import {
   GeneralApiProviderConfigSchema,
   type GeneralApiProviderConfig,
@@ -40,7 +39,7 @@ interface GeneralApiRequestBody {
   }>;
 }
 
-export class GeneralApiProvider implements MailProvider<GeneralApiProviderConfig> {
+export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfig> {
   readonly type = MailProviderType.GENERAL_API;
   readonly capabilities = GENERAL_API_CAPABILITIES;
   readonly configSchema = GeneralApiProviderConfigSchema;
@@ -129,20 +128,6 @@ export class GeneralApiProvider implements MailProvider<GeneralApiProviderConfig
         errorMessage: message,
       };
     }
-  }
-
-  async sendTest(
-    config: GeneralApiProviderConfig,
-    input: SendTestMailInput,
-  ): Promise<SendMailResult> {
-    return this.send(config, {
-      fromName: "NextPhish Test",
-      fromEmail: input.toEmail,
-      to: [input.toEmail],
-      subject: "NextPhish API Provider Test",
-      html: "<p>This is a test email from NextPhish to verify the API provider configuration.</p>",
-      text: "This is a test email from NextPhish to verify the API provider configuration.",
-    });
   }
 
   private buildHeaders(

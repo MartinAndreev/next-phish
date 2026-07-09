@@ -8,6 +8,7 @@ export type {
   ConnectionTestResult,
 } from "./mail-provider.types";
 export type { MailProvider } from "./mail-provider.interface";
+export { BaseMailProvider } from "./base-mail-provider";
 export {
   SMTPProviderConfigSchema,
   SMTPProvider,

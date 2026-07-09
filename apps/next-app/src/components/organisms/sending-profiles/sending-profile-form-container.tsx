@@ -8,32 +8,20 @@ import { toFormikValidation } from "@/src/lib/to-formik-validation";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
+import { formatValidationError } from "@/src/lib/format-validation-error";
 import { SendingProfileFormPresentation } from "./sending-profile-form-presentation";
 import { TestEmailDialog } from "./test-email-dialog";
 import type { MailProviderType } from "@next-phish/backend";
-import { z } from "zod";
-
-const formSchema = z.object({
-  name: z.string().trim().min(1, "Profile name is required"),
-  providerType: z.string().min(1, "Provider type is required"),
-  fromName: z.string().trim().min(1, "From name is required"),
-  fromEmail: z.string().email("From email must be valid"),
-  replyToEmail: z
-    .string()
-    .email()
-    .optional()
-    .transform((v) => (v === "" ? undefined : v)),
-  isDefault: z.boolean(),
-  providerConfig: z.record(z.string()),
-});
-
-type ProfileFormValues = z.infer<typeof formSchema>;
+import {
+  sendingProfileFormSchema,
+  type SendingProfileFormValues,
+} from "@next-phish/shared";
 
 interface SendingProfileFormContainerProps {
   profileId?: string;
 }
 
-function defaultFormValues(): ProfileFormValues {
+function defaultFormValues(): SendingProfileFormValues {
   return {
     name: "",
     providerType: "",
@@ -53,7 +41,7 @@ function valuesFromProfile(profile: {
   replyToEmail: string | null;
   isDefault: boolean;
   providerConfig: Record<string, unknown>;
-}): ProfileFormValues {
+}): SendingProfileFormValues {
   const config: Record<string, string> = {};
   for (const [key, value] of Object.entries(profile.providerConfig)) {
     if (value === null || value === undefined) continue;
@@ -86,23 +74,6 @@ function serializeProviderConfig(
     }
   }
   return result;
-}
-
-export function formatValidationError(err: unknown): string {
-  if (!err || typeof err !== "object") return "An unexpected error occurred";
-
-  const anyErr = err as Record<string, unknown>;
-
-  const data = anyErr.data as Record<string, unknown> | undefined;
-  const issues = data?.zodError as
-    | Array<{ message: string; path: Array<string | number> }>
-    | undefined;
-
-  if (issues?.length) {
-    return issues.map((issue) => issue.message).join("; ");
-  }
-
-  return String(anyErr.message ?? "An unexpected error occurred");
 }
 
 export function SendingProfileFormContainer({
@@ -152,7 +123,7 @@ export function SendingProfileFormContainer({
     ? valuesFromProfile(profile)
     : defaultFormValues();
 
-  async function handleSubmit(values: ProfileFormValues) {
+  async function handleSubmit(values: SendingProfileFormValues) {
     const config = serializeProviderConfig(values.providerConfig);
 
     if (profileId) {
@@ -184,7 +155,7 @@ export function SendingProfileFormContainer({
     <>
       <Formik
         initialValues={initialValues}
-        validate={toFormikValidation(formSchema)}
+        validate={toFormikValidation(sendingProfileFormSchema)}
         onSubmit={handleSubmit}
         enableReinitialize
       >

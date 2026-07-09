@@ -6,9 +6,8 @@ import type {
   MailProviderCapabilities,
   SendMailInput,
   SendMailResult,
-  SendTestMailInput,
 } from "../mail-provider.types";
-import type { MailProvider } from "../mail-provider.interface";
+import { BaseMailProvider } from "../base-mail-provider";
 import {
   SMTPProviderConfigSchema,
   type SMTPProviderConfig,
@@ -28,7 +27,7 @@ const SMTP_CAPABILITIES: MailProviderCapabilities = {
   supportsRateLimitInfo: false,
 };
 
-export class SMTPProvider implements MailProvider<SMTPProviderConfig> {
+export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
   readonly type = MailProviderType.SMTP;
   readonly capabilities = SMTP_CAPABILITIES;
   readonly configSchema =
@@ -100,20 +99,6 @@ export class SMTPProvider implements MailProvider<SMTPProviderConfig> {
     } finally {
       transporter.close();
     }
-  }
-
-  async sendTest(
-    config: SMTPProviderConfig,
-    input: SendTestMailInput,
-  ): Promise<SendMailResult> {
-    return this.send(config, {
-      fromName: "NextPhish Test",
-      fromEmail: input.toEmail,
-      to: [input.toEmail],
-      subject: "NextPhish SMTP Test",
-      html: "<p>This is a test email from NextPhish to verify SMTP configuration.</p>",
-      text: "This is a test email from NextPhish to verify SMTP configuration.",
-    });
   }
 
   private createTransporter(config: SMTPProviderConfig): Transporter {

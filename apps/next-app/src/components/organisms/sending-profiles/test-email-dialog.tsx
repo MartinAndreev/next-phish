@@ -7,7 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { useTranslation } from "@/src/lib/i18n";
 import { trpc } from "@/src/lib/trpc";
 import { FormMessage } from "@/src/components/atoms/form-message";
-import { formatValidationError } from "./sending-profile-form-container";
+import { formatValidationError } from "@/src/lib/format-validation-error";
 
 interface TestEmailDialogProps {
   profileId: string;
@@ -71,10 +71,14 @@ export function TestEmailDialog({
           {t("sendingProfiles.testEmailDescription")}
         </p>
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="testEmail"
+            className="mb-2 block text-sm font-medium text-zinc-300"
+          >
             {t("sendingProfiles.testEmailRecipient")}
           </label>
           <InputText
+            id="testEmail"
             size="small"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}

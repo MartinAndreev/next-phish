@@ -36,13 +36,17 @@ export function GeneralApiConfigFields() {
         placeholder="https://api.example.com/send"
       />
       <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
+        <label
+          htmlFor="providerConfig.authMethod"
+          className="mb-2 block text-sm font-medium text-zinc-300"
+        >
           {t("sendingProfiles.generalAuthMethod")}
         </label>
         <Field
           as={Dropdown}
           pt={selectSmall}
           name="providerConfig.authMethod"
+          inputId="providerConfig.authMethod"
           options={authMethodOptions}
           className="w-full"
         />

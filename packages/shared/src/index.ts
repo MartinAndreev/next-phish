@@ -75,6 +75,8 @@ export {
   mcpImportPageFromUrlSchema,
   mcpListFilesSchema,
   mcpGetJobStatusSchema,
+  mcpCreateSendingProfileSchema,
+  mcpUpdateSendingProfileSchema,
 } from "./schemas";
 
 export {
@@ -100,6 +102,9 @@ export type {
   CreateTargetGroupData,
   UpdateTargetGroupData,
 } from "./types";
+
+export { sendingProfileFormSchema } from "./schemas";
+export type { SendingProfileFormValues } from "./schemas";
 
 export {
   PERMISSION_GROUPS,

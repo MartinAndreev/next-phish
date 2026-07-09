@@ -61,13 +61,26 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     host: "127.0.0.1",
   });
   await server.start();
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Wait longer for the server to be ready in CI environments
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const url = `postgresql://postgres:postgres@127.0.0.1:${port}/postgres?sslmode=disable`;
   const prisma = new PrismaClient({
     datasources: { db: { url } },
   });
-  await prisma.$connect();
+
+  // Retry connection with backoff
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await prisma.$connect();
+      break;
+    } catch (err) {
+      retries--;
+      if (retries === 0) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
 
   return {
     prisma,

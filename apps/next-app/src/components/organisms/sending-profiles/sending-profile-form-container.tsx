@@ -11,10 +11,10 @@ import { trpc } from "@/src/lib/trpc";
 import { formatValidationError } from "@/src/lib/format-validation-error";
 import { SendingProfileFormPresentation } from "./sending-profile-form-presentation";
 import { TestEmailDialog } from "./test-email-dialog";
-import type { MailProviderType } from "@next-phish/backend";
 import {
   sendingProfileFormSchema,
   type SendingProfileFormValues,
+  type MailProviderType,
 } from "@next-phish/shared";
 
 interface SendingProfileFormContainerProps {

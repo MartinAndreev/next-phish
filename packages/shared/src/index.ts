@@ -103,6 +103,9 @@ export type {
   UpdateTargetGroupData,
 } from "./types";
 
+export { MAIL_PROVIDER_TYPES } from "./types";
+export type { MailProviderType } from "./types";
+
 export { sendingProfileFormSchema } from "./schemas";
 export type { SendingProfileFormValues } from "./schemas";
 

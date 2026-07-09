@@ -5,7 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
-import { MailProviderType } from "@next-phish/backend";
+import { MAIL_PROVIDER_TYPES } from "@next-phish/shared";
 import { selectSmall } from "@/src/components/ui/theme-constants";
 import { FormField } from "./form-field";
 import { SmtpConfigFields } from "./smtp-config-fields";
@@ -32,7 +32,7 @@ type ProfileFormValues = {
   providerConfig: Record<string, string>;
 };
 
-const PROVIDER_OPTIONS = Object.values(MailProviderType).map((value) => ({
+const PROVIDER_OPTIONS = MAIL_PROVIDER_TYPES.map((value) => ({
   label: value,
   value,
 }));

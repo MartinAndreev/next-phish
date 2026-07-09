@@ -27,3 +27,6 @@ export type {
   CreateTargetGroupData,
   UpdateTargetGroupData,
 } from "./target-group.types";
+
+export { MAIL_PROVIDER_TYPES } from "./mail-provider.types";
+export type { MailProviderType } from "./mail-provider.types";

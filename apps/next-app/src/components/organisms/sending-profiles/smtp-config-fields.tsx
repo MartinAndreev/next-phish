@@ -1,27 +1,22 @@
 "use client";
 
-import { Field } from "formik";
-import { InputText } from "primereact/inputtext";
+import { Field, ErrorMessage } from "formik";
 import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { useTranslation } from "@/src/lib/i18n";
+import { FormField } from "./form-field";
+
+const errorCls = "mt-1 text-xs text-red-400";
 
 export function SmtpConfigFields() {
   const t = useTranslation();
 
   return (
     <>
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.smptHost")}
-        </label>
-        <Field
-          as={InputText}
-          name="providerConfig.host"
-          size="small"
-          className="w-full"
-        />
-      </div>
+      <FormField
+        name="providerConfig.host"
+        label={t("sendingProfiles.smptHost")}
+      />
       <div>
         <label className="mb-2 block text-sm font-medium text-zinc-300">
           {t("sendingProfiles.smtpPort")}
@@ -45,32 +40,23 @@ export function SmtpConfigFields() {
             />
           )}
         </Field>
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.smtpUsername")}
-        </label>
-        <Field
-          as={InputText}
-          name="providerConfig.username"
-          size="small"
-          className="w-full"
-          autoComplete="off"
+        <ErrorMessage
+          name="providerConfig.port"
+          component="p"
+          className={errorCls}
         />
       </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.smtpPassword")}
-        </label>
-        <Field
-          as={InputText}
-          name="providerConfig.password"
-          type="password"
-          size="small"
-          className="w-full"
-          autoComplete="off"
-        />
-      </div>
+      <FormField
+        name="providerConfig.username"
+        label={t("sendingProfiles.smtpUsername")}
+        autoComplete="off"
+      />
+      <FormField
+        name="providerConfig.password"
+        label={t("sendingProfiles.smtpPassword")}
+        type="password"
+        autoComplete="off"
+      />
       <div className="flex flex-wrap gap-6">
         <div className="flex items-center gap-2">
           <Field name="providerConfig.secure">

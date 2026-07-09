@@ -1,10 +1,12 @@
 "use client";
 
-import { Field, useFormikContext } from "formik";
-import { InputText } from "primereact/inputtext";
+import { Field, ErrorMessage, useFormikContext } from "formik";
 import { Dropdown } from "primereact/dropdown";
 import { useTranslation } from "@/src/lib/i18n";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { FormField } from "./form-field";
+
+const errorCls = "mt-1 text-xs text-red-400";
 
 type ProfileFormValues = {
   providerConfig: Record<string, string>;
@@ -22,31 +24,17 @@ export function GeneralApiConfigFields() {
 
   return (
     <>
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.generalApiKey")}
-        </label>
-        <Field
-          as={InputText}
-          name="providerConfig.apiKey"
-          type="password"
-          size="small"
-          className="w-full"
-          autoComplete="off"
-        />
-      </div>
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.generalSendEndpoint")}
-        </label>
-        <Field
-          as={InputText}
-          name="providerConfig.sendEndpoint"
-          size="small"
-          className="w-full"
-          placeholder="https://api.example.com/send"
-        />
-      </div>
+      <FormField
+        name="providerConfig.apiKey"
+        label={t("sendingProfiles.generalApiKey")}
+        type="password"
+        autoComplete="off"
+      />
+      <FormField
+        name="providerConfig.sendEndpoint"
+        label={t("sendingProfiles.generalSendEndpoint")}
+        placeholder="https://api.example.com/send"
+      />
       <div>
         <label className="mb-2 block text-sm font-medium text-zinc-300">
           {t("sendingProfiles.generalAuthMethod")}
@@ -58,20 +46,18 @@ export function GeneralApiConfigFields() {
           options={authMethodOptions}
           className="w-full"
         />
+        <ErrorMessage
+          name="providerConfig.authMethod"
+          component="p"
+          className={errorCls}
+        />
       </div>
       {authMethod === "header" && (
-        <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
-            {t("sendingProfiles.generalAuthHeaderName")}
-          </label>
-          <Field
-            as={InputText}
-            name="providerConfig.authHeaderName"
-            size="small"
-            className="w-full"
-            placeholder="X-API-Key"
-          />
-        </div>
+        <FormField
+          name="providerConfig.authHeaderName"
+          label={t("sendingProfiles.generalAuthHeaderName")}
+          placeholder="X-API-Key"
+        />
       )}
     </>
   );

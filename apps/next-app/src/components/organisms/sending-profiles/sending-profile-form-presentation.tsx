@@ -1,12 +1,12 @@
 "use client";
 
 import { Field, useFormikContext } from "formik";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { useTranslation } from "@/src/lib/i18n";
 import { selectSmall } from "@/src/components/ui/theme-constants";
+import { FormField } from "./form-field";
 import { SmtpConfigFields } from "./smtp-config-fields";
 import { MsGraphConfigFields } from "./ms-graph-config-fields";
 import { AwsSesConfigFields } from "./aws-ses-config-fields";
@@ -74,18 +74,11 @@ export function SendingProfileFormPresentation({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
-            {t("sendingProfiles.name")}
-          </label>
-          <Field
-            as={InputText}
-            name="name"
-            size="small"
-            placeholder={t("sendingProfiles.namePlaceholder")}
-            className="w-full"
-          />
-        </div>
+        <FormField
+          name="name"
+          label={t("sendingProfiles.name")}
+          placeholder={t("sendingProfiles.namePlaceholder")}
+        />
 
         <div>
           <label className="mb-2 block text-sm font-medium text-zinc-300">
@@ -102,64 +95,26 @@ export function SendingProfileFormPresentation({
       </div>
 
       <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
-            {t("sendingProfiles.fromName")}
-          </label>
-          <Field
-            as={InputText}
-            name="fromName"
-            size="small"
-            placeholder={t("sendingProfiles.fromNamePlaceholder")}
-            className="w-full"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
-            {t("sendingProfiles.fromEmail")}
-          </label>
-          <Field
-            as={InputText}
-            name="fromEmail"
-            size="small"
-            placeholder={t("sendingProfiles.fromEmailPlaceholder")}
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-zinc-300">
-          {t("sendingProfiles.replyToEmail")}
-        </label>
-        <Field
-          as={InputText}
-          name="replyToEmail"
-          size="small"
-          placeholder={t("sendingProfiles.replyToEmailPlaceholder")}
-          className="w-full"
+        <FormField
+          name="fromName"
+          label={t("sendingProfiles.fromName")}
+          placeholder={t("sendingProfiles.fromNamePlaceholder")}
+        />
+        <FormField
+          name="fromEmail"
+          label={t("sendingProfiles.fromEmail")}
+          placeholder={t("sendingProfiles.fromEmailPlaceholder")}
         />
       </div>
 
+      <FormField
+        name="replyToEmail"
+        label={t("sendingProfiles.replyToEmail")}
+        placeholder={t("sendingProfiles.replyToEmailPlaceholder")}
+      />
+
       <div className="flex items-center gap-2">
-        <Field name="isDefault">
-          {({
-            field,
-          }: {
-            field: {
-              value: boolean;
-              onChange: (val: boolean) => void;
-              name: string;
-            };
-          }) => (
-            <InputSwitch
-              checked={field.value}
-              onChange={(e) => field.onChange(e.value)}
-              inputId={field.name}
-            />
-          )}
-        </Field>
+        <Field name="isDefault" as={InputSwitch} type="checkbox" />
         <label htmlFor="isDefault" className="text-sm text-zinc-300">
           {t("sendingProfiles.isDefault")}
         </label>

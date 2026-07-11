@@ -10,6 +10,7 @@ import {
   pageStatusSchema,
 } from "./page.schema";
 import { listFilesSchema } from "./file.schema";
+import { createTargetGroupSchema } from "./target-group.schema";
 
 const organizationId = z.string().describe("The organization ID.");
 
@@ -118,4 +119,8 @@ export const mcpUpdateSendingProfileSchema = z.object({
   headers: z.record(z.string()).optional().nullable(),
   providerConfig: z.record(z.unknown()).optional(),
   isDefault: z.boolean().optional(),
+});
+
+export const mcpCreateTargetGroupSchema = createTargetGroupSchema.extend({
+  organizationId,
 });

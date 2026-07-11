@@ -77,6 +77,7 @@ export {
   mcpGetJobStatusSchema,
   mcpCreateSendingProfileSchema,
   mcpUpdateSendingProfileSchema,
+  mcpCreateTargetGroupSchema,
 } from "./schemas";
 
 export {

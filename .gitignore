@@ -39,3 +39,8 @@ next-env.d.ts
 
 .idea/
 .opencode/
+
+# Conduit local runtime state
+.conduit/cache/
+.conduit/worktrees/
+.conduit/runs/

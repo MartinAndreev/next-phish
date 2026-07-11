@@ -20,6 +20,10 @@ Check `docs/architecture.md` for the full stack and structure.
 
 See [docs/setup.md](docs/setup.md) for local environment setup.
 
+## MCP Server
+
+NextPhish includes an MCP (Model Context Protocol) server that lets AI assistants like Claude and Cursor interact with your instance through natural language. See [docs/mcp-setup.md](docs/mcp-setup.md) for setup instructions and the full tool reference.
+
 ## License
 
 MIT

@@ -8,6 +8,7 @@ import {
   registerFileTools,
   registerJobTools,
   registerSendingProfileTools,
+  registerTargetGroupTools,
 } from "./tools";
 
 const redisHost = process.env.REDIS_HOST || "localhost";
@@ -50,6 +51,7 @@ export async function handleMcpRequest(req: Request) {
         registerFileTools(server, getCaller);
         registerJobTools(server, getCaller);
         registerSendingProfileTools(server, getCaller);
+        registerTargetGroupTools(server, getCaller);
       },
       { serverInfo: { name: "next-phish", version: "1.0.0" } },
       {

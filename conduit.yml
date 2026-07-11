@@ -1,0 +1,53 @@
+version: 1
+specsDir: specs
+stateDir: .conduit
+roles:
+  architect:
+    runner: codex
+    mode: primary
+    model: gpt-5.6-terra
+    skill:
+      source: file:.conduit/roles/architect.md
+  researcher:
+    runner: opencode
+    mode: subagent
+    readOnly: true
+    model: opencode-go/mimo-v2.5-pro
+    skill:
+      source: file:.conduit/roles/researcher.md
+  frontend:
+    runner: opencode
+    mode: subagent
+    owns: [apps/web, packages/ui]
+    model: opencode-go/mimo-v2.5-pro
+    skill:
+      source: file:.conduit/roles/frontend.md
+  backend:
+    runner: opencode
+    mode: subagent
+    owns: [apps/api, packages/contracts]
+    model: opencode-go/mimo-v2.5-pro
+    skill:
+      source: file:.conduit/roles/backend.md
+  qa:
+    runner: opencode
+    mode: subagent
+    owns: [tests, e2e]
+    model: opencode-go/mimo-v2.5-pro
+    skill:
+      source: file:.conduit/roles/qa.md
+  reviewer:
+    runner: codex
+    mode: primary
+    model: opencode-go/mimo-v2.5-pro
+    readOnly: true
+    skill:
+      source: file:.conduit/roles/reviewer.md
+  documentation:
+    description: "Writes and verifies user, operator, and developer documentation."
+    runner: opencode
+    mode: subagent
+    model: opencode-go/mimo-v2.5-pro
+    owns: [docs, README.md]
+    skill:
+      source: file:.conduit/roles/documentation.md

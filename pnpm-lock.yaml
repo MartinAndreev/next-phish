@@ -19,6 +19,9 @@ importers:
       "@hkdobrev/run-if-changed":
         specifier: ^0.6
         version: 0.6.3(typescript@6.0.3)
+      conduit-orchestrator:
+        specifier: file:/tmp/conduit-orchestrator-0.1.9.tgz
+        version: file:../../../../../tmp/conduit-orchestrator-0.1.9.tgz(typescript@6.0.3)(web-tree-sitter@0.25.10)
       eslint:
         specifier: ^9
         version: 9.39.4(jiti@2.7.0)
@@ -1881,6 +1884,80 @@ packages:
       }
     engines: { node: ">=14" }
 
+  "@opentui/core-darwin-arm64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-p5+7AAxpxGuDGagyQfewKtmTFnN7THvTVY4FyKqUtJomNaHdQXPHztapNNzMx0DGWbwOUbVKzpL+yc3CZY3chQ==,
+      }
+    cpu: [arm64]
+    os: [darwin]
+
+  "@opentui/core-darwin-x64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-+fh0vEUE0lwVC7RW5ijYLRlTLp5NfvCRj8SzxDVd7IL2j2ssB6YXcfIbXq2EW7UGnrejwPRXf1tgUrIXW9KmOw==,
+      }
+    cpu: [x64]
+    os: [darwin]
+
+  "@opentui/core-linux-arm64-musl@0.4.3":
+    resolution:
+      {
+        integrity: sha512-8p8g8/AEq/xFGpQ7XcIFKcAqjc0QwsZcv+Ll9RbCDpUA56FGH6jfLDir0KYTNTgYXJTIrBIENI9K46VuxMUMQA==,
+      }
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  "@opentui/core-linux-arm64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-gl6qA5QJy6u8Cbt7gOtHbhhfMZ4qQDb0kEwFXHcMGmbnKzz4OHoq74D6tNjyvSQB9saoC7C6C0tvn2DcJOuNog==,
+      }
+    cpu: [arm64]
+    os: [linux]
+
+  "@opentui/core-linux-x64-musl@0.4.3":
+    resolution:
+      {
+        integrity: sha512-/QiFpCrpU2O7vy8QYmLIQYbvAtKDgmqcVjR7dGtqSzkiQk3ktNJoo5RozG7ueXnjung1Wp0nKldKxo2Csg/OrA==,
+      }
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  "@opentui/core-linux-x64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-dXpJitiZdYE3hq2Pvx6e9I0uPQSOcnaLLp1pDgWAHv+3kvKSHEX//9Yr/pV/Ua6qqT7p+2D/K4vXNap/NKVo2w==,
+      }
+    cpu: [x64]
+    os: [linux]
+
+  "@opentui/core-win32-arm64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-Mx2zuOjrhm/z2SDS6RExIyjP/SnN/8QhhagxURUw0jQi/NssGSeAllu1cBAFFnhobJL5QLTE4FU4CRhUK9svgg==,
+      }
+    cpu: [arm64]
+    os: [win32]
+
+  "@opentui/core-win32-x64@0.4.3":
+    resolution:
+      {
+        integrity: sha512-NuoqvWKGXaYnmlqvu7Gg2lLI6yVMnS9OfWBvxp+7Q+McSgHFSTQmYBXaPpvQ8HikpQXE1nCeMPtuSG4PdZHe2w==,
+      }
+    cpu: [x64]
+    os: [win32]
+
+  "@opentui/core@0.4.3":
+    resolution:
+      {
+        integrity: sha512-rrJfAk13tALDqldYjhc78eWQ+aKq1iknJgffIOg3OwyZoqQo+p6gtuqyhmWvXIfQzlNUbpgpCPcxbXlhMnlaHQ==,
+      }
+    peerDependencies:
+      web-tree-sitter: 0.25.10
+
   "@oxc-project/types@0.137.0":
     resolution:
       {
@@ -2149,6 +2226,7 @@ packages:
         integrity: sha512-KT0ZuiAIOEHwrNaJm8XUksROGNffV58Sv1GLW2M0Ztsg05kmKlIfQ9YsbQY9x7nu6CXPS6AI+YzZWJ5jsnZW1w==,
       }
     engines: { node: ">=16.0.0" }
+    deprecated: "Moved to the Silex monorepo: https://short.silex.me/code (details and how to help: https://github.com/GrapesJS/grapesjs/discussions/6779)"
     peerDependencies:
       backbone: "*"
       grapesjs: ">=0.19.0 <0.23.0"
@@ -3312,6 +3390,14 @@ packages:
       redis:
         optional: true
 
+  bun-ffi-structs@0.2.4:
+    resolution:
+      {
+        integrity: sha512-AJzsqoVFs1KBbJbWHIYrVZLDC3NhTqqh25awRXqzoLzmBAKr5oqk6+CwuYHAekKx+VBCYVohBoKuRq40dV+TYg==,
+      }
+    peerDependencies:
+      typescript: ^5
+
   bytes@3.1.2:
     resolution:
       {
@@ -3431,6 +3517,13 @@ packages:
       }
     engines: { node: ">=18" }
 
+  cli-spinners@3.4.0:
+    resolution:
+      {
+        integrity: sha512-bXfOC4QcT1tKXGorxL3wbJm6XJPDqEnij2gQ2m7ESQuE+/z9YFIWnl/5RpTiKWbMq3EVKR4fRLJGn6DVfu0mpw==,
+      }
+    engines: { node: ">=18.20" }
+
   cli-truncate@4.0.0:
     resolution:
       {
@@ -3503,6 +3596,13 @@ packages:
       }
     engines: { node: ">=16" }
 
+  commander@14.0.3:
+    resolution:
+      {
+        integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==,
+      }
+    engines: { node: ">=20" }
+
   compare-func@2.0.0:
     resolution:
       {
@@ -3514,6 +3614,16 @@ packages:
       {
         integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==,
       }
+
+  conduit-orchestrator@file:../../../../../tmp/conduit-orchestrator-0.1.9.tgz:
+    resolution:
+      {
+        integrity: sha512-ziDu1K5zR/0/BEHr+YEM6dAIwWumgPNFsqsX5G7khEkk5rQFtvfAB7FDlosqVmk5LIz09QoCzr9nRyPjwqw1wA==,
+        tarball: file:../../../../../tmp/conduit-orchestrator-0.1.9.tgz,
+      }
+    version: 0.1.9
+    engines: { node: ">=22" }
+    hasBin: true
 
   confbox@0.2.4:
     resolution:
@@ -3777,6 +3887,13 @@ packages:
         integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==,
       }
     engines: { node: ">=8" }
+
+  diff@9.0.0:
+    resolution:
+      {
+        integrity: sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==,
+      }
+    engines: { node: ">=0.3.1" }
 
   doctrine@2.1.0:
     resolution:
@@ -4969,6 +5086,13 @@ packages:
       }
     engines: { node: ">=0.10.0" }
 
+  is-interactive@2.0.0:
+    resolution:
+      {
+        integrity: sha512-qP1vozQRI+BMOPcjFzrjXuQvdak2pHNUMZoeG2eRbiSqyvbEf/wQtEOTOX1guk6E3t36RkaqiSt8A/6YElNxLQ==,
+      }
+    engines: { node: ">=12" }
+
   is-map@2.0.3:
     resolution:
       {
@@ -5468,6 +5592,13 @@ packages:
         integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==,
       }
 
+  log-symbols@7.0.1:
+    resolution:
+      {
+        integrity: sha512-ja1E3yCr9i/0hmBVaM0bfwDjnGy8I/s6PP4DFp+yP+a+mrHO4Rm7DtmnqROTUkHIkqffC84YY7AeqX6oFk0WFg==,
+      }
+    engines: { node: ">=18" }
+
   log-update@6.1.0:
     resolution:
       {
@@ -5513,6 +5644,14 @@ packages:
         integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==,
       }
     engines: { node: ">=10" }
+
+  marked@17.0.1:
+    resolution:
+      {
+        integrity: sha512-boeBdiS0ghpWcSwoNm/jJBwdpFaMnZWRzjA6SkUMYb40SVaN1x7mmfGKp0jvexGcx+7y2La5zRZsYFZI6Qpypg==,
+      }
+    engines: { node: ">= 20" }
+    hasBin: true
 
   math-intrinsics@1.1.0:
     resolution:
@@ -5851,6 +5990,13 @@ packages:
         integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==,
       }
     engines: { node: ">= 0.8.0" }
+
+  ora@9.4.1:
+    resolution:
+      {
+        integrity: sha512-6VlU9MLXbjVQD04AZCMX28hVtA5bUoadvUqO76MUCVA0ilwJbMiHsITRPfyVm6p/BC0Av/BXMujx39WCe1LEqw==,
+      }
+    engines: { node: ">=20" }
 
   own-keys@1.0.1:
     resolution:
@@ -6542,6 +6688,13 @@ packages:
         integrity: sha512-Rq7ybcX2RuC55r9oaPVEW7/xu3tj8u4GeBYHBWCychFtzMIr86A7e3PPEBPT37sHStKX3+TiX/Fr/ACmJLVlLQ==,
       }
 
+  stdin-discarder@0.3.2:
+    resolution:
+      {
+        integrity: sha512-eCPu1qRxPVkl5605OTWF8Wz40b4Mf45NY5LQmVPQ599knfs5QhASUm9GbJ5BDMDOXgrnh0wyEdvzmL//YMlw0A==,
+      }
+    engines: { node: ">=18" }
+
   stop-iteration-iterator@1.1.0:
     resolution:
       {
@@ -6610,6 +6763,13 @@ packages:
         integrity: sha512-UXSH262CSZY1tfu3G3Secr6uGLCFVPMhIqHjlgCUtCCcgihYc/xKs9djMTMUOb2j1mVSeU8EU6NWc/iQKU6Gfg==,
       }
     engines: { node: ">= 0.4" }
+
+  strip-ansi@7.1.2:
+    resolution:
+      {
+        integrity: sha512-gmBGslpoQJtgnMAvOVqGZpEz9dyoKTCzy2nfz/n8aIFhN/jCE/rCmcxabB6jOOHV+0WNnylOxaxBQPSvcWklhA==,
+      }
+    engines: { node: ">=12" }
 
   strip-ansi@7.2.0:
     resolution:
@@ -7008,6 +7168,17 @@ packages:
       jsdom:
         optional: true
 
+  web-tree-sitter@0.25.10:
+    resolution:
+      {
+        integrity: sha512-Y09sF44/13XvgVKgO2cNDw5rGk6s26MgoZPXLESvMXeefBf7i6/73eFurre0IsTW6E14Y0ArIzhUMmjoc7xyzA==,
+      }
+    peerDependencies:
+      "@types/emscripten": ^1.40.0
+    peerDependenciesMeta:
+      "@types/emscripten":
+        optional: true
+
   whatwg-encoding@3.1.1:
     resolution:
       {
@@ -7095,7 +7266,11 @@ packages:
       }
 
   xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz:
-    resolution: { tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz }
+    resolution:
+      {
+        integrity: sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==,
+        tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz,
+      }
     version: 0.20.3
     engines: { node: ">=0.8" }
     hasBin: true
@@ -8182,6 +8357,50 @@ snapshots:
 
   "@opentelemetry/semantic-conventions@1.41.1": {}
 
+  "@opentui/core-darwin-arm64@0.4.3":
+    optional: true
+
+  "@opentui/core-darwin-x64@0.4.3":
+    optional: true
+
+  "@opentui/core-linux-arm64-musl@0.4.3":
+    optional: true
+
+  "@opentui/core-linux-arm64@0.4.3":
+    optional: true
+
+  "@opentui/core-linux-x64-musl@0.4.3":
+    optional: true
+
+  "@opentui/core-linux-x64@0.4.3":
+    optional: true
+
+  "@opentui/core-win32-arm64@0.4.3":
+    optional: true
+
+  "@opentui/core-win32-x64@0.4.3":
+    optional: true
+
+  "@opentui/core@0.4.3(typescript@6.0.3)(web-tree-sitter@0.25.10)":
+    dependencies:
+      bun-ffi-structs: 0.2.4(typescript@6.0.3)
+      diff: 9.0.0
+      marked: 17.0.1
+      string-width: 7.2.0
+      strip-ansi: 7.1.2
+      web-tree-sitter: 0.25.10
+    optionalDependencies:
+      "@opentui/core-darwin-arm64": 0.4.3
+      "@opentui/core-darwin-x64": 0.4.3
+      "@opentui/core-linux-arm64": 0.4.3
+      "@opentui/core-linux-arm64-musl": 0.4.3
+      "@opentui/core-linux-x64": 0.4.3
+      "@opentui/core-linux-x64-musl": 0.4.3
+      "@opentui/core-win32-arm64": 0.4.3
+      "@opentui/core-win32-x64": 0.4.3
+    transitivePeerDependencies:
+      - typescript
+
   "@oxc-project/types@0.137.0": {}
 
   "@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)":
@@ -9011,6 +9230,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  bun-ffi-structs@0.2.4(typescript@6.0.3):
+    dependencies:
+      typescript: 6.0.3
+
   bytes@3.1.2: {}
 
   c12@3.1.0:
@@ -9099,6 +9322,8 @@ snapshots:
     dependencies:
       restore-cursor: 5.1.0
 
+  cli-spinners@3.4.0: {}
+
   cli-truncate@4.0.0:
     dependencies:
       slice-ansi: 5.0.0
@@ -9133,12 +9358,23 @@ snapshots:
 
   commander@11.1.0: {}
 
+  commander@14.0.3: {}
+
   compare-func@2.0.0:
     dependencies:
       array-ify: 1.0.0
       dot-prop: 5.3.0
 
   concat-map@0.0.1: {}
+
+  conduit-orchestrator@file:../../../../../tmp/conduit-orchestrator-0.1.9.tgz(typescript@6.0.3)(web-tree-sitter@0.25.10):
+    dependencies:
+      "@opentui/core": 0.4.3(typescript@6.0.3)(web-tree-sitter@0.25.10)
+      commander: 14.0.3
+      ora: 9.4.1
+    transitivePeerDependencies:
+      - typescript
+      - web-tree-sitter
 
   confbox@0.2.4: {}
 
@@ -9271,6 +9507,8 @@ snapshots:
   destr@2.0.5: {}
 
   detect-libc@2.1.2: {}
+
+  diff@9.0.0: {}
 
   doctrine@2.1.0:
     dependencies:
@@ -10191,6 +10429,8 @@ snapshots:
     dependencies:
       is-extglob: 2.1.1
 
+  is-interactive@2.0.0: {}
+
   is-map@2.0.3: {}
 
   is-negative-zero@2.0.3: {}
@@ -10438,6 +10678,11 @@ snapshots:
 
   lodash@4.18.1: {}
 
+  log-symbols@7.0.1:
+    dependencies:
+      is-unicode-supported: 2.1.0
+      yoctocolors: 2.1.2
+
   log-update@6.1.0:
     dependencies:
       ansi-escapes: 7.3.0
@@ -10469,6 +10714,8 @@ snapshots:
   make-dir@4.0.0:
     dependencies:
       semver: 7.8.4
+
+  marked@17.0.1: {}
 
   math-intrinsics@1.1.0: {}
 
@@ -10669,6 +10916,17 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
       word-wrap: 1.2.5
+
+  ora@9.4.1:
+    dependencies:
+      chalk: 5.6.2
+      cli-cursor: 5.0.0
+      cli-spinners: 3.4.0
+      is-interactive: 2.0.0
+      is-unicode-supported: 2.1.0
+      log-symbols: 7.0.1
+      stdin-discarder: 0.3.2
+      string-width: 8.2.1
 
   own-keys@1.0.1:
     dependencies:
@@ -11127,6 +11385,8 @@ snapshots:
 
   std-env@4.1.0: {}
 
+  stdin-discarder@0.3.2: {}
+
   stop-iteration-iterator@1.1.0:
     dependencies:
       es-errors: 1.3.0
@@ -11195,6 +11455,10 @@ snapshots:
       call-bind: 1.0.9
       define-properties: 1.2.1
       es-object-atoms: 1.1.2
+
+  strip-ansi@7.1.2:
+    dependencies:
+      ansi-regex: 6.2.2
 
   strip-ansi@7.2.0:
     dependencies:
@@ -11436,6 +11700,8 @@ snapshots:
       "@vitest/coverage-v8": 4.1.9(vitest@4.1.9)
     transitivePeerDependencies:
       - msw
+
+  web-tree-sitter@0.25.10: {}
 
   whatwg-encoding@3.1.1:
     dependencies:

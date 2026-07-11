@@ -4,3 +4,4 @@ export { registerPageTools } from "./page.tools";
 export { registerFileTools } from "./file.tools";
 export { registerJobTools } from "./job.tools";
 export { registerSendingProfileTools } from "./sending-profile.tools";
+export { registerTargetGroupTools } from "./target-group.tools";

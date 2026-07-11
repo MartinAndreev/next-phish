@@ -57,6 +57,7 @@ export {
   mcpGetJobStatusSchema,
   mcpCreateSendingProfileSchema,
   mcpUpdateSendingProfileSchema,
+  mcpCreateTargetGroupSchema,
 } from "./mcp.schema";
 
 export {

@@ -263,10 +263,40 @@ const scheduleDefinitionSchema = z
       });
   });
 
+const scheduleTypeSchema = z.enum(["ONE_TIME", "RECURRING"]);
+const scheduleStatusSchema = z.enum([
+  "DRAFT",
+  "SCHEDULED",
+  "RUNNING",
+  "COMPLETED",
+  "CANCELLED",
+]);
+const scheduleSortSchema = z.object({
+  field: z.enum(["name", "type", "status", "startsAt"]),
+  order: z.enum(["asc", "desc"]),
+});
+
 export const ListSchedulesSchema = z.object({
+  search: z.string().trim().optional(),
+  sort: z.array(scheduleSortSchema).optional(),
+  filters: z
+    .object({
+      type: scheduleTypeSchema.optional(),
+      status: scheduleStatusSchema.optional(),
+    })
+    .optional(),
   limit: z.number().int().min(1).max(100).default(50),
   offset: z.number().int().min(0).default(0),
 });
+export const ScheduleTimelineSchema = z
+  .object({
+    startsAt: z.coerce.date(),
+    endsAt: z.coerce.date(),
+  })
+  .refine((value) => value.endsAt > value.startsAt, {
+    message: "Timeline end must follow its start",
+    path: ["endsAt"],
+  });
 export const CreateScheduleSchema = scheduleDefinitionSchema;
 export const UpdateScheduleSchema = z.object({
   id: z.string().min(1),

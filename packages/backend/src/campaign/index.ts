@@ -5,6 +5,7 @@ export {
   GetCampaignQuery,
   ListSchedulesQuery,
   GetScheduleQuery,
+  GetScheduleTimelineQuery,
 } from "./queries";
 export {
   CreateCampaignCommand,

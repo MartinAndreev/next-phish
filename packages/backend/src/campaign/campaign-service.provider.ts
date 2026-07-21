@@ -7,6 +7,7 @@ import {
   GetCampaignQuery,
   ListSchedulesQuery,
   GetScheduleQuery,
+  GetScheduleTimelineQuery,
 } from "./queries";
 import {
   CreateCampaignCommand,
@@ -37,6 +38,7 @@ export function registerCampaignServices(db: PrismaClient): void {
     [CloneCampaignCommand, new CloneCampaignCommand(repo)],
     [ListSchedulesQuery, new ListSchedulesQuery(repo)],
     [GetScheduleQuery, new GetScheduleQuery(repo)],
+    [GetScheduleTimelineQuery, new GetScheduleTimelineQuery(repo)],
     [CreateScheduleCommand, new CreateScheduleCommand(repo)],
     [UpdateScheduleCommand, new UpdateScheduleCommand(repo)],
     [CancelScheduleCommand, new CancelScheduleCommand(repo)],

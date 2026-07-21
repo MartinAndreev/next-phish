@@ -192,10 +192,33 @@ export class CampaignRepository {
     });
   }
 
-  listSchedules(organizationId: string, limit: number, offset: number) {
+  listSchedules(
+    organizationId: string,
+    input: {
+      search?: string;
+      sort?: Array<{
+        field: "name" | "type" | "status" | "startsAt";
+        order: "asc" | "desc";
+      }>;
+      filters?: {
+        type?: "ONE_TIME" | "RECURRING";
+        status?: "DRAFT" | "SCHEDULED" | "RUNNING" | "COMPLETED" | "CANCELLED";
+      };
+      limit: number;
+      offset: number;
+    },
+  ) {
+    const where: Prisma.ScheduleWhereInput = {
+      organizationId,
+      type: input.filters?.type,
+      status: input.filters?.status,
+      name: input.search
+        ? { contains: input.search, mode: "insensitive" }
+        : undefined,
+    };
     return Promise.all([
       this.db.schedule.findMany({
-        where: { organizationId },
+        where,
         include: {
           sources: {
             include: {
@@ -212,12 +235,56 @@ export class CampaignRepository {
           },
           _count: { select: { campaigns: true } },
         },
-        orderBy: { startsAt: "desc" },
-        take: limit,
-        skip: offset,
+        orderBy: input.sort?.length
+          ? input.sort.map((sort) => ({ [sort.field]: sort.order }))
+          : { startsAt: "desc" },
+        take: input.limit,
+        skip: input.offset,
       }),
-      this.db.schedule.count({ where: { organizationId } }),
+      this.db.schedule.count({ where }),
     ]).then(([rows, total]) => ({ rows, total }));
+  }
+
+  getScheduleTimeline(organizationId: string, startsAt: Date, endsAt: Date) {
+    return Promise.all([
+      this.db.schedule.findMany({
+        where: {
+          organizationId,
+          status: { in: ["SCHEDULED", "RUNNING"] },
+          startsAt: { lte: endsAt },
+          OR: [{ endsAt: null }, { endsAt: { gte: startsAt } }],
+        },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          status: true,
+          startsAt: true,
+          endsAt: true,
+          autoCompleteAfterDays: true,
+        },
+        orderBy: { startsAt: "asc" },
+      }),
+      this.db.campaign.findMany({
+        where: {
+          organizationId,
+          status: { in: ["PENDING_START", "ACTIVE", "PAUSED"] },
+          OR: [
+            { occurrenceAt: { lte: endsAt } },
+            { occurrenceAt: null, createdAt: { lte: endsAt } },
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          occurrenceAt: true,
+          createdAt: true,
+          autoCompleteAfterDays: true,
+        },
+        orderBy: { occurrenceAt: "asc" },
+      }),
+    ]).then(([schedules, campaigns]) => ({ schedules, campaigns }));
   }
 
   getSchedule(id: string, organizationId: string) {

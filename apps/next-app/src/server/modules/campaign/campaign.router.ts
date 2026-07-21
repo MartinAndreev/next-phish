@@ -9,6 +9,7 @@ import {
   CloneCampaignCommand,
   ListSchedulesQuery,
   GetScheduleQuery,
+  GetScheduleTimelineQuery,
   CreateScheduleCommand,
   UpdateScheduleCommand,
   CancelScheduleCommand,
@@ -23,6 +24,7 @@ import {
   CloneCampaignSchema,
   CampaignLifecycleSchema,
   ListSchedulesSchema,
+  ScheduleTimelineSchema,
   CreateScheduleSchema,
   UpdateScheduleSchema,
 } from "@next-phish/backend";
@@ -119,6 +121,14 @@ export const campaignRouter = router({
       organizationId: ctx.activeOrganizationId,
     }),
   ),
+  getScheduleTimeline: readProcedure
+    .input(ScheduleTimelineSchema)
+    .query(({ ctx, input }) =>
+      bus.query(Container.get(GetScheduleTimelineQuery), {
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+      }),
+    ),
   createSchedule: writeProcedure
     .input(CreateScheduleSchema)
     .mutation(({ ctx, input }) =>

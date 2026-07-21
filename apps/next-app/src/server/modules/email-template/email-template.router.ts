@@ -11,6 +11,8 @@ import {
   CreateEmailTemplateCommandSchema,
   UpdateEmailTemplateCommandSchema,
   DeleteEmailTemplateCommandSchema,
+  CatalogPreviewService,
+  UploadCatalogPreviewSchema,
 } from "@next-phish/backend";
 import { createPermissionProcedure, router } from "../../trpc/procedures";
 import { toRouterPermissions } from "@next-phish/shared";
@@ -75,6 +77,17 @@ export const emailTemplateRouter = router({
         },
       });
     }),
+
+  uploadPreview: writeProcedure
+    .input(UploadCatalogPreviewSchema)
+    .mutation(({ ctx, input }) =>
+      Container.get(CatalogPreviewService).upload({
+        ...input,
+        resourceType: "EMAIL_TEMPLATE",
+        organizationId: ctx.activeOrganizationId,
+        uploadedById: ctx.userId,
+      }),
+    ),
 
   delete: writeProcedure
     .input(DeleteEmailTemplateCommandSchema)

@@ -28,6 +28,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     read: "read:mail-sending",
     write: "write:mail-sending",
   },
+  {
+    resource: "campaigns",
+    read: "read:campaigns",
+    write: "write:campaigns",
+  },
 ];
 
 export type PermissionResource = (typeof PERMISSION_GROUPS)[number]["resource"];

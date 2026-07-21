@@ -24,6 +24,8 @@ export function EmailTemplateFormContainer({
     handleSubmit,
     handleUploadFile,
     handleDeleteFile,
+    regeneratePreview,
+    isGeneratingPreview,
     breadcrumbItems,
     t,
     router,
@@ -84,6 +86,8 @@ export function EmailTemplateFormContainer({
       onRemove={handleRemove}
       onSubmit={handleFormSubmit}
       onCancel={() => router.push("/email-templates")}
+      onRegeneratePreview={regeneratePreview ?? undefined}
+      isGeneratingPreview={isGeneratingPreview}
     />
   );
 }

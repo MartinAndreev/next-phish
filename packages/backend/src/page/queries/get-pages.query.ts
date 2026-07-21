@@ -29,6 +29,8 @@ export class GetPagesQuery implements IQueryHandler<
       input.organizationId,
       {
         search: input.search,
+        selectedId: input.selectedId,
+        includeContent: input.includeContent,
         limit: input.limit,
         offset: input.offset,
         sort: input.sort,

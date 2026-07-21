@@ -19,6 +19,8 @@ import {
   DeletePageCommandSchema,
   ImportPageFromUrlSchema,
   CreatePageSubmissionSchema,
+  CatalogPreviewService,
+  UploadCatalogPreviewSchema,
 } from "@next-phish/backend";
 import {
   createPermissionProcedure,
@@ -87,6 +89,17 @@ export const pageRouter = router({
         },
       });
     }),
+
+  uploadPreview: writeProcedure
+    .input(UploadCatalogPreviewSchema)
+    .mutation(({ ctx, input }) =>
+      Container.get(CatalogPreviewService).upload({
+        ...input,
+        resourceType: "PAGE",
+        organizationId: ctx.activeOrganizationId,
+        uploadedById: ctx.userId,
+      }),
+    ),
 
   delete: writeProcedure
     .input(DeletePageCommandSchema)

@@ -22,7 +22,10 @@ export class DeleteFileCommand implements ICommandHandler<
       return false;
     }
 
-    await this.r2.deleteObject(file.remoteId);
-    return this.fileRepo.delete(data.id);
+    const result = await this.fileRepo.delete(data.id);
+    if (result.orphanedRemoteId) {
+      await this.r2.deleteObject(result.orphanedRemoteId);
+    }
+    return result.deleted;
   }
 }

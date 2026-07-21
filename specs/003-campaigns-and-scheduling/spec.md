@@ -1,6 +1,6 @@
 # Feature 003 — Campaigns and Scheduling
 
-> **Status:** Product documentation draft. Runtime implementation and schedule execution are out of scope.
+> **Status:** Runtime persistence, authoring APIs, and catalog-preview infrastructure approved. Schedule execution and email delivery remain out of scope.
 
 ## Problem, user, and outcome
 
@@ -30,8 +30,8 @@ In scope:
 
 Out of scope:
 
-- Implementing database models, APIs, forms, pages, workers, queues, or send logic.
 - Executing schedules or delivering email.
+- Worker/queue recurrence processing and provider-specific send enforcement.
 - Defining provider-specific rate enforcement, retries, sending windows, weekends,
   holidays, or delivery-failure recovery.
 - Treating unverified Gophish behavior as a NextPhish requirement.
@@ -110,7 +110,7 @@ Only resources belonging to the selected organization are eligible.
 - At the occurrence, the schedule source is cloned into an independent concrete
   campaign. A template-based schedule applies its selected target group to the clone.
 - When the concrete campaign is created, its complete state and referenced resources
-  are copied into private, immutable shadow snapshots.
+  are copied into private, immutable relational shadow copies.
 - The persisted instant is UTC. Display and entry use the campaign target timezone.
 
 ### Delivery configuration
@@ -166,7 +166,7 @@ recurrence rule, and a selection strategy.
 - Already-started `active` or `paused` campaigns and terminal `completed` or `failed`
   campaigns are never changed by a parent schedule edit.
 - Affected campaigns still in `scheduled` are rebuilt with revised timing,
-  configuration, and hidden snapshots before entering `pending_start`.
+  configuration, and hidden relational shadow copies before entering `pending_start`.
 - End-condition editing is the exception and remains available while the repeater is
   running without mutating an active campaign.
 
@@ -272,22 +272,19 @@ The state contract does not bring schedule execution into this documentation fea
 - A finite deck schedule also completes when its deck is exhausted, even if its
   configured completion date is later or absent.
 
-### Cloning, hidden snapshots, and history
+### Cloning, hidden relational shadow copies, and history
 
 - Every schedule occurrence clones its concrete-campaign or template source into its
   own concrete campaign.
-- At campaign creation, NextPhish creates hidden shadow copies of the complete campaign
-  configuration and every required referenced resource, including the email template,
-  landing page, sending profile, target group, and target-group membership.
-- Shadow copies are private implementation records. They do not appear in normal
-  listing pages or pickers, cannot be reused or edited independently, and remain bound
-  to the created campaign.
-- Source edits, archival, or deletion after snapshot creation do not change an
+- Before a materialized occurrence enters `pending_start`, NextPhish transactionally creates hidden relational shadow copies of the complete campaign configuration and every required referenced resource, including the email template, landing page, sending profile, target group, and deduplicated target-group membership.
+- Shadow copies use the normal resource tables with `SHADOW` visibility. They are private implementation records: they do not appear in normal listings, pickers, or MCP tools, cannot be reused or edited independently, and remain bound to the created campaign.
+- Shadow attachment file records share immutable stored objects with their catalog sources. Stored object bytes are deleted only after their final file reference is removed.
+- Source edits, archival, or deletion after shadow-copy creation do not change an
   already-created campaign.
-- Each resulting campaign has independent identity, immutable snapshot state, and
+- Each resulting campaign has independent identity, immutable relational shadow state, and
   immutable execution/history attribution.
-- Rescheduling an affected not-started campaign rebuilds its shadow snapshots. Active,
-  paused, completed, and failed campaigns keep their existing snapshots.
+- Rescheduling an affected not-started campaign rebuilds its relational shadow copies. Active,
+  paused, completed, and failed campaigns keep their existing relational shadow copies.
 
 ### Missing, archived, or unusable references
 
@@ -297,8 +294,8 @@ The state contract does not bring schedule execution into this documentation fea
   template, page, email template, sending profile, or target group becomes unavailable.
 - Its list row is marked **Broken** and provides a tooltip identifying the missing or
   unusable dependency.
-- An already-created campaign with complete hidden snapshots continues from those
-  snapshots and is not broken solely because an original source later changes,
+- An already-created campaign with complete hidden relational shadow copies continues
+  from those copies and is not broken solely because an original source later changes,
   archives, or is deleted.
 - Broken schedules cannot create a new occurrence until repaired.
 - Repair uses the normal Edit flow and validation. Saving clears **Broken** only after
@@ -325,7 +322,7 @@ The state contract does not bring schedule execution into this documentation fea
   work is created, including case and surrounding-whitespace differences.
 - Provider-specific aliases are not treated as equivalent unless a future requirement
   explicitly adds that behavior.
-- The campaign’s hidden target snapshot stores the deduplicated recipient set.
+- The campaign’s hidden shadow target group stores the deduplicated recipient set.
 
 ## Authoritative product documentation
 
@@ -359,8 +356,8 @@ this feature.
 | AC-07 | Weekly, monthly, quarterly, half-yearly, and yearly calendar configuration and missing-day fallback are documented.                                                                                                                                                                                |
 | AC-08 | UTC persistence, organization default timezone, campaign/schedule target timezone behavior, and the approved DST gap/overlap policy are documented without implying that local calendar fields are stored as UTC text.                                                                             |
 | AC-09 | Schedule end date, optional maximum-campaign count, manual cancellation, 20-day default campaign auto-completion, nullable disable behavior, and deck exhaustion are documented.                                                                                                                   |
-| AC-10 | Each occurrence produces an independently identifiable concrete campaign with hidden immutable snapshots of its full campaign/resource state at campaign creation.                                                                                                                                 |
-| AC-11 | Broken-reference visibility and picker exclusion behavior are documented, including the rule that complete snapshots isolate already-created campaigns from later source changes or deletion.                                                                                                      |
+| AC-10 | Each occurrence produces an independently identifiable concrete campaign with hidden immutable relational copies of its full campaign/resource state at campaign creation.                                                                                                                         |
+| AC-11 | Broken-reference visibility and picker exclusion behavior are documented, including the rule that complete relational shadow copies isolate already-created campaigns from later source changes or deletion.                                                                                       |
 | AC-12 | Documentation explicitly excludes sending and schedule execution from this feature.                                                                                                                                                                                                                |
 | AC-13 | The concrete campaign state machine uses `draft`, `published`, `scheduled`, `pending_start`, `active`, `paused`, `completed`, and `failed`; cancellation additionally permits scheduled/pending campaigns to complete, active can become paused/completed, and paused can become active/completed. |
 | AC-14 | Every schedule field is editable before start; a multi-campaign schedule is also fully editable between active campaigns, and saving reschedules every affected future/scheduled campaign without changing started or terminal campaigns.                                                          |
@@ -368,7 +365,16 @@ this feature.
 | AC-16 | Duplicated schedules are independent; an equivalent campaign/configuration/date collision produces a non-blocking warning before save.                                                                                                                                                             |
 | AC-17 | Broken records are repaired through normal Edit and validation, with affected future campaigns rescheduled/rebuilt after a valid save.                                                                                                                                                             |
 | AC-18 | Better Auth exposes a `campaigns` subject with `read` and `write` actions, preserving organization scoping.                                                                                                                                                                                        |
-| AC-19 | A campaign deduplicates its recipient snapshot by normalized email so one address receives at most one send per campaign, including future multi-group targeting.                                                                                                                                  |
+| AC-19 | A campaign deduplicates its shadow recipient set by normalized email so one address receives at most one send per campaign, including future multi-group targeting.                                                                                                                                |
+
+## Catalog previews
+
+- Email-template and page catalogs use best-effort preview images generated in an authenticated user's browser from a persisted content revision and inert dummy data.
+- Preview rendering is sandboxed and must not enable scripts, forms, navigation, or popups.
+- The browser uploads a bounded PNG or WebP. The backend verifies organization ownership, image type and dimensions, and performs a revision compare-and-swap before marking it ready.
+- Preview images are derived caches. Missing, failed, or stale previews display a placeholder and can be regenerated.
+- Preview images are served through an authenticated organization-scoped route rather than a public object-storage URL.
+- Client-side generation intentionally avoids requiring a headless browser in service workers.
 
 ## Deferred execution scope
 

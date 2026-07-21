@@ -6,6 +6,7 @@ import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n";
 import { useFormStatus } from "@/src/hooks/use-form-status";
 import type { AttachedFile } from "@/src/components/organisms/email-templates/file-attachment-panel";
+import { createCatalogPreview } from "@/src/lib/catalog-preview";
 
 interface UseEmailTemplateEditorOptions {
   templateId?: string;
@@ -33,9 +34,8 @@ export function useEmailTemplateEditor({
     );
 
   const createMutation = trpc.emailTemplate.create.useMutation({
-    onSuccess: async (template) => {
+    onSuccess: async () => {
       await utils.emailTemplate.list.invalidate();
-      router.push(`/email-templates/${template.id}`);
       setSuccess(t("emailTemplates.saveTemplate"));
     },
   });
@@ -52,6 +52,7 @@ export function useEmailTemplateEditor({
     },
   });
 
+  const previewMutation = trpc.emailTemplate.uploadPreview.useMutation();
   const uploadFileMutation = trpc.file.uploadFile.useMutation();
   const deleteFileMutation = trpc.file.delete.useMutation();
 
@@ -123,12 +124,21 @@ export function useEmailTemplateEditor({
     };
 
     try {
-      if (templateId) {
-        await updateMutation.mutateAsync({ id: templateId, ...payload });
-        return;
+      const saved = templateId
+        ? await updateMutation.mutateAsync({ id: templateId, ...payload })
+        : await createMutation.mutateAsync(payload);
+      try {
+        await createCatalogPreview({
+          html: payload.html,
+          resourceId: saved.id,
+          sourceRevision: saved.contentRevision,
+          upload: (preview) => previewMutation.mutateAsync(preview),
+        });
+        await utils.emailTemplate.list.invalidate();
+      } catch {
+        // Preview generation is best-effort; the persisted template remains valid.
       }
-
-      await createMutation.mutateAsync(payload);
+      if (!templateId) router.push(`/email-templates/${saved.id}`);
     } catch (error) {
       const fallback = templateId
         ? t("emailTemplates.updateError")
@@ -192,6 +202,16 @@ export function useEmailTemplateEditor({
     handleSubmit,
     handleUploadFile,
     handleDeleteFile,
+    regeneratePreview: data
+      ? () =>
+          createCatalogPreview({
+            html: data.html,
+            resourceId: data.id,
+            sourceRevision: data.contentRevision,
+            upload: (preview) => previewMutation.mutateAsync(preview),
+          }).then(() => utils.emailTemplate.list.invalidate())
+      : null,
+    isGeneratingPreview: previewMutation.isPending,
     breadcrumbItems,
     t,
     router,

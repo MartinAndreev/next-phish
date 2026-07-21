@@ -25,7 +25,7 @@ export async function GET(
   }
 
   const r2 = new R2Client();
-  const object = await r2.getObject(importFile.file.remoteId);
+  const object = await r2.getObject(importFile.file.storedObject.remoteId);
   if (!object) {
     return NextResponse.json({ error: "File not in storage" }, { status: 404 });
   }

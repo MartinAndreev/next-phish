@@ -75,4 +75,7 @@ export type {
 } from "./target-group.schema";
 
 export { sendingProfileFormSchema } from "./sending-profile.schema";
+
+export { campaignFormSchema, scheduleFormSchema } from "./campaign.schema";
+export type { CampaignFormValues, ScheduleFormValues } from "./campaign.schema";
 export type { SendingProfileFormValues } from "./sending-profile.schema";

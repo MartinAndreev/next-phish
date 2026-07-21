@@ -1,17 +1,40 @@
 export const selectSmall = {
   root: {
-    className:
-      "bg-brand-dark border border-white/10 rounded-lg text-white/80 h-8",
+    className: "h-8 rounded-lg",
   },
-  filterInput: { className: "text-brand-dark text-xs py-1.5" },
-  input: { className: "text-white/80 text-xs py-1.5" },
-  panel: {
-    className: "bg-brand-dark border border-white/10 rounded-lg shadow-lg",
+  input: {
+    className: "px-3 py-1.5 text-xs",
   },
-  wrapper: { className: "bg-brand-dark" },
-  list: { className: "list-none p-1 m-0" },
+  trigger: {
+    className: "w-8",
+  },
+  filterInput: {
+    className: "py-1.5 text-xs",
+  },
   item: {
+    className: "px-3 py-1.5 text-xs",
+  },
+};
+
+export const inputNumberSmall = {
+  root: { className: "h-8 w-full" },
+  input: {
+    root: {
+      className: "h-8 px-3 py-1.5 text-xs",
+    },
+  },
+};
+
+export const selectSmallDark = {
+  ...selectSmall,
+  root: {
     className:
-      "text-zinc-100 cursor-pointer font-normal whitespace-nowrap px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-xs",
+      "h-8 rounded-lg border-white/10 bg-brand-dark text-white/80 hover:border-white/20",
+  },
+  input: {
+    className: "px-3 py-1.5 text-xs text-white/80",
+  },
+  trigger: {
+    className: "w-8 text-zinc-400",
   },
 };

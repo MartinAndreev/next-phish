@@ -15,7 +15,7 @@ imports.get("/api/imports/:importId/assets/:fileId/:fileName", async (c) => {
   }
 
   const r2 = new R2Client();
-  const object = await r2.getObject(importFile.file.remoteId);
+  const object = await r2.getObject(importFile.file.storedObject.remoteId);
   if (!object) {
     return c.text("File not in storage", 404);
   }

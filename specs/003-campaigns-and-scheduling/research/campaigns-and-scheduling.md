@@ -128,13 +128,11 @@ applied to the clone. This gives every occurrence its own identity and campaign
 history rather than reusing or overwriting the source.
 
 When the concrete campaign instance is created, NextPhish creates hidden shadow copies
-of its complete campaign state and referenced resources. The instance runs from those
-snapshots rather than the mutable source records.
+of its complete campaign state and referenced resources. The instance references those relational shadow records rather than the mutable source records.
 
-### Hidden campaign snapshots
+### Hidden relational shadow resources
 
-The snapshot includes the campaign/template configuration and private copies of every
-referenced resource needed by the campaign, including:
+The transactionally created shadow graph includes the campaign/template configuration and private relational copies of every referenced resource needed by the campaign, including:
 
 - email-template content and campaign-relevant settings;
 - landing-page content and settings;
@@ -151,9 +149,7 @@ Shadow copies are internal implementation records:
 - later edits, archival, or deletion of the original resources do not change an
   already-created campaign instance.
 
-Each affected future campaign rebuilt by a schedule edit receives a new snapshot when
-that campaign instance is recreated. Active, paused, and terminal campaigns keep their
-existing snapshots.
+Each affected future campaign rebuilt by a schedule edit receives rebuilt relational shadow resources when that campaign instance is recreated. Active, paused, and terminal campaigns keep their existing shadow resources.
 
 ## Creating and scheduling campaigns
 
@@ -187,7 +183,7 @@ template and one target group. It can be configured for:
 - a future local date and time.
 
 When the occurrence’s concrete campaign is created, the template is cloned, the
-selected target group is attached, and hidden resource snapshots are created.
+selected target group is attached, and hidden relational shadow resources are created.
 
 ## Delivery patterns
 
@@ -270,7 +266,7 @@ windows below.
 - Saving an edit recalculates and reschedules every affected future campaign. Campaigns
   already in `active`, `paused`, `completed`, or `failed` are not changed.
 - Any already-materialized affected campaign that is still `scheduled` is rebuilt with
-  the revised timing, configuration, and hidden snapshots before it can enter
+  the revised timing, configuration, and hidden relational shadow resources before it can enter
   `pending_start`.
 - Editing repeater end conditions remains the exception: those fields can be changed
   while the schedule is running without mutating an active campaign.
@@ -414,9 +410,7 @@ becomes unavailable. Its list row is marked **Broken**, and a tooltip identifies
 missing or unusable campaign template, email template, landing page, sending profile,
 or target group.
 
-An already-created campaign with complete hidden snapshots continues from those
-snapshots and is not made broken solely because an original source is later changed,
-archived, or deleted. A broken schedule cannot create a new campaign until repaired. Repair uses the normal
+An already-created campaign with complete hidden relational shadow resources continues from those copies and is not made broken solely because an original source is later changed, archived, or deleted. A broken schedule cannot create a new campaign until repaired. Repair uses the normal
 Edit flow: the user replaces or restores invalid dependencies and saves through the
 same validation as any other edit. Saving the repair clears **Broken** only when every
 required dependency is valid and reschedules/rebuilds affected future campaigns.
@@ -462,8 +456,13 @@ recipient by normalized email address before creating send work. Whitespace and 
 case differences do not create another recipient; provider-specific alias rewriting is
 not implied.
 
-The hidden target snapshot records the deduplicated recipient set used by that
-campaign, so later group edits cannot add a duplicate to an already-created campaign.
+The hidden shadow target group records the deduplicated recipient set used by that campaign, so later group edits cannot add a duplicate to an already-created campaign.
+
+## Persistence and catalog previews
+
+Before an occurrence enters `pending_start`, NextPhish transactionally copies its email template, page and redirect dependencies, sending profile, target group, and normalized recipient membership into their existing resource tables with private `SHADOW` visibility. Catalog queries, pickers, ordinary CRUD, and MCP tools expose only `CATALOG` resources. Shadow attachment file records share immutable stored objects with their catalog sources; object bytes are deleted only after the final file reference is removed.
+
+Email-template and page catalogs may show best-effort cached previews. An authenticated browser renders a persisted revision with inert dummy data in a sandbox, uploads a bounded PNG or WebP, and the backend accepts it only when the organization and source revision still match. Missing, stale, or failed previews use a placeholder. Preview bytes are served through an authenticated organization-scoped route, not a public object URL. This avoids headless-browser dependencies in workers.
 
 ## Deferred execution scope
 

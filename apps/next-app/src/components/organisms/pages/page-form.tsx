@@ -37,6 +37,8 @@ interface PageFormProps {
   t: (key: string) => string;
   onSubmit: (values: PageFormValues) => Promise<void>;
   onCancel: () => void;
+  onRegeneratePreview?: () => Promise<void>;
+  isGeneratingPreview?: boolean;
 }
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
@@ -53,6 +55,8 @@ export function PageForm({
   t,
   onSubmit,
   onCancel,
+  onRegeneratePreview,
+  isGeneratingPreview,
 }: PageFormProps) {
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const editorRef = useRef<Editor | null>(null);
@@ -81,6 +85,18 @@ export function PageForm({
         <p className="mt-1 text-sm text-zinc-400">
           {pageId ? t("pages.editSubtitle") : t("pages.createSubtitle")}
         </p>
+        {pageId && onRegeneratePreview ? (
+          <Button
+            type="button"
+            size="small"
+            outlined
+            icon="pi pi-image"
+            label="Regenerate preview"
+            loading={isGeneratingPreview}
+            onClick={() => void onRegeneratePreview()}
+            className="mt-3"
+          />
+        ) : null}
       </div>
 
       <Formik<PageFormValues>

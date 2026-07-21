@@ -15,8 +15,70 @@ enum EmailTemplateStatus {
 
 enum FilePurpose {
   EMAIL_ATTACHMENT
+  CATALOG_PREVIEW
   IMPORT
   EXPORT
+}
+
+enum ResourceVisibility {
+  CATALOG
+  SHADOW
+}
+
+enum PreviewStatus {
+  MISSING
+  PENDING
+  READY
+  FAILED
+  STALE
+}
+
+enum CampaignType {
+  TEMPLATE
+  CONCRETE
+}
+
+enum CampaignStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  PENDING_START
+  ACTIVE
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+enum ScheduleType {
+  ONE_TIME
+  RECURRING
+}
+
+enum ScheduleStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  COMPLETED
+  CANCELLED
+}
+
+enum ScheduleSelectionStrategy {
+  DECK
+  RANDOM
+}
+
+enum RecurrenceFrequency {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  HALF_YEARLY
+  YEARLY
+}
+
+enum DeliveryMode {
+  BLAST
+  DRIP
+  BATCH
 }
 
 enum PageType {
@@ -85,6 +147,8 @@ model User {
   jobs           Job[]           @relation("JobCreatedBy")
   siteImports    SiteImport[]    @relation("SiteImportCreatedBy")
   targetGroups   TargetGroup[]   @relation("TargetGroupCreatedBy")
+  campaigns      Campaign[]      @relation("CampaignCreatedBy")
+  schedules      Schedule[]      @relation("ScheduleCreatedBy")
 
   @@map("user")
 }
@@ -149,23 +213,28 @@ model TwoFactor {
 }
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  logo      String?
-  metadata  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  logo            String?
+  metadata        String?
+  defaultTimezone String   @default("UTC")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  members        Member[]
-  invitations    Invitation[]
-  emailTemplates EmailTemplate[]
-  pages          Page[]
-  files          File[]
-  jobs           Job[]
-  siteImports    SiteImport[]
-  targetGroups   TargetGroup[]
+  members             Member[]
+  invitations         Invitation[]
+  emailTemplates      EmailTemplate[]
+  pages               Page[]
+  files               File[]
+  jobs                Job[]
+  siteImports         SiteImport[]
+  targetGroups        TargetGroup[]
   mailSendingProfiles MailSendingProfile[]
+  campaigns           Campaign[]
+  schedules           Schedule[]
+  storedObjects       StoredObject[]
+  catalogPreviews     CatalogPreview[]
 
   @@map("organization")
 }
@@ -211,26 +280,50 @@ model Setting {
   @@map("setting")
 }
 
-model File {
-  id             String      @id @default(cuid())
-  remoteId       String
-  name           String
+model StoredObject {
+  id             String   @id @default(cuid())
+  remoteId       String   @unique
   size           Int
   format         String
-  purpose        FilePurpose @default(EMAIL_ATTACHMENT)
   organizationId String?
-  uploadedById   String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  createdAt      DateTime @default(now())
 
-  uploadedBy         User?               @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
-  organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  emailTemplateFiles EmailTemplateFile[]
-  siteImportFiles    SiteImportFile[]
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  files        File[]
 
   @@index([organizationId])
+  @@map("stored_object")
+}
+
+model File {
+  id               String             @id @default(cuid())
+  storedObjectId   String
+  name             String
+  size             Int
+  format           String
+  purpose          FilePurpose        @default(EMAIL_ATTACHMENT)
+  visibility       ResourceVisibility @default(CATALOG)
+  organizationId   String?
+  uploadedById     String?
+  shadowCampaignId String?
+  sourceFileId     String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  storedObject       StoredObject        @relation(fields: [storedObjectId], references: [id], onDelete: Restrict)
+  uploadedBy         User?               @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  shadowCampaign     Campaign?           @relation("CampaignShadowFiles", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
+  sourceFile         File?               @relation("FileShadowSource", fields: [sourceFileId], references: [id], onDelete: SetNull)
+  shadowCopies       File[]              @relation("FileShadowSource")
+  emailTemplateFiles EmailTemplateFile[]
+  siteImportFiles    SiteImportFile[]
+  catalogPreview     CatalogPreview?
+
+  @@index([organizationId, visibility, purpose])
   @@index([uploadedById])
-  @@index([purpose])
+  @@index([storedObjectId])
+  @@index([shadowCampaignId])
   @@map("file")
 }
 
@@ -248,51 +341,71 @@ model EmailTemplateFile {
 }
 
 model EmailTemplate {
-  id             String              @id @default(cuid())
-  name           String
-  tags           String[]
-  html           String
-  design         Json
-  organizationId String
-  createdById    String
-  status         EmailTemplateStatus @default(DRAFT)
-  trackingPixel  Boolean             @default(true)
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  id               String              @id @default(cuid())
+  name             String
+  tags             String[]
+  html             String
+  design           Json
+  organizationId   String
+  createdById      String
+  status           EmailTemplateStatus @default(DRAFT)
+  trackingPixel    Boolean             @default(true)
+  visibility       ResourceVisibility  @default(CATALOG)
+  contentRevision  Int                 @default(1)
+  shadowCampaignId String?
+  sourceTemplateId String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
-  organization Organization        @relation(references: [id], fields: [organizationId], onDelete: Cascade)
-  createdBy    User                @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
-  files        EmailTemplateFile[]
+  organization        Organization        @relation(references: [id], fields: [organizationId], onDelete: Cascade)
+  createdBy           User                @relation("EmailTemplateCreatedBy", references: [id], fields: [createdById], onDelete: Cascade)
+  files               EmailTemplateFile[]
+  shadowCampaign      Campaign?           @relation("CampaignShadowEmailTemplates", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
+  sourceTemplate      EmailTemplate?      @relation("EmailTemplateShadowSource", fields: [sourceTemplateId], references: [id], onDelete: SetNull)
+  shadowCopies        EmailTemplate[]     @relation("EmailTemplateShadowSource")
+  selectedByCampaigns Campaign[]          @relation("CampaignEmailTemplate")
+  preview             CatalogPreview?
 
-  @@index([organizationId])
+  @@index([organizationId, visibility])
+  @@index([shadowCampaignId])
   @@index([createdById])
   @@index([status])
   @@map("email_template")
 }
 
 model Page {
-  id             String     @id @default(cuid())
-  name           String
-  type           PageType   @default(LANDING)
-  html           String     @default("")
-  design         Json?
-  status         PageStatus @default(DRAFT)
-  captureData    Boolean    @default(false)
-  redirectUrl    String?
-  redirectPageId String?
-  redirectPage   Page?      @relation("PageRedirect", fields: [redirectPageId], references: [id])
-  redirectTarget Page[]     @relation("PageRedirect")
-  contentType    String?
-  organizationId String
-  createdById    String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id               String             @id @default(cuid())
+  name             String
+  type             PageType           @default(LANDING)
+  html             String             @default("")
+  design           Json?
+  status           PageStatus         @default(DRAFT)
+  captureData      Boolean            @default(false)
+  redirectUrl      String?
+  redirectPageId   String?
+  redirectPage     Page?              @relation("PageRedirect", fields: [redirectPageId], references: [id])
+  redirectTarget   Page[]             @relation("PageRedirect")
+  contentType      String?
+  organizationId   String
+  createdById      String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  visibility       ResourceVisibility @default(CATALOG)
+  contentRevision  Int                @default(1)
+  shadowCampaignId String?
+  sourcePageId     String?
 
-  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User             @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  submissions  PageSubmission[]
+  organization        Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy           User             @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  submissions         PageSubmission[]
+  shadowCampaign      Campaign?        @relation("CampaignShadowPages", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
+  sourcePage          Page?            @relation("PageShadowSource", fields: [sourcePageId], references: [id], onDelete: SetNull)
+  shadowCopies        Page[]           @relation("PageShadowSource")
+  selectedByCampaigns Campaign[]       @relation("CampaignPage")
+  preview             CatalogPreview?
 
-  @@index([organizationId])
+  @@index([organizationId, visibility])
+  @@index([shadowCampaignId])
   @@index([createdById])
   @@index([status])
   @@map("page")
@@ -384,59 +497,78 @@ model SiteImportFile {
 }
 
 model TargetGroup {
-  id             String            @id @default(cuid())
-  name           String
-  status         TargetGroupStatus @default(DRAFT)
-  organizationId String
-  createdById    String
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id                  String             @id @default(cuid())
+  name                String
+  status              TargetGroupStatus  @default(DRAFT)
+  organizationId      String
+  createdById         String
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  visibility          ResourceVisibility @default(CATALOG)
+  shadowCampaignId    String?
+  sourceTargetGroupId String?
 
-  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User              @relation("TargetGroupCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  users        TargetGroupUser[]
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy           User              @relation("TargetGroupCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  users               TargetGroupUser[]
+  shadowCampaign      Campaign?         @relation("CampaignShadowTargetGroups", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
+  sourceTargetGroup   TargetGroup?      @relation("TargetGroupShadowSource", fields: [sourceTargetGroupId], references: [id], onDelete: SetNull)
+  shadowCopies        TargetGroup[]     @relation("TargetGroupShadowSource")
+  selectedByCampaigns Campaign[]        @relation("CampaignTargetGroup")
+  schedules           Schedule[]
 
-  @@index([organizationId])
+  @@index([organizationId, visibility])
+  @@index([shadowCampaignId])
   @@index([createdById])
   @@index([status])
   @@map("target_group")
 }
 
 model TargetGroupUser {
-  id            String   @id @default(cuid())
-  targetGroupId String
-  email         String
-  firstName     String
-  lastName      String
-  position      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  targetGroupId   String
+  email           String
+  normalizedEmail String?
+  firstName       String
+  lastName        String
+  position        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   targetGroup TargetGroup @relation(fields: [targetGroupId], references: [id], onDelete: Cascade)
 
   @@unique([targetGroupId, email])
+  @@unique([targetGroupId, normalizedEmail])
   @@index([targetGroupId])
   @@index([email])
   @@map("target_group_user")
 }
 
 model MailSendingProfile {
-  id             String           @id @default(cuid())
-  organizationId String
-  name           String
-  providerType   MailProviderType
-  fromName       String
-  fromEmail      String
-  replyToEmail   String?
-  headers        Json?            @default("{}")
-  providerConfig Json
-  isDefault      Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id                     String             @id @default(cuid())
+  organizationId         String
+  name                   String
+  providerType           MailProviderType
+  fromName               String
+  fromEmail              String
+  replyToEmail           String?
+  headers                Json?              @default("{}")
+  providerConfig         Json
+  isDefault              Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  visibility             ResourceVisibility @default(CATALOG)
+  shadowCampaignId       String?
+  sourceSendingProfileId String?
 
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  shadowCampaign       Campaign?            @relation("CampaignShadowSendingProfiles", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
+  sourceSendingProfile MailSendingProfile?  @relation("SendingProfileShadowSource", fields: [sourceSendingProfileId], references: [id], onDelete: SetNull)
+  shadowCopies         MailSendingProfile[] @relation("SendingProfileShadowSource")
+  selectedByCampaigns  Campaign[]           @relation("CampaignSendingProfile")
 
-  @@index([organizationId])
+  @@index([organizationId, visibility])
+  @@index([shadowCampaignId])
   @@index([providerType])
   @@map("mail_sending_profile")
 }
@@ -466,4 +598,130 @@ model Apikey {
   metadata            String?
 
   @@map("api_key")
+}
+
+model CatalogPreview {
+  id              String        @id @default(cuid())
+  organizationId  String
+  emailTemplateId String?       @unique
+  pageId          String?       @unique
+  fileId          String?       @unique
+  sourceRevision  Int
+  rendererVersion Int           @default(1)
+  status          PreviewStatus @default(PENDING)
+  failureReason   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  emailTemplate EmailTemplate? @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade)
+  page          Page?          @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  file          File?          @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@map("catalog_preview")
+}
+
+model Campaign {
+  id                    String         @id @default(cuid())
+  organizationId        String
+  createdById           String
+  name                  String
+  tags                  String[]
+  type                  CampaignType
+  status                CampaignStatus @default(DRAFT)
+  emailTemplateId       String?
+  pageId                String?
+  mailSendingProfileId  String?
+  targetGroupId         String?
+  targetTimezone        String
+  autoCompleteAfterDays Int?           @default(20)
+  sourceCampaignId      String?
+  scheduleId            String?
+  occurrenceAt          DateTime?      @db.Timestamptz(3)
+  brokenAt              DateTime?
+  brokenReason          String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  organization          Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy             User                 @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  emailTemplate         EmailTemplate?       @relation("CampaignEmailTemplate", fields: [emailTemplateId], references: [id], onDelete: SetNull)
+  page                  Page?                @relation("CampaignPage", fields: [pageId], references: [id], onDelete: SetNull)
+  mailSendingProfile    MailSendingProfile?  @relation("CampaignSendingProfile", fields: [mailSendingProfileId], references: [id], onDelete: SetNull)
+  targetGroup           TargetGroup?         @relation("CampaignTargetGroup", fields: [targetGroupId], references: [id], onDelete: SetNull)
+  sourceCampaign        Campaign?            @relation("CampaignClone", fields: [sourceCampaignId], references: [id], onDelete: SetNull)
+  clones                Campaign[]           @relation("CampaignClone")
+  schedule              Schedule?            @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  scheduleSources       ScheduleSource[]
+  shadowEmailTemplates  EmailTemplate[]      @relation("CampaignShadowEmailTemplates")
+  shadowPages           Page[]               @relation("CampaignShadowPages")
+  shadowSendingProfiles MailSendingProfile[] @relation("CampaignShadowSendingProfiles")
+  shadowTargetGroups    TargetGroup[]        @relation("CampaignShadowTargetGroups")
+  shadowFiles           File[]               @relation("CampaignShadowFiles")
+
+  @@unique([scheduleId, occurrenceAt])
+  @@index([organizationId, type, status])
+  @@index([scheduleId, status])
+  @@index([sourceCampaignId])
+  @@map("campaign")
+}
+
+model Schedule {
+  id                    String                     @id @default(cuid())
+  organizationId        String
+  createdById           String
+  targetGroupId         String?
+  name                  String
+  type                  ScheduleType
+  status                ScheduleStatus             @default(DRAFT)
+  targetTimezone        String
+  startsAt              DateTime                   @db.Timestamptz(3)
+  frequency             RecurrenceFrequency?
+  localTimeMinutes      Int?
+  weekday               Int?
+  dayOfMonth            Int?
+  month                 Int?
+  selectionStrategy     ScheduleSelectionStrategy?
+  shuffleDeck           Boolean                    @default(false)
+  deliveryMode          DeliveryMode
+  dripEmailsPerMinute   Int?
+  batchSize             Int?
+  batchIntervalMinutes  Int?
+  maxCampaigns          Int?
+  endsAt                DateTime?                  @db.Timestamptz(3)
+  autoCompleteAfterDays Int?                       @default(20)
+  nextOccurrenceAt      DateTime?                  @db.Timestamptz(3)
+  cancelledAt           DateTime?                  @db.Timestamptz(3)
+  completedAt           DateTime?                  @db.Timestamptz(3)
+  brokenAt              DateTime?
+  brokenReason          String?
+  collisionFingerprint  String?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation("ScheduleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  targetGroup  TargetGroup?     @relation(fields: [targetGroupId], references: [id], onDelete: SetNull)
+  sources      ScheduleSource[]
+  campaigns    Campaign[]
+
+  @@index([organizationId, status, startsAt])
+  @@index([targetGroupId])
+  @@index([collisionFingerprint])
+  @@map("schedule")
+}
+
+model ScheduleSource {
+  scheduleId String
+  campaignId String
+  position   Int
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+
+  @@id([scheduleId, campaignId])
+  @@unique([scheduleId, position])
+  @@index([campaignId])
+  @@map("schedule_source")
 }

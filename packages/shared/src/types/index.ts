@@ -11,6 +11,7 @@ export type {
 
 export type {
   EmailTemplateStatus,
+  CatalogPreviewView,
   EmailTemplateAuthorView,
   EmailTemplateListItemView,
   EmailTemplateView,

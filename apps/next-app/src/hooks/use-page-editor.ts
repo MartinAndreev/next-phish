@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { createCatalogPreview } from "@/src/lib/catalog-preview";
 
 interface UsePageEditorOptions {
   pageId?: string;
@@ -24,9 +25,8 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
   );
 
   const createMutation = trpc.page.create.useMutation({
-    onSuccess: async (page) => {
+    onSuccess: async () => {
       await utils.page.list.invalidate();
-      router.push(`/pages/${page.id}`);
       setSuccess(t("pages.savePage"));
     },
   });
@@ -42,6 +42,8 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
       setSuccess(t("pages.updatePage"));
     },
   });
+
+  const previewMutation = trpc.page.uploadPreview.useMutation();
 
   useEffect(() => {
     if (!data) {
@@ -74,12 +76,21 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     };
 
     try {
-      if (pageId) {
-        await updateMutation.mutateAsync({ id: pageId, ...payload });
-        return;
+      const saved = pageId
+        ? await updateMutation.mutateAsync({ id: pageId, ...payload })
+        : await createMutation.mutateAsync(payload);
+      try {
+        await createCatalogPreview({
+          html: payload.html,
+          resourceId: saved.id,
+          sourceRevision: saved.contentRevision,
+          upload: (preview) => previewMutation.mutateAsync(preview),
+        });
+        await utils.page.list.invalidate();
+      } catch {
+        // Preview generation is best-effort; the persisted page remains valid.
       }
-
-      await createMutation.mutateAsync(payload);
+      if (!pageId) router.push(`/pages/${saved.id}`);
     } catch (error) {
       const fallback = pageId ? t("pages.updateError") : t("pages.createError");
       setError(error instanceof Error ? error.message : fallback);
@@ -125,6 +136,16 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     setSuccess,
     reset,
     handleSubmit,
+    regeneratePreview: data
+      ? () =>
+          createCatalogPreview({
+            html: data.html,
+            resourceId: data.id,
+            sourceRevision: data.contentRevision,
+            upload: (preview) => previewMutation.mutateAsync(preview),
+          }).then(() => utils.page.list.invalidate())
+      : null,
+    isGeneratingPreview: previewMutation.isPending,
     breadcrumbItems,
     t,
     router,

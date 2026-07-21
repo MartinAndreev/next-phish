@@ -99,14 +99,22 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await db.close();
     },
     async resetData() {
+      await prisma.catalogPreview.deleteMany();
+      await prisma.scheduleSource.deleteMany();
+      await prisma.campaign.deleteMany();
+      await prisma.schedule.deleteMany();
       await prisma.targetGroupUser.deleteMany();
       await prisma.targetGroup.deleteMany();
       await prisma.siteImportFile.deleteMany();
       await prisma.siteImport.deleteMany();
       await prisma.job.deleteMany();
+      await prisma.emailTemplateFile.deleteMany();
       await prisma.file.deleteMany();
+      await prisma.storedObject.deleteMany();
       await prisma.pageSubmission.deleteMany();
       await prisma.page.deleteMany();
+      await prisma.emailTemplate.deleteMany();
+      await prisma.mailSendingProfile.deleteMany();
       await prisma.user.deleteMany();
       await prisma.organization.deleteMany();
     },

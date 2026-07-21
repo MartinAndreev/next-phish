@@ -56,6 +56,7 @@ export type {
 
 export type {
   EmailTemplateStatus,
+  CatalogPreviewView,
   EmailTemplateAuthorView,
   EmailTemplateListItemView,
   EmailTemplateView,
@@ -109,6 +110,9 @@ export type { MailProviderType } from "./types";
 
 export { sendingProfileFormSchema } from "./schemas";
 export type { SendingProfileFormValues } from "./schemas";
+
+export { campaignFormSchema, scheduleFormSchema } from "./schemas";
+export type { CampaignFormValues, ScheduleFormValues } from "./schemas";
 
 export {
   PERMISSION_GROUPS,

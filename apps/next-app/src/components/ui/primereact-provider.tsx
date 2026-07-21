@@ -114,50 +114,164 @@ const customTailwind = {
     content: { className: "bg-transparent text-zinc-200 p-0" },
   },
 
+  // Calendar
+  calendar: {
+    ...Tailwind.calendar,
+    root: ({ props }: { props: { disabled?: boolean } }) => ({
+      className: classNames(
+        "relative grid h-8 max-w-full grid-cols-[minmax(0,1fr)_2rem] overflow-hidden rounded-lg border border-gray-300 bg-white transition-colors hover:border-blue-500 focus-within:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
+        { "pointer-events-none cursor-default opacity-60": props.disabled },
+      ),
+    }),
+    input: {
+      root: ({ parent }: { parent: { props: { showIcon?: boolean } } }) => ({
+        className: classNames(
+          "h-8 min-w-0 w-full appearance-none border-0 bg-white px-3 py-1.5 font-sans text-xs text-slate-700 focus:outline-none focus:shadow-none",
+          parent.props.showIcon ? "rounded-none" : "rounded-lg",
+        ),
+      }),
+    },
+    icon: {
+      root: {
+        className: "text-slate-400",
+      },
+    },
+    dropdownButton: {
+      root: {
+        className:
+          "flex h-8 w-8 items-center justify-center rounded-none border-0 border-l border-white/20 p-2 text-xs !text-white",
+      },
+    },
+    panel: ({ props }: { props: { inline?: boolean } }) => ({
+      className: classNames(
+        "!w-68 !min-w-68 rounded-lg bg-white p-1 text-xs text-slate-700",
+        props.inline
+          ? "inline-block overflow-x-auto border border-gray-300"
+          : "absolute border-0 shadow-md",
+      ),
+    }),
+    header: {
+      className:
+        "m-0 flex items-center justify-between rounded-t-lg border-b border-gray-300 bg-white p-1 font-semibold text-gray-700",
+    },
+    previousButton: {
+      className:
+        "relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border-0 bg-transparent text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-700",
+    },
+    nextButton: {
+      className:
+        "relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border-0 bg-transparent text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-700",
+    },
+    title: "mx-auto leading-7",
+    monthTitle: {
+      className:
+        "mr-1 p-1 font-semibold text-gray-700 transition hover:text-blue-500",
+    },
+    yearTitle: {
+      className:
+        "p-1 font-semibold text-gray-700 transition hover:text-blue-500",
+    },
+    table: { className: "my-1 w-full border-collapse" },
+    tableHeaderCell: "p-1",
+    day: "p-1",
+    dayLabel: ({
+      context,
+    }: {
+      context: { disabled?: boolean; selected?: boolean };
+    }) => ({
+      className: classNames(
+        "relative mx-auto flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-transparent transition-shadow focus:outline-none",
+        context.disabled ? "cursor-default opacity-60" : "cursor-pointer",
+        context.selected && !context.disabled
+          ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+          : "bg-transparent text-gray-600 hover:bg-gray-200",
+      ),
+    }),
+    timePicker: {
+      className:
+        "flex items-center justify-center border-t border-solid border-gray-300 p-1",
+    },
+    separatorContainer: "flex flex-col items-center px-1",
+    hourPicker: "flex flex-col items-center px-1",
+    minutePicker: "flex flex-col items-center px-1",
+    ampmPicker: "flex flex-col items-center px-1",
+    incrementButton: {
+      className:
+        "relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border-0 bg-transparent text-gray-600 transition-colors hover:bg-gray-200",
+    },
+    decrementButton: {
+      className:
+        "relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border-0 bg-transparent text-gray-600 transition-colors hover:bg-gray-200",
+    },
+  },
+
   // Dropdown
   dropdown: {
     ...Tailwind.dropdown,
-    root: {
+    root: ({ props }: { props: { disabled?: boolean } }) => ({
+      className: classNames(
+        "relative inline-flex w-full cursor-pointer select-none items-center rounded-lg border border-gray-300 bg-white text-slate-700 transition-colors hover:border-blue-500 focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
+        { "pointer-events-none cursor-default opacity-60": props.disabled },
+      ),
+    }),
+    input: ({ props }: { props: { showClear?: boolean } }) => ({
+      className: classNames(
+        "relative block flex flex-auto cursor-pointer overflow-hidden overflow-ellipsis whitespace-nowrap rounded-lg border-0 bg-transparent p-3 font-sans text-base text-slate-700 transition focus:outline-none focus:shadow-none",
+        { "pr-7": props.showClear },
+      ),
+    }),
+    trigger: {
       className:
-        "cursor-pointer inline-flex relative select-none transition-colors duration-200 ease-in-out rounded-xl w-full shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] placeholder:text-slate-400 m-0 font-sans text-gray-600 dark:text-white/80 bg-white dark:bg-gray-900 border transition-colors duration-200 appearance-none rounded-lg focus:outline-none focus:outline-offset-0 focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)] dark:focus:shadow-[0_0_0_0.2rem_rgba(147,197,253,0.5)] hover:border-blue-500 border-gray-300 dark:border-blue-900/40 items-center",
-    },
-    label: {
-      className: "text-white/80",
+        "flex w-10 shrink-0 items-center justify-center rounded-r-lg bg-transparent text-slate-500",
     },
     header: {
       className:
-        "p-3 border-b border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+        "sticky top-0 z-10 mt-0 border-b border-slate-200 bg-slate-50/95 p-2 text-slate-700 backdrop-blur-sm",
     },
     panel: {
-      className: "bg-brand-dark border border-white/10 rounded-xl shadow-lg",
+      className:
+        "mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_16px_40px_rgba(2,11,29,0.28)]",
     },
     transition: {
       timeout: 150,
       classNames: {
-        enter: "opacity-0",
-        enterActive: "opacity-100 transition-opacity duration-150 ease-in",
-        exit: "opacity-100",
-        exitActive: "opacity-0 transition-opacity duration-150 ease-linear",
+        enter: "scale-95 opacity-0",
+        enterActive: "scale-100 opacity-100 transition duration-150 ease-out",
+        exit: "scale-100 opacity-100",
+        exitActive: "scale-95 opacity-0 transition duration-100 ease-in",
       },
     },
     wrapper: {
-      className: "max-h-60 overflow-auto bg-brand-dark rounded-xl",
-    },
-    list: { className: "list-none p-1 m-0" },
-    item: {
       className:
-        "text-zinc-100 cursor-pointer font-normal whitespace-nowrap px-4 py-2.5 rounded-lg hover:bg-white/10 transition-colors",
+        "max-h-52 overflow-auto bg-white text-slate-700 [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-track]:bg-transparent",
     },
+    list: { className: "m-0 list-none p-1.5" },
+    item: ({
+      context,
+    }: {
+      context: { disabled?: boolean; focused?: boolean; selected?: boolean };
+    }) => ({
+      className: classNames(
+        "relative m-0 flex cursor-pointer items-center gap-2 overflow-hidden whitespace-nowrap rounded-lg border-0 px-3 py-2 text-sm font-normal transition-colors",
+        context.selected
+          ? "bg-blue-50 font-medium text-blue-700 ring-1 ring-inset ring-blue-100"
+          : context.focused
+            ? "bg-slate-100 text-slate-950"
+            : "text-slate-700 hover:bg-slate-50",
+        { "pointer-events-none cursor-default opacity-60": context.disabled },
+      ),
+    }),
     filterContainer: { className: "relative p-2" },
     filterInput: {
       className:
-        "w-full rounded-lg border border-white/10 bg-white/95 text-slate-900 px-4 py-2.5 pr-10",
+        "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-9 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100",
     },
     filterIcon: {
-      className: "absolute right-5 top-1/2 -translate-y-1/2 text-gray-400",
+      className:
+        "absolute right-5 top-1/2 -translate-y-1/2 text-sm text-slate-400",
     },
     emptyMessage: {
-      className: "text-zinc-400 px-4 py-2.5",
+      className: "px-3 py-2 text-sm text-slate-500",
     },
   },
 
@@ -165,42 +279,47 @@ const customTailwind = {
   multiselect: {
     root: {
       className:
-        "inline-flex cursor-pointer select-none bg-brand-dark border border-white/10 text-white/80 transition-colors duration-200 ease-in-out rounded-xl w-full hover:border-white/20 focus:outline-none focus:outline-offset-0 items-center",
+        "inline-flex w-full cursor-pointer items-center rounded-lg border border-gray-300 bg-white text-slate-700 transition-colors hover:border-blue-500 focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
     },
     labelContainer: {
       className: "overflow-hidden flex flex-auto cursor-pointer",
     },
-    label: { className: "text-white/80 px-2 text-sm" },
+    label: { className: "px-3 py-2 text-sm text-slate-700" },
     token: {
       className:
         "px-2 mr-2 bg-white/10 text-white/80 rounded-full inline-flex items-center bg-[image:var(--brand-gradient)]",
     },
-    removeTokenIcon: { className: "ml-1 text-zinc-400 hover:text-white" },
+    removeTokenIcon: {
+      className: "ml-1 cursor-pointer text-white/80 hover:text-white",
+    },
     trigger: {
-      className: "flex items-center justify-center shrink-0 text-zinc-400 w-12",
+      className:
+        "flex w-10 shrink-0 items-center justify-center text-slate-500",
     },
     dropdownIcon: { className: "w-4 h-4" },
     header: {
       className:
-        "p-3 flex justify-between border-b border-white/10 text-zinc-100 bg-brand-dark mt-0 rounded-tl-xl rounded-tr-xl",
+        "mt-0 flex justify-between border-b border-slate-200 bg-slate-50 p-2 text-slate-700",
     },
     panel: {
-      className: "bg-brand-dark border border-white/10 rounded-xl shadow-lg",
+      className:
+        "mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_16px_40px_rgba(2,11,29,0.28)]",
     },
     wrapper: {
-      className: "max-h-60 overflow-auto bg-brand-dark rounded-xl",
+      className:
+        "max-h-52 overflow-auto bg-white text-slate-700 [scrollbar-color:#94a3b8_transparent] [scrollbar-width:thin]",
     },
     list: { className: "list-none p-1 m-0" },
     itemGroup: {
       className:
-        "text-zinc-400 text-xs font-semibold px-3 py-2 uppercase tracking-wider",
+        "px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500",
     },
     item: ({ context }: { context?: { checked?: boolean } }) => ({
       className: classNames(
         "cursor-pointer font-normal whitespace-nowrap px-3 py-2 rounded-lg transition-colors flex items-center gap-2",
         context?.checked
-          ? "bg-cyan-500/20 text-cyan-200"
-          : "text-zinc-100 hover:bg-white/10",
+          ? "bg-blue-50 text-blue-700"
+          : "text-slate-700 hover:bg-slate-100",
       ),
     }),
     checkboxContainer: { className: "mr-2" },
@@ -213,13 +332,13 @@ const customTailwind = {
     filterContainer: { className: "relative p-2" },
     filterInput: {
       className:
-        "w-full rounded-lg border border-white/10 bg-white/95 text-slate-900 px-4 py-2.5 pr-10",
+        "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-9 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100",
     },
     filterIcon: {
-      className: "absolute right-5 top-1/2 -translate-y-1/2 text-gray-400",
+      className: "absolute right-5 top-1/2 -translate-y-1/2 text-slate-400",
     },
     emptyMessage: {
-      className: "text-zinc-400 px-4 py-2.5",
+      className: "px-3 py-2 text-sm text-slate-500",
     },
   },
   checkbox: {
@@ -285,25 +404,54 @@ const customTailwind = {
       className: "bg-black/50",
     },
   },
+  // InputNumber
+  inputnumber: {
+    ...Tailwind.inputnumber,
+    root: {
+      className: "inline-flex w-full",
+    },
+    input: {
+      root: ({
+        props,
+      }: {
+        props: { showButtons?: boolean; buttonLayout?: string };
+      }) => ({
+        className: classNames(
+          "w-full appearance-none rounded-lg border border-gray-300 bg-white p-3 font-sans text-base text-slate-700 transition-colors hover:border-blue-500 focus:border-blue-400 focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(191,219,254,1)]",
+          {
+            "rounded-r-none":
+              props.showButtons && props.buttonLayout === "stacked",
+          },
+        ),
+      }),
+    },
+  },
+
   // Chips
   chips: {
+    ...Tailwind.chips,
     root: {
-      className:
-        "flex-row items-center flex-wrap gap-2 bg-brand-dark text-white border border-white/10 rounded-lg p-1",
+      className: "w-full",
     },
     container: {
-      className: "flex flex-row items-center gap-1 flex-wrap",
+      className:
+        "m-0 flex min-h-10 w-full cursor-text list-none flex-wrap items-center gap-2 rounded-xl border border-white/20 bg-brand-dark px-3 py-2 text-white transition-colors hover:border-white/30 focus-within:border-brand-blue/70 focus-within:shadow-[0_0_0_3px_rgba(41,184,255,0.12)]",
+    },
+    inputToken: {
+      className:
+        "inline-flex min-w-32 flex-1 items-center py-0.5 text-white/80",
     },
     input: {
       className:
-        "w-full text-white/80 text-xs py-1 px-2 bg-transparent flex-auto w-[1%] cursor-pointer border-0 focus:outline-none",
-    },
-    inputToken: {
-      className: "text-white/80 inline-flex items-center",
+        "m-0 w-full cursor-text border-0 bg-transparent p-0 text-xs text-white/80 shadow-none outline-none placeholder:text-zinc-500",
     },
     token: {
       className:
-        "text-white/80 text-xs py-1 px-2 bg-[image:var(--brand-gradient)] rounded-lg flex items-center gap-2 transition-colors items-center",
+        "inline-flex items-center gap-1.5 rounded-full border-0 bg-[image:var(--brand-gradient)] px-2.5 py-1 text-xs font-medium text-white shadow-sm before:text-white/60 before:content-['#']",
+    },
+    removeTokenIcon: {
+      className:
+        "ml-0.5 h-4 w-4 cursor-pointer rounded-full p-0.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white focus:outline-none",
     },
   },
   // DataTable

@@ -5,7 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
 import { CreateOrgModal } from "./create-org-modal";
-import { selectSmall } from "@/src/components/ui/theme-constants";
+import { selectSmallDark } from "@/src/components/ui/theme-constants";
 import { useTranslation } from "@/src/lib/i18n";
 
 interface OrgSwitcherProps {
@@ -48,7 +48,7 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
             }
           }}
           className="flex-1"
-          pt={selectSmall}
+          pt={selectSmallDark}
           valueTemplate={(option) => {
             if (!option)
               return (

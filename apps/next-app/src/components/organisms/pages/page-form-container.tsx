@@ -18,6 +18,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     editorDesignRef,
     status,
     handleSubmit,
+    regeneratePreview,
+    isGeneratingPreview,
     breadcrumbItems,
     t,
     router,
@@ -82,6 +84,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
       t={t}
       onSubmit={handleFormSubmit}
       onCancel={() => router.push("/pages")}
+      onRegeneratePreview={regeneratePreview ?? undefined}
+      isGeneratingPreview={isGeneratingPreview}
     />
   );
 }

@@ -53,6 +53,8 @@ interface EmailTemplateFormProps {
   onRemove: (fileId: string) => Promise<void>;
   onSubmit: (values: EmailTemplateFormValues) => Promise<void>;
   onCancel: () => void;
+  onRegeneratePreview?: () => Promise<void>;
+  isGeneratingPreview?: boolean;
 }
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
@@ -80,6 +82,8 @@ export function EmailTemplateForm({
   onRemove,
   onSubmit,
   onCancel,
+  onRegeneratePreview,
+  isGeneratingPreview,
 }: EmailTemplateFormProps) {
   return (
     <div className="px-6 py-8">
@@ -97,6 +101,18 @@ export function EmailTemplateForm({
             ? t("emailTemplates.editSubtitle")
             : t("emailTemplates.createSubtitle")}
         </p>
+        {templateId && onRegeneratePreview ? (
+          <Button
+            type="button"
+            size="small"
+            outlined
+            icon="pi pi-image"
+            label="Regenerate preview"
+            loading={isGeneratingPreview}
+            onClick={() => void onRegeneratePreview()}
+            className="mt-3"
+          />
+        ) : null}
       </div>
 
       <Formik<EmailTemplateFormValues>

@@ -26,6 +26,8 @@ interface FindUsersByGroupIdInput {
   offset: number;
 }
 
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
 const authorSelect = {
   id: true,
   name: true,
@@ -67,7 +69,10 @@ export class TargetGroupRepository {
     organizationId: string,
     input: FindByOrganizationIdInput,
   ): Promise<{ rows: TargetGroupListItemView[]; total: number }> {
-    const where: Record<string, unknown> = { organizationId };
+    const where: Record<string, unknown> = {
+      organizationId,
+      visibility: "CATALOG",
+    };
 
     if (input.search) {
       where.name = { contains: input.search, mode: "insensitive" as const };
@@ -104,7 +109,7 @@ export class TargetGroupRepository {
     organizationId: string,
   ): Promise<TargetGroupView | null> {
     const row = await this.db.targetGroup.findFirst({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
       select: detailSelect,
     });
 
@@ -155,6 +160,7 @@ export class TargetGroupRepository {
           ? {
               create: data.users.map((u) => ({
                 email: u.email,
+                normalizedEmail: normalizeEmail(u.email),
                 firstName: u.firstName,
                 lastName: u.lastName,
                 position: u.position ?? null,
@@ -178,7 +184,7 @@ export class TargetGroupRepository {
     data: UpdateTargetGroupData,
   ): Promise<boolean> {
     const result = await this.db.targetGroup.updateMany({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
       data: {
         name: data.name,
         status: data.status,
@@ -190,7 +196,7 @@ export class TargetGroupRepository {
 
   async delete(id: string, organizationId: string): Promise<boolean> {
     const result = await this.db.targetGroup.deleteMany({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
     });
 
     return result.count > 0;
@@ -211,6 +217,7 @@ export class TargetGroupRepository {
       data: users.map((u) => ({
         targetGroupId,
         email: u.email,
+        normalizedEmail: normalizeEmail(u.email),
         firstName: u.firstName,
         lastName: u.lastName,
         position: u.position ?? null,
@@ -236,12 +243,13 @@ export class TargetGroupRepository {
     let updated = 0;
 
     for (const user of users) {
-      const existing = await this.db.targetGroupUser.findUnique({
+      const existing = await this.db.targetGroupUser.findFirst({
         where: {
-          targetGroupId_email: {
-            targetGroupId,
-            email: user.email,
-          },
+          targetGroupId,
+          OR: [
+            { normalizedEmail: normalizeEmail(user.email) },
+            { email: user.email },
+          ],
         },
       });
 
@@ -260,6 +268,7 @@ export class TargetGroupRepository {
           data: {
             targetGroupId,
             email: user.email,
+            normalizedEmail: normalizeEmail(user.email),
             firstName: user.firstName,
             lastName: user.lastName,
             position: user.position ?? null,
@@ -310,6 +319,7 @@ export class TargetGroupRepository {
       data: {
         targetGroupId,
         email: data.email,
+        normalizedEmail: normalizeEmail(data.email),
         firstName: data.firstName,
         lastName: data.lastName,
         position: data.position ?? null,
@@ -334,6 +344,7 @@ export class TargetGroupRepository {
       where: { id, targetGroupId },
       data: {
         email: data.email,
+        normalizedEmail: normalizeEmail(data.email),
         firstName: data.firstName,
         lastName: data.lastName,
         position: data.position ?? null,

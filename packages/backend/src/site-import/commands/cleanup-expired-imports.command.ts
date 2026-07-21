@@ -27,14 +27,12 @@ export class CleanupExpiredImportsCommand implements ICommandHandler<
     for (const siteImport of expired) {
       for (const file of siteImport.files) {
         try {
-          await this.r2.deleteObject(file.file.remoteId);
+          const result = await this.fileRepo.delete(file.fileId);
+          if (result.orphanedRemoteId) {
+            await this.r2.deleteObject(result.orphanedRemoteId);
+          }
         } catch {
-          // ignore R2 errors during cleanup
-        }
-        try {
-          await this.fileRepo.delete(file.fileId);
-        } catch {
-          // ignore file record errors
+          // ignore storage cleanup errors
         }
       }
       await this.siteImportRepo.delete(siteImport.id);

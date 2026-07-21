@@ -1,4 +1,6 @@
 export type PageType = "LANDING" | "REDIRECT";
+import type { CatalogPreviewView } from "./email-template.types";
+
 export type PageStatus = "DRAFT" | "ACTIVE";
 
 export interface PageAuthorView {
@@ -16,6 +18,10 @@ export interface PageListItemView {
   createdById: string;
   createdAt: Date;
   updatedAt: Date;
+  contentRevision: number;
+  /** Included by catalog picker queries for a sandboxed live-preview fallback. */
+  html?: string;
+  preview: CatalogPreviewView | null;
   createdBy: PageAuthorView;
 }
 

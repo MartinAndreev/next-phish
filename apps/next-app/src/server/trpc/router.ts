@@ -8,6 +8,7 @@ import { jobRouter } from "../modules/job/job.router";
 import { apiKeyRouter } from "../modules/api-key/api-key.router";
 import { targetGroupRouter } from "../modules/target-group/target-group.router";
 import { mailSendingRouter } from "../modules/mail-sending/mail-sending.router";
+import { campaignRouter } from "../modules/campaign/campaign.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -19,5 +20,6 @@ export const appRouter = router({
   apiKey: apiKeyRouter,
   targetGroup: targetGroupRouter,
   mailSending: mailSendingRouter,
+  campaign: campaignRouter,
 });
 export type AppRouter = typeof appRouter;

@@ -23,6 +23,7 @@ export const owner = ac.newRole({
   pages: ["read", "write"],
   files: ["read", "write"],
   jobs: ["read"],
+  campaigns: ["read", "write"],
 } as unknown as Parameters<typeof ac.newRole>[0]);
 
 export const admin = ac.newRole({
@@ -32,6 +33,7 @@ export const admin = ac.newRole({
   pages: ["read", "write"],
   files: ["read", "write"],
   jobs: ["read"],
+  campaigns: ["read", "write"],
 } as unknown as Parameters<typeof ac.newRole>[0]);
 
 export const member = ac.newRole({
@@ -41,4 +43,5 @@ export const member = ac.newRole({
   pages: ["read"],
   files: ["read"],
   jobs: ["read"],
+  campaigns: ["read"],
 } as unknown as Parameters<typeof ac.newRole>[0]);

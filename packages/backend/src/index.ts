@@ -204,6 +204,9 @@ export type { CreateApiKeyData, RevokeOrgApiKeysData } from "./api-key";
 
 export { R2Client } from "./storage/r2-client";
 
+export * from "./campaign";
+export * from "./catalog-preview";
+
 export {
   TargetGroupRepository,
   TargetGroupService,

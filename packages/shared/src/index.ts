@@ -115,6 +115,25 @@ export { campaignFormSchema, scheduleFormSchema } from "./schemas";
 export type { CampaignFormValues, ScheduleFormValues } from "./schemas";
 
 export {
+  campaignEventTypeSchema,
+  deliveryEventTypeSchema,
+  recipientDeliveryStatusSchema,
+  negativeEventSeveritySchema,
+  materializeOccurrencePayloadSchema,
+  feedDeliveriesPayloadSchema,
+  deliverRecipientPayloadSchema,
+  processDeliveryEventPayloadSchema,
+  executionQueuePayloadSchema,
+} from "./schemas";
+export type {
+  CampaignEventType,
+  DeliveryEventType,
+  RecipientDeliveryStatus,
+  NegativeEventSeverity,
+  ExecutionQueuePayload,
+} from "./schemas";
+
+export {
   PERMISSION_GROUPS,
   toBetterAuthStatements,
   toRouterPermissions,

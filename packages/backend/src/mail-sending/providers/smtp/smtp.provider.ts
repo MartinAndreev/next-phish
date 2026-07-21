@@ -25,6 +25,7 @@ const SMTP_CAPABILITIES: MailProviderCapabilities = {
   supportsBatch: false,
   supportsTracking: false,
   supportsRateLimitInfo: false,
+  supportsIdempotencyKey: false,
 };
 
 export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
@@ -69,6 +70,7 @@ export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
         cc: message.cc?.join(", "),
         bcc: message.bcc?.join(", "),
         subject: message.subject,
+        messageId: message.messageId,
         html: message.html,
         text: message.text,
         headers: message.headers,
@@ -117,6 +119,12 @@ export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
       host,
       port,
       secure: config.secure,
+      pool: true,
+      maxConnections: Number(process.env.SMTP_MAX_CONNECTIONS ?? 5),
+      connectionTimeout: Number(
+        process.env.SMTP_CONNECTION_TIMEOUT_MS ?? 15_000,
+      ),
+      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT_MS ?? 60_000),
       auth:
         config.username || config.password
           ? { user: config.username, pass: config.password }

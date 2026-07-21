@@ -1,6 +1,7 @@
 import { MailSendingProfileRepository } from "../repositories";
 import { MailProviderRegistry } from "../registry";
 import { MailProfileCacheService } from "./mail-profile-cache.service";
+import { assertSafeHeaderValue } from "../../delivery";
 import type {
   SendMailInput,
   SendMailResult,
@@ -20,7 +21,17 @@ export class MailDispatcherService {
     organizationId: string,
     message: SendMailInput,
   ): Promise<SendMailResult> {
-    const profile = await this.profileRepo.findById(profileId, organizationId);
+    if (message.to.length !== 1 || message.cc?.length || message.bcc?.length)
+      throw new Error("Campaign delivery requires exactly one recipient");
+    for (const [name, value] of Object.entries(message.headers ?? {})) {
+      assertSafeHeaderValue(name);
+      assertSafeHeaderValue(value);
+    }
+    if (message.messageId) assertSafeHeaderValue(message.messageId);
+    const profile = await this.profileRepo.findExecutionById(
+      profileId,
+      organizationId,
+    );
     if (!profile) {
       return {
         provider: message as unknown as SendMailResult["provider"],
@@ -35,7 +46,7 @@ export class MailDispatcherService {
     return this.profileCache.withCachedConfig(
       profileId,
       provider,
-      () => this.profileRepo.getConfig(profileId, organizationId),
+      () => this.profileRepo.getExecutionConfig(profileId, organizationId),
       (validConfig) => provider.send(validConfig, message),
     );
   }

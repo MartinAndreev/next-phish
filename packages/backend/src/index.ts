@@ -206,6 +206,7 @@ export { R2Client } from "./storage/r2-client";
 
 export * from "./campaign";
 export * from "./catalog-preview";
+export * from "./delivery";
 
 export {
   TargetGroupRepository,

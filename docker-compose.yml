@@ -64,6 +64,9 @@ services:
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - STATIC_SERVER_PORT=3001
+      - PAGE_SUBMISSION_ENCRYPTION_KEY=${PAGE_SUBMISSION_ENCRYPTION_KEY}
+      - PUBLIC_CONTENT_URL=${PUBLIC_CONTENT_URL:-http://content.localhost:3001}
+      - TRUSTED_PROXY_NETWORKS=${TRUSTED_PROXY_NETWORKS:-}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules
@@ -81,6 +84,9 @@ services:
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - SMTP_HOST=fakesmtp
+      - PAGE_SUBMISSION_ENCRYPTION_KEY=${PAGE_SUBMISSION_ENCRYPTION_KEY}
+      - PUBLIC_CONTENT_URL=${PUBLIC_CONTENT_URL:-http://content.localhost:3001}
+      - MESSAGE_ID_DOMAIN=${MESSAGE_ID_DOMAIN:-mail.example.com}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules

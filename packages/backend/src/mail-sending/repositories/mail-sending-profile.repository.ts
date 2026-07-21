@@ -116,6 +116,17 @@ export class MailSendingProfileRepository {
     return (row as unknown as MailSendingProfileRow) ?? null;
   }
 
+  async findExecutionById(
+    id: string,
+    organizationId: string,
+  ): Promise<MailSendingProfileRow | null> {
+    const row = await this.db.mailSendingProfile.findFirst({
+      where: { id, organizationId },
+      select: detailSelect,
+    });
+    return (row as unknown as MailSendingProfileRow) ?? null;
+  }
+
   async findDefault(
     organizationId: string,
   ): Promise<MailSendingProfileRow | null> {
@@ -161,6 +172,18 @@ export class MailSendingProfileRepository {
     });
 
     return result.count > 0;
+  }
+
+  async getExecutionConfig(
+    id: string,
+    organizationId: string,
+  ): Promise<Record<string, unknown>> {
+    const row = await this.db.mailSendingProfile.findFirst({
+      where: { id, organizationId },
+      select: { providerConfig: true },
+    });
+    if (!row) throw new Error(`MailSendingProfile ${id} not found`);
+    return row.providerConfig as Record<string, unknown>;
   }
 
   async getConfig(

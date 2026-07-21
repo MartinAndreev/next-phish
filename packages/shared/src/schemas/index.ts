@@ -79,3 +79,22 @@ export { sendingProfileFormSchema } from "./sending-profile.schema";
 export { campaignFormSchema, scheduleFormSchema } from "./campaign.schema";
 export type { CampaignFormValues, ScheduleFormValues } from "./campaign.schema";
 export type { SendingProfileFormValues } from "./sending-profile.schema";
+
+export {
+  campaignEventTypeSchema,
+  deliveryEventTypeSchema,
+  recipientDeliveryStatusSchema,
+  negativeEventSeveritySchema,
+  materializeOccurrencePayloadSchema,
+  feedDeliveriesPayloadSchema,
+  deliverRecipientPayloadSchema,
+  processDeliveryEventPayloadSchema,
+  executionQueuePayloadSchema,
+} from "./execution.schema";
+export type {
+  CampaignEventType,
+  DeliveryEventType,
+  RecipientDeliveryStatus,
+  NegativeEventSeverity,
+  ExecutionQueuePayload,
+} from "./execution.schema";

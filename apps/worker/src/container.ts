@@ -1,4 +1,5 @@
 import { initializeContainer } from "@next-phish/backend";
+import { connection } from "./connection";
 
 const encryptionKey = process.env.PAGE_SUBMISSION_ENCRYPTION_KEY;
 if (!encryptionKey) {
@@ -7,4 +8,4 @@ if (!encryptionKey) {
   );
 }
 
-initializeContainer({ encryptionKey });
+initializeContainer({ encryptionKey, redis: connection });

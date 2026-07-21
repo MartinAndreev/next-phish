@@ -22,6 +22,7 @@ import {
   CompleteCampaignCommand,
   DuplicateScheduleCommand,
   MaterializeOccurrenceCommand,
+  MaterializeClaimedOccurrenceCommand,
 } from "./commands";
 
 export function registerCampaignServices(db: PrismaClient): void {
@@ -47,6 +48,10 @@ export function registerCampaignServices(db: PrismaClient): void {
     [CompleteCampaignCommand, new CompleteCampaignCommand(repo)],
     [DuplicateScheduleCommand, new DuplicateScheduleCommand(repo)],
     [MaterializeOccurrenceCommand, new MaterializeOccurrenceCommand(repo)],
+    [
+      MaterializeClaimedOccurrenceCommand,
+      new MaterializeClaimedOccurrenceCommand(repo),
+    ],
   ] as const)
     Container.set(token, instance);
 }

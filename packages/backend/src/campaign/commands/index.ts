@@ -10,3 +10,4 @@ export { UpdateScheduleCommand } from "./update-schedule.command";
 export { CancelScheduleCommand } from "./cancel-schedule.command";
 export { DuplicateScheduleCommand } from "./duplicate-schedule.command";
 export { MaterializeOccurrenceCommand } from "./materialize-occurrence.command";
+export { MaterializeClaimedOccurrenceCommand } from "./materialize-claimed-occurrence.command";

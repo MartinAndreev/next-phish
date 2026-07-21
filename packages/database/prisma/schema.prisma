@@ -81,6 +81,62 @@ enum DeliveryMode {
   BATCH
 }
 
+enum OccurrenceStatus {
+  PENDING
+  MATERIALIZING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum RecipientDeliveryStatus {
+  PLANNED
+  QUEUED
+  DISPATCHING
+  RETRYABLE
+  SENT
+  FAILED
+  DELIVERY_UNKNOWN
+  CANCELLED
+}
+
+enum NegativeEventSeverity {
+  NONE
+  OPENED
+  CLICKED
+  SUBMITTED
+}
+
+enum CampaignEventType {
+  SCHEDULED
+  SENT
+  OPENED
+  CLICKED
+  SUBMITTED
+  REPORTED
+  FAILED
+}
+
+enum DeliveryEventType {
+  QUEUED
+  DISPATCH_STARTED
+  ACCEPTED
+  DEFERRED
+  DELIVERED
+  BOUNCED
+  REJECTED
+  RETRY_SCHEDULED
+  DELIVERY_UNKNOWN
+  CANCELLED
+}
+
+enum OutboxStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
 enum PageType {
   LANDING
   REDIRECT
@@ -136,19 +192,20 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  sessions       Session[]
-  accounts       Account[]
-  twoFactor      TwoFactor?
-  members        Member[]
-  invitations    Invitation[]
-  emailTemplates EmailTemplate[] @relation("EmailTemplateCreatedBy")
-  pages          Page[]          @relation("PageCreatedBy")
-  uploadedFiles  File[]          @relation("UploadedFiles")
-  jobs           Job[]           @relation("JobCreatedBy")
-  siteImports    SiteImport[]    @relation("SiteImportCreatedBy")
-  targetGroups   TargetGroup[]   @relation("TargetGroupCreatedBy")
-  campaigns      Campaign[]      @relation("CampaignCreatedBy")
-  schedules      Schedule[]      @relation("ScheduleCreatedBy")
+  sessions        Session[]
+  accounts        Account[]
+  twoFactor       TwoFactor?
+  members         Member[]
+  invitations     Invitation[]
+  emailTemplates  EmailTemplate[]              @relation("EmailTemplateCreatedBy")
+  pages           Page[]                       @relation("PageCreatedBy")
+  uploadedFiles   File[]                       @relation("UploadedFiles")
+  jobs            Job[]                        @relation("JobCreatedBy")
+  siteImports     SiteImport[]                 @relation("SiteImportCreatedBy")
+  targetGroups    TargetGroup[]                @relation("TargetGroupCreatedBy")
+  campaigns       Campaign[]                   @relation("CampaignCreatedBy")
+  schedules       Schedule[]                   @relation("ScheduleCreatedBy")
+  ignoredNetworks OrganizationIgnoredNetwork[] @relation("IgnoredNetworkCreatedBy")
 
   @@map("user")
 }
@@ -235,6 +292,12 @@ model Organization {
   schedules           Schedule[]
   storedObjects       StoredObject[]
   catalogPreviews     CatalogPreview[]
+  campaignRecipients  CampaignRecipient[]
+  campaignEvents      CampaignEvent[]
+  deliveryEvents      DeliveryEvent[]
+  ignoredNetworks     OrganizationIgnoredNetwork[]
+  outboxEvents        OutboxEvent[]
+  scheduleOccurrences ScheduleOccurrence[]
 
   @@map("organization")
 }
@@ -623,42 +686,50 @@ model CatalogPreview {
 }
 
 model Campaign {
-  id                    String         @id @default(cuid())
-  organizationId        String
-  createdById           String
-  name                  String
-  tags                  String[]
-  type                  CampaignType
-  status                CampaignStatus @default(DRAFT)
-  emailTemplateId       String?
-  pageId                String?
-  mailSendingProfileId  String?
-  targetGroupId         String?
-  targetTimezone        String
-  autoCompleteAfterDays Int?           @default(20)
-  sourceCampaignId      String?
-  scheduleId            String?
-  occurrenceAt          DateTime?      @db.Timestamptz(3)
-  brokenAt              DateTime?
-  brokenReason          String?
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
+  id                     String         @id @default(cuid())
+  organizationId         String
+  createdById            String
+  name                   String
+  tags                   String[]       @default([])
+  type                   CampaignType
+  status                 CampaignStatus @default(DRAFT)
+  emailTemplateId        String?
+  pageId                 String?
+  mailSendingProfileId   String?
+  targetGroupId          String?
+  targetTimezone         String
+  autoCompleteAfterDays  Int?           @default(20)
+  sourceCampaignId       String?
+  scheduleId             String?
+  occurrenceAt           DateTime?      @db.Timestamptz(3)
+  materializedAt         DateTime?      @db.Timestamptz(3)
+  expectedRecipientCount Int?
+  brokenAt               DateTime?
+  brokenReason           String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
-  organization          Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy             User                 @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  emailTemplate         EmailTemplate?       @relation("CampaignEmailTemplate", fields: [emailTemplateId], references: [id], onDelete: SetNull)
-  page                  Page?                @relation("CampaignPage", fields: [pageId], references: [id], onDelete: SetNull)
-  mailSendingProfile    MailSendingProfile?  @relation("CampaignSendingProfile", fields: [mailSendingProfileId], references: [id], onDelete: SetNull)
-  targetGroup           TargetGroup?         @relation("CampaignTargetGroup", fields: [targetGroupId], references: [id], onDelete: SetNull)
-  sourceCampaign        Campaign?            @relation("CampaignClone", fields: [sourceCampaignId], references: [id], onDelete: SetNull)
-  clones                Campaign[]           @relation("CampaignClone")
-  schedule              Schedule?            @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy             User                   @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  emailTemplate         EmailTemplate?         @relation("CampaignEmailTemplate", fields: [emailTemplateId], references: [id], onDelete: SetNull)
+  page                  Page?                  @relation("CampaignPage", fields: [pageId], references: [id], onDelete: SetNull)
+  mailSendingProfile    MailSendingProfile?    @relation("CampaignSendingProfile", fields: [mailSendingProfileId], references: [id], onDelete: SetNull)
+  targetGroup           TargetGroup?           @relation("CampaignTargetGroup", fields: [targetGroupId], references: [id], onDelete: SetNull)
+  sourceCampaign        Campaign?              @relation("CampaignClone", fields: [sourceCampaignId], references: [id], onDelete: SetNull)
+  clones                Campaign[]             @relation("CampaignClone")
+  schedule              Schedule?              @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
   scheduleSources       ScheduleSource[]
-  shadowEmailTemplates  EmailTemplate[]      @relation("CampaignShadowEmailTemplates")
-  shadowPages           Page[]               @relation("CampaignShadowPages")
-  shadowSendingProfiles MailSendingProfile[] @relation("CampaignShadowSendingProfiles")
-  shadowTargetGroups    TargetGroup[]        @relation("CampaignShadowTargetGroups")
-  shadowFiles           File[]               @relation("CampaignShadowFiles")
+  occurrenceSources     ScheduleOccurrence[]   @relation("OccurrenceSource")
+  shadowEmailTemplates  EmailTemplate[]        @relation("CampaignShadowEmailTemplates")
+  shadowPages           Page[]                 @relation("CampaignShadowPages")
+  shadowSendingProfiles MailSendingProfile[]   @relation("CampaignShadowSendingProfiles")
+  shadowTargetGroups    TargetGroup[]          @relation("CampaignShadowTargetGroups")
+  shadowFiles           File[]                 @relation("CampaignShadowFiles")
+  occurrence            ScheduleOccurrence?
+  recipients            CampaignRecipient[]
+  events                CampaignEvent[]
+  deliveryEvents        DeliveryEvent[]
+  trackingLinks         CampaignTrackingLink[]
 
   @@unique([scheduleId, occurrenceAt])
   @@index([organizationId, type, status])
@@ -697,19 +768,214 @@ model Schedule {
   brokenAt              DateTime?
   brokenReason          String?
   collisionFingerprint  String?
+  revision              Int                        @default(1)
+  executionEnabled      Boolean                    @default(true)
   createdAt             DateTime                   @default(now())
   updatedAt             DateTime                   @updatedAt
 
-  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User             @relation("ScheduleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  targetGroup  TargetGroup?     @relation(fields: [targetGroupId], references: [id], onDelete: SetNull)
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User                 @relation("ScheduleCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  targetGroup  TargetGroup?         @relation(fields: [targetGroupId], references: [id], onDelete: SetNull)
   sources      ScheduleSource[]
   campaigns    Campaign[]
+  occurrences  ScheduleOccurrence[]
 
   @@index([organizationId, status, startsAt])
+  @@index([status, executionEnabled, nextOccurrenceAt])
   @@index([targetGroupId])
   @@index([collisionFingerprint])
   @@map("schedule")
+}
+
+model ScheduleOccurrence {
+  id                         String           @id @default(cuid())
+  scheduleId                 String
+  organizationId             String
+  occurrenceAt               DateTime         @db.Timestamptz(3)
+  scheduleRevision           Int
+  sourceCampaignId           String
+  campaignId                 String?          @unique
+  status                     OccurrenceStatus @default(PENDING)
+  materializationCursor      String?
+  materializedRecipientCount Int              @default(0)
+  leaseOwner                 String?
+  leaseExpiresAt             DateTime?        @db.Timestamptz(3)
+  attempts                   Int              @default(0)
+  lastError                  String?
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+  completedAt                DateTime?        @db.Timestamptz(3)
+
+  schedule       Schedule     @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sourceCampaign Campaign     @relation("OccurrenceSource", fields: [sourceCampaignId], references: [id], onDelete: Restrict)
+  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@unique([scheduleId, occurrenceAt])
+  @@index([organizationId, status, occurrenceAt])
+  @@index([status, leaseExpiresAt])
+  @@map("schedule_occurrence")
+}
+
+model CampaignRecipient {
+  id                     String                  @id @default(cuid())
+  campaignId             String
+  organizationId         String
+  sourceUserId           String?
+  email                  String
+  normalizedEmail        String
+  firstName              String
+  lastName               String
+  position               String?
+  mergeData              Json?
+  trackingRef            String                  @unique @db.VarChar(12)
+  idempotencyKey         String                  @unique
+  messageId              String                  @unique
+  providerMessageId      String?
+  scheduledAt            DateTime                @db.Timestamptz(3)
+  deliveryStatus         RecipientDeliveryStatus @default(PLANNED)
+  queuedAt               DateTime?               @db.Timestamptz(3)
+  dispatchStartedAt      DateTime?               @db.Timestamptz(3)
+  sentAt                 DateTime?               @db.Timestamptz(3)
+  failedAt               DateTime?               @db.Timestamptz(3)
+  cancelledAt            DateTime?               @db.Timestamptz(3)
+  attemptCount           Int                     @default(0)
+  retryAt                DateTime?               @db.Timestamptz(3)
+  leaseOwner             String?
+  leaseExpiresAt         DateTime?               @db.Timestamptz(3)
+  lastError              String?
+  highestNegativeEvent   NegativeEventSeverity   @default(NONE)
+  highestNegativeEventAt DateTime?               @db.Timestamptz(3)
+  reported               Boolean                 @default(false)
+  reportedAt             DateTime?               @db.Timestamptz(3)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  campaign       Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  attempts       DeliveryAttempt[]
+  campaignEvents CampaignEvent[]
+  deliveryEvents DeliveryEvent[]
+
+  @@unique([campaignId, normalizedEmail])
+  @@index([organizationId, deliveryStatus, scheduledAt])
+  @@index([campaignId, deliveryStatus])
+  @@index([deliveryStatus, retryAt, leaseExpiresAt])
+  @@map("campaign_recipient")
+}
+
+model CampaignTrackingLink {
+  id             String   @id @default(cuid())
+  campaignId     String
+  linkId         String   @db.VarChar(12)
+  destinationUrl String
+  createdAt      DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, linkId])
+  @@index([linkId])
+  @@map("campaign_tracking_link")
+}
+
+model DeliveryAttempt {
+  id                  String    @id @default(cuid())
+  campaignRecipientId String
+  attemptNumber       Int
+  startedAt           DateTime  @default(now()) @db.Timestamptz(3)
+  completedAt         DateTime? @db.Timestamptz(3)
+  outcome             String?
+  providerMessageId   String?
+  errorCode           String?
+  sanitizedError      String?
+
+  campaignRecipient CampaignRecipient @relation(fields: [campaignRecipientId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignRecipientId, attemptNumber])
+  @@index([startedAt])
+  @@map("delivery_attempt")
+}
+
+model CampaignEvent {
+  id                  String            @id @default(cuid())
+  organizationId      String
+  campaignId          String
+  campaignRecipientId String
+  type                CampaignEventType
+  deduplicationKey    String            @unique
+  occurredAt          DateTime          @db.Timestamptz(3)
+  createdAt           DateTime          @default(now())
+
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign          Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignRecipient CampaignRecipient @relation(fields: [campaignRecipientId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, occurredAt])
+  @@index([campaignRecipientId, type])
+  @@map("campaign_event")
+}
+
+model DeliveryEvent {
+  id                  String            @id @default(cuid())
+  organizationId      String
+  campaignId          String
+  campaignRecipientId String
+  type                DeliveryEventType
+  deduplicationKey    String            @unique
+  providerEventId     String?           @unique
+  metadata            Json?
+  occurredAt          DateTime          @db.Timestamptz(3)
+  createdAt           DateTime          @default(now())
+
+  organization      Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign          Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignRecipient CampaignRecipient @relation(fields: [campaignRecipientId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, occurredAt])
+  @@index([campaignRecipientId, type])
+  @@map("delivery_event")
+}
+
+model OutboxEvent {
+  id               String       @id @default(cuid())
+  organizationId   String?
+  topic            String
+  deduplicationKey String       @unique
+  payloadVersion   Int          @default(1)
+  payload          Json
+  status           OutboxStatus @default(PENDING)
+  availableAt      DateTime     @default(now()) @db.Timestamptz(3)
+  claimedBy        String?
+  claimedAt        DateTime?    @db.Timestamptz(3)
+  publishedAt      DateTime?    @db.Timestamptz(3)
+  attempts         Int          @default(0)
+  lastError        String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, availableAt])
+  @@index([claimedAt])
+  @@map("outbox_event")
+}
+
+model OrganizationIgnoredNetwork {
+  id                String   @id @default(cuid())
+  organizationId    String
+  network           String
+  normalizedNetwork String
+  description       String?
+  createdById       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("IgnoredNetworkCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, normalizedNetwork])
+  @@index([organizationId])
+  @@map("organization_ignored_network")
 }
 
 model ScheduleSource {

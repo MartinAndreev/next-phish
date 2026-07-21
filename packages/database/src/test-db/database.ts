@@ -100,6 +100,14 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     },
     async resetData() {
       await prisma.catalogPreview.deleteMany();
+      await prisma.campaignEvent.deleteMany();
+      await prisma.deliveryEvent.deleteMany();
+      await prisma.deliveryAttempt.deleteMany();
+      await prisma.campaignTrackingLink.deleteMany();
+      await prisma.campaignRecipient.deleteMany();
+      await prisma.outboxEvent.deleteMany();
+      await prisma.scheduleOccurrence.deleteMany();
+      await prisma.organizationIgnoredNetwork.deleteMany();
       await prisma.scheduleSource.deleteMany();
       await prisma.campaign.deleteMany();
       await prisma.schedule.deleteMany();

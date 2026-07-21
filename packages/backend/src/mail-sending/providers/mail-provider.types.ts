@@ -14,6 +14,7 @@ export interface MailProviderCapabilities {
   supportsBatch: boolean;
   supportsTracking: boolean;
   supportsRateLimitInfo: boolean;
+  supportsIdempotencyKey: boolean;
 }
 
 export interface MailAttachment {
@@ -35,6 +36,10 @@ export interface SendMailInput {
   attachments?: MailAttachment[];
   headers?: Record<string, string>;
   metadata?: Record<string, unknown>;
+  /** Stable RFC 5322 identifier for one logical message. */
+  messageId?: string;
+  /** Stable provider idempotency key when the provider supports it. */
+  idempotencyKey?: string;
 }
 
 export interface SendTestMailInput {

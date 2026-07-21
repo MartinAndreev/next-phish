@@ -20,6 +20,7 @@ export {
   CancelScheduleCommand,
   DuplicateScheduleCommand,
   MaterializeOccurrenceCommand,
+  MaterializeClaimedOccurrenceCommand,
 } from "./commands";
 export type {
   CampaignType,

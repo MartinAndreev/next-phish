@@ -1,5 +1,13 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { CampaignService } from "../services";
+import {
+  calculateScheduledAt,
+  createDeliveryIdempotencyKey,
+  generateLogicalMessageId,
+  generateTrackingRef,
+  rewriteTrackedLinks,
+  type DeliveryPacing,
+} from "../../delivery";
 import type {
   CampaignDefinitionInput,
   ScheduleDefinitionInput,
@@ -388,6 +396,8 @@ export class CampaignRepository {
           collisionFingerprint: this.service.createScheduleFingerprint(data),
           brokenAt: null,
           brokenReason: null,
+          revision: { increment: 1 },
+          executionEnabled: true,
           sources: {
             create: sourceCampaignIds.map((campaignId, position) => ({
               campaignId,
@@ -406,6 +416,22 @@ export class CampaignRepository {
         where: { id, organizationId },
       });
       if (!schedule) throw new Error("Schedule not found");
+      const campaigns = await tx.campaign.findMany({
+        where: { scheduleId: id },
+        select: { id: true },
+      });
+      const campaignIds = campaigns.map((campaign) => campaign.id);
+      await tx.campaignRecipient.updateMany({
+        where: {
+          campaignId: { in: campaignIds },
+          deliveryStatus: { in: ["PLANNED", "QUEUED", "RETRYABLE"] },
+        },
+        data: { deliveryStatus: "CANCELLED", cancelledAt: new Date() },
+      });
+      await tx.scheduleOccurrence.updateMany({
+        where: { scheduleId: id, status: { in: ["PENDING", "FAILED"] } },
+        data: { status: "CANCELLED" },
+      });
       await tx.campaign.updateMany({
         where: {
           scheduleId: id,
@@ -478,6 +504,56 @@ export class CampaignRepository {
     return this.createSchedule(organizationId, createdById, data);
   }
 
+  async materializeClaimedOccurrence(occurrenceId: string) {
+    const occurrence = await this.db.scheduleOccurrence.findUnique({
+      where: { id: occurrenceId },
+      include: { schedule: { select: { createdById: true } } },
+    });
+    if (!occurrence) throw new Error("Schedule occurrence not found");
+    if (occurrence.status === "COMPLETED" && occurrence.campaignId)
+      return this.db.campaign.findUniqueOrThrow({
+        where: { id: occurrence.campaignId },
+        include: campaignInclude,
+      });
+    const claimed = await this.db.scheduleOccurrence.updateMany({
+      where: {
+        id: occurrenceId,
+        status: { in: ["PENDING", "FAILED"] },
+        OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: new Date() } }],
+      },
+      data: {
+        status: "MATERIALIZING",
+        leaseOwner: `materialize:${process.pid}`,
+        leaseExpiresAt: new Date(Date.now() + 5 * 60_000),
+        attempts: { increment: 1 },
+      },
+    });
+    if (!claimed.count) return null;
+    try {
+      return await this.materializeOccurrence(
+        occurrence.scheduleId,
+        occurrence.sourceCampaignId,
+        occurrence.occurrenceAt,
+        occurrence.organizationId,
+        occurrence.schedule.createdById,
+      );
+    } catch (error) {
+      await this.db.scheduleOccurrence.updateMany({
+        where: { id: occurrenceId, status: "MATERIALIZING" },
+        data: {
+          status: "FAILED",
+          leaseOwner: null,
+          leaseExpiresAt: null,
+          lastError:
+            error instanceof Error
+              ? error.message.slice(0, 500)
+              : "Materialization failed",
+        },
+      });
+      throw error;
+    }
+  }
+
   async materializeOccurrence(
     scheduleId: string,
     sourceCampaignId: string,
@@ -490,7 +566,7 @@ export class CampaignRepository {
         where: {
           id: scheduleId,
           organizationId,
-          status: { in: ["SCHEDULED", "RUNNING"] },
+          status: { in: ["SCHEDULED", "RUNNING", "COMPLETED"] },
         },
         include: { sources: true },
       });
@@ -516,7 +592,7 @@ export class CampaignRepository {
           emailTemplate: { include: { files: { include: { file: true } } } },
           page: true,
           mailSendingProfile: true,
-          targetGroup: { include: { users: true } },
+          targetGroup: { include: { users: { orderBy: { id: "asc" } } } },
         },
       });
       if (
@@ -543,7 +619,7 @@ export class CampaignRepository {
                 visibility: "CATALOG",
                 status: "ACTIVE",
               },
-              include: { users: true },
+              include: { users: { orderBy: { id: "asc" } } },
             });
       if (!targetGroup) throw new Error("Target group is unavailable");
       const run = await tx.campaign.create({
@@ -603,6 +679,23 @@ export class CampaignRepository {
           },
         },
       });
+      const trackedContent = rewriteTrackedLinks(
+        shadowEmail.html,
+        process.env.PUBLIC_CONTENT_URL ?? "https://content.example.com",
+      );
+      if (trackedContent.links.length) {
+        await tx.campaignTrackingLink.createMany({
+          data: trackedContent.links.map((link) => ({
+            campaignId: run.id,
+            linkId: link.linkId,
+            destinationUrl: link.destinationUrl,
+          })),
+        });
+        await tx.emailTemplate.update({
+          where: { id: shadowEmail.id },
+          data: { html: trackedContent.html },
+        });
+      }
       const shadowPage = await this.clonePage(
         tx,
         source.page.id,
@@ -659,16 +752,110 @@ export class CampaignRepository {
           users: { create: users },
         },
       });
-      return tx.campaign.update({
+      const pacing: DeliveryPacing =
+        schedule.deliveryMode === "DRIP"
+          ? {
+              mode: "DRIP",
+              emailsPerMinute: schedule.dripEmailsPerMinute!,
+            }
+          : schedule.deliveryMode === "BATCH"
+            ? {
+                mode: "BATCH",
+                batchSize: schedule.batchSize!,
+                batchIntervalMinutes: schedule.batchIntervalMinutes!,
+              }
+            : { mode: "BLAST" };
+      const messageIdDomain =
+        process.env.MESSAGE_ID_DOMAIN ?? "mail.example.com";
+      for (const [index, user] of users.entries()) {
+        let recipient = null;
+        for (
+          let collisionAttempt = 0;
+          collisionAttempt < 8 && !recipient;
+          collisionAttempt += 1
+        ) {
+          await tx.campaignRecipient.createMany({
+            data: [
+              {
+                campaignId: run.id,
+                organizationId,
+                email: user.email,
+                normalizedEmail: user.normalizedEmail,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                position: user.position,
+                trackingRef: generateTrackingRef(),
+                messageId: generateLogicalMessageId(messageIdDomain),
+                idempotencyKey: createDeliveryIdempotencyKey(
+                  run.id,
+                  user.normalizedEmail,
+                ),
+                scheduledAt: calculateScheduledAt(occurrenceAt, index, pacing),
+              },
+            ],
+            skipDuplicates: true,
+          });
+          recipient = await tx.campaignRecipient.findUnique({
+            where: {
+              campaignId_normalizedEmail: {
+                campaignId: run.id,
+                normalizedEmail: user.normalizedEmail,
+              },
+            },
+          });
+        }
+        if (!recipient)
+          throw new Error("Unable to allocate neutral identifiers");
+        await tx.campaignEvent.upsert({
+          where: { deduplicationKey: `recipient:${recipient.id}:scheduled` },
+          create: {
+            organizationId,
+            campaignId: run.id,
+            campaignRecipientId: recipient.id,
+            type: "SCHEDULED",
+            deduplicationKey: `recipient:${recipient.id}:scheduled`,
+            occurredAt: new Date(),
+          },
+          update: {},
+        });
+      }
+      const occurrence = await tx.scheduleOccurrence.findUnique({
+        where: { scheduleId_occurrenceAt: { scheduleId, occurrenceAt } },
+      });
+      const campaign = await tx.campaign.update({
         where: { id: run.id },
         data: {
           emailTemplateId: shadowEmail.id,
           pageId: shadowPage.id,
           mailSendingProfileId: shadowProfile.id,
           targetGroupId: shadowGroup.id,
+          expectedRecipientCount: users.length,
+          materializedAt: new Date(),
         },
         include: campaignInclude,
       });
+      if (occurrence) {
+        await tx.scheduleOccurrence.update({
+          where: { id: occurrence.id },
+          data: {
+            campaignId: run.id,
+            status: "COMPLETED",
+            materializedRecipientCount: users.length,
+            completedAt: new Date(),
+          },
+        });
+        await tx.outboxEvent.upsert({
+          where: { deduplicationKey: `campaign:${run.id}:feed` },
+          create: {
+            organizationId,
+            topic: "delivery-feeder",
+            deduplicationKey: `campaign:${run.id}:feed`,
+            payload: { version: 1, wakeId: run.id },
+          },
+          update: {},
+        });
+      }
+      return campaign;
     });
   }
 

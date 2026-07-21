@@ -28,6 +28,7 @@ const GRAPH_CAPABILITIES: MailProviderCapabilities = {
   supportsBatch: true,
   supportsTracking: false,
   supportsRateLimitInfo: false,
+  supportsIdempotencyKey: false,
 };
 
 const TOKEN_ENDPOINT = "https://login.microsoftonline.com";

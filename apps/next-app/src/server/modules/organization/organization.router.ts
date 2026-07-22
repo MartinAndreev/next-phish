@@ -5,25 +5,32 @@ import {
   GetUserOrganizationsQuery,
   GetOrganizationByIdQuery,
   GetOrganizationMembersQuery,
+  GetOrganizationAnalyticsQuery,
+  GetOrganizationDashboardQuery,
   CreateOrganizationCommand,
   DeleteOrganizationCommand,
+  UpdateOrganizationCommand,
   GetUserOrganizationsSchema,
   CreateOrganizationCommandSchema,
   GetOrganizationMembersSchema,
   DeliveryRepository,
   normalizeNetwork,
 } from "@next-phish/backend";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 import {
-  createPermissionProcedure,
-  organizationMemberProcedure,
-  router,
-} from "../../trpc/procedures";
-import { toRouterPermissions } from "@next-phish/shared";
+  ignoredNetworkSchema,
+  toRouterPermissions,
+  updateOrganizationSchema,
+} from "@next-phish/shared";
 
 const bus = Container.get(MessageBus);
 
 const writeProcedure = createPermissionProcedure(
   toRouterPermissions("organizations", "write"),
+);
+
+const readProcedure = createPermissionProcedure(
+  toRouterPermissions("organizations", "read"),
 );
 
 const readProcedureNoOrg = createPermissionProcedure(
@@ -42,20 +49,41 @@ export const organizationRouter = router({
       });
     }),
 
-  getById: organizationMemberProcedure.query(async ({ ctx, input }) => {
-    const handler = Container.get(GetOrganizationByIdQuery);
-    return bus.query(handler, {
-      id: input.organizationId,
-      userId: ctx.userId,
-    });
-  }),
+  getById: readProcedure
+    .input(z.object({ organizationId: z.string().min(1) }))
+    .query(async ({ ctx }) => {
+      const handler = Container.get(GetOrganizationByIdQuery);
+      return bus.query(handler, {
+        id: ctx.activeOrganizationId,
+        userId: ctx.userId,
+      });
+    }),
 
-  listMembers: organizationMemberProcedure
+  analytics: readProcedure
+    .input(z.object({ organizationId: z.string().min(1) }))
+    .query(({ ctx }) => {
+      const handler = Container.get(GetOrganizationAnalyticsQuery);
+      return bus.query(handler, {
+        organizationId: ctx.activeOrganizationId,
+      });
+    }),
+
+  dashboard: readProcedure
+    .input(z.object({ organizationId: z.string().min(1) }))
+    .query(({ ctx }) => {
+      const handler = Container.get(GetOrganizationDashboardQuery);
+      return bus.query(handler, {
+        organizationId: ctx.activeOrganizationId,
+      });
+    }),
+
+  listMembers: readProcedure
     .input(GetOrganizationMembersSchema)
     .query(async ({ ctx, input }) => {
       const handler = Container.get(GetOrganizationMembersQuery);
       return bus.query(handler, {
         ...input,
+        organizationId: ctx.activeOrganizationId,
         userId: ctx.userId,
       });
     }),
@@ -68,6 +96,20 @@ export const organizationRouter = router({
         ...input,
         userId: ctx.userId,
         headers: ctx.headers,
+      });
+    }),
+
+  update: writeProcedure
+    .input(
+      updateOrganizationSchema.extend({ organizationId: z.string().min(1) }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const handler = Container.get(UpdateOrganizationCommand);
+      return bus.dispatch(handler, {
+        organizationId: ctx.activeOrganizationId,
+        userId: ctx.userId,
+        name: input.name,
+        slug: input.slug,
       });
     }),
 
@@ -87,12 +129,7 @@ export const organizationRouter = router({
   ),
 
   createIgnoredNetwork: writeProcedure
-    .input(
-      z.object({
-        network: z.string().trim().min(1).max(64),
-        description: z.string().trim().max(200).optional(),
-      }),
-    )
+    .input(ignoredNetworkSchema.extend({ organizationId: z.string().min(1) }))
     .mutation(({ ctx, input }) => {
       const normalized = normalizeNetwork(input.network).canonical;
       return Container.get(DeliveryRepository).createIgnoredNetwork({

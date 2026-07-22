@@ -6,10 +6,13 @@ import {
   GetUserOrganizationsQuery,
   GetOrganizationByIdQuery,
   GetOrganizationMembersQuery,
+  GetOrganizationAnalyticsQuery,
+  GetOrganizationDashboardQuery,
 } from "./queries";
 import {
   CreateOrganizationCommand,
   DeleteOrganizationCommand,
+  UpdateOrganizationCommand,
 } from "./commands";
 
 interface AuthApi {
@@ -40,6 +43,18 @@ export function registerOrganizationServices(db: PrismaClient): void {
   Container.set(
     GetOrganizationMembersQuery,
     new GetOrganizationMembersQuery(orgRepo),
+  );
+  Container.set(
+    GetOrganizationAnalyticsQuery,
+    new GetOrganizationAnalyticsQuery(orgRepo),
+  );
+  Container.set(
+    GetOrganizationDashboardQuery,
+    new GetOrganizationDashboardQuery(orgRepo),
+  );
+  Container.set(
+    UpdateOrganizationCommand,
+    new UpdateOrganizationCommand(orgRepo, orgService),
   );
 }
 

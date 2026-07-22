@@ -1,6 +1,7 @@
 import "server-only";
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
-import { auth } from "@/src/server/auth";
+import { getRequestSessionSnapshot } from "@/src/server/request-auth";
 import {
   DEFAULT_LOCALE,
   detectLocale,
@@ -10,7 +11,7 @@ import {
 } from "./config";
 import { createTranslator } from "./shared";
 
-export async function getLocale(): Promise<Locale> {
+export const getLocale = cache(async (): Promise<Locale> => {
   const [cookieStore, requestHeaders] = await Promise.all([
     cookies(),
     headers(),
@@ -21,14 +22,14 @@ export async function getLocale(): Promise<Locale> {
     return cookieLocale;
   }
 
-  const session = await auth.api.getSession({ headers: requestHeaders });
+  const { session } = await getRequestSessionSnapshot();
   const sessionLocale = session?.user?.language;
   if (isLocale(sessionLocale)) {
     return sessionLocale;
   }
 
   return detectLocale(requestHeaders.get("accept-language")) ?? DEFAULT_LOCALE;
-}
+});
 
 export async function getTranslator() {
   return createTranslator(await getLocale());

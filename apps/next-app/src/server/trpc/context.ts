@@ -1,19 +1,25 @@
-import { headers } from "next/headers";
 import { auth } from "@/src/server/auth";
+import {
+  getRequestAuthSnapshot,
+  resolveAuthSnapshot,
+  type RequestAuthSnapshot,
+  type RequestUserState,
+} from "@/src/server/request-auth";
 import { TRPCError } from "@trpc/server";
 
 export interface Context {
-  session: Awaited<ReturnType<typeof auth.api.getSession>>;
+  session: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
   headers: Headers;
   userId: string;
+  userState: RequestUserState | null;
   apiKey?: string;
 }
 
-export async function createContext(): Promise<Context> {
-  const hdrs = await headers();
-  const session = await auth.api.getSession({
-    headers: hdrs,
-  });
+function createAuthenticatedContext(
+  snapshot: RequestAuthSnapshot,
+  apiKey?: string,
+): Context {
+  const { session, headers: requestHeaders, userState } = snapshot;
 
   if (!session?.user?.id) {
     throw new TRPCError({
@@ -21,32 +27,26 @@ export async function createContext(): Promise<Context> {
       message: "You must be logged in to access this resource",
     });
   }
-
-  return { session, headers: hdrs, userId: session.user.id };
-}
-
-export async function createContextWithHeaders(
-  requestHeaders: Headers,
-): Promise<Context> {
-  const session = await auth.api.getSession({
-    headers: requestHeaders,
-  });
-
-  if (!session?.user?.id) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "You must be logged in to access this resource",
-    });
-  }
-
-  const apiKey = requestHeaders.get("x-api-key") ?? undefined;
 
   return {
     session,
     headers: requestHeaders,
     userId: session.user.id,
+    userState,
     apiKey,
   };
+}
+
+export async function createContext(): Promise<Context> {
+  return createAuthenticatedContext(await getRequestAuthSnapshot());
+}
+
+export async function createContextWithHeaders(
+  requestHeaders: Headers,
+): Promise<Context> {
+  const snapshot = await resolveAuthSnapshot(requestHeaders);
+  const apiKey = requestHeaders.get("x-api-key") ?? undefined;
+  return createAuthenticatedContext(snapshot, apiKey);
 }
 
 export async function validateOrganizationAccess(

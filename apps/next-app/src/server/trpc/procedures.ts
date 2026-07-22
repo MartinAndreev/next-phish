@@ -22,14 +22,37 @@ const t = initTRPC.context<Context>().create({
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
+export const authenticatedProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
-  return next({
-    ctx: {
-      ...ctx,
-      session: ctx.session,
-    },
-  });
+export const protectedProcedure = authenticatedProcedure.use(
+  async ({ ctx, next }) => {
+    const user = ctx.userState;
+
+    if (!user || user.disabledAt) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "This account is disabled",
+      });
+    }
+    if (user.passwordSetupRequired) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "Set your initial password before continuing",
+      });
+    }
+
+    return next({ ctx });
+  },
+);
+
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  if (ctx.userState?.role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Administrator access is required",
+    });
+  }
+  return next({ ctx });
 });
 
 type Permissions = Record<string, string[]>;
@@ -112,30 +135,3 @@ export function createPermissionProcedure(
       });
     });
 }
-
-export const organizationMemberProcedure = protectedProcedure
-  .input(z.object({ organizationId: z.string() }))
-  .use(async ({ ctx, input, next }) => {
-    const orgRepo = Container.get(OrganizationRepository);
-    const org = await orgRepo.findById(input.organizationId);
-
-    if (!org) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Organization not found",
-      });
-    }
-
-    const member = org.members.find((m) => m.userId === ctx.userId);
-
-    if (!member) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You are not a member of this organization",
-      });
-    }
-
-    return next({
-      ctx: { ...ctx },
-    });
-  });

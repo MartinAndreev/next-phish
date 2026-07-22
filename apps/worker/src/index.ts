@@ -14,12 +14,16 @@ import {
   stableJobId,
   assertNeutralDomain,
   getPublicContentUrl,
+  EMAIL_SERVICE_TOKEN,
+  renderTemplate,
 } from "@next-phish/backend";
+import type { IEmailService } from "@next-phish/backend";
 import {
   deliverRecipientPayloadSchema,
   feedDeliveriesPayloadSchema,
   materializeOccurrencePayloadSchema,
   processTrackingEventPayloadSchema,
+  welcomeUserPayloadSchema,
 } from "@next-phish/shared";
 import { connection } from "./connection";
 
@@ -34,6 +38,7 @@ const queues = {
   events: new Queue("delivery-events", queueOptions),
   tracking: new Queue("tracking-events", queueOptions),
   outbox: new Queue("outbox", queueOptions),
+  userNotifications: new Queue("user-notifications", queueOptions),
 };
 
 const commonJobOptions = {
@@ -54,6 +59,24 @@ function strictHandler(
 }
 
 const workers: Worker[] = [
+  new Worker(
+    "user-notifications",
+    strictHandler({
+      "welcome-user": async (job) => {
+        const payload = welcomeUserPayloadSchema.parse(job.data);
+        const email = Container.get<IEmailService>(EMAIL_SERVICE_TOKEN);
+        await email.send({
+          to: payload.email,
+          subject: "Welcome to Next Phish",
+          html: renderTemplate("welcome-user", {
+            name: payload.name,
+            magicLink: payload.magicLink,
+          }),
+        });
+      },
+    }),
+    { connection, concurrency: 5 },
+  ),
   new Worker(
     "jobs",
     strictHandler({

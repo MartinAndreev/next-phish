@@ -1,15 +1,14 @@
 "use client";
 
 import { Chart } from "primereact/chart";
+import { Skeleton } from "primereact/skeleton";
+import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
 
 const options = {
   responsive: true,
   maintainAspectRatio: false,
-  interaction: {
-    mode: "index" as const,
-    intersect: false,
-  },
+  interaction: { mode: "index" as const, intersect: false },
   plugins: {
     legend: {
       position: "bottom" as const,
@@ -33,6 +32,7 @@ const options = {
       ticks: {
         color: "rgba(255,255,255,0.5)",
         font: { size: 11 },
+        precision: 0,
       },
       grid: { color: "rgba(255,255,255,0.06)" },
       border: { display: false },
@@ -40,61 +40,50 @@ const options = {
   },
 };
 
-export function EmailStatsChart() {
+const monthKeys = [
+  "charts.jan",
+  "charts.feb",
+  "charts.mar",
+  "charts.apr",
+  "charts.may",
+  "charts.jun",
+  "charts.jul",
+  "charts.aug",
+  "charts.sep",
+  "charts.oct",
+  "charts.nov",
+  "charts.dec",
+] as const;
+
+const series = [
+  ["sent", "charts.sent", "#29b8ff", "rgba(41, 184, 255, 0.1)"],
+  ["opened", "charts.opened", "#15e5d4", "rgba(21, 229, 212, 0.1)"],
+  ["clicked", "charts.clicked", "#5c73ff", "rgba(92, 115, 255, 0.1)"],
+  ["submitted", "charts.submitted", "#7b5cff", "rgba(123, 92, 255, 0.1)"],
+  ["reported", "charts.reported", "#f59e0b", "rgba(245, 158, 11, 0.1)"],
+  ["failed", "charts.errored", "#ef4444", "rgba(239, 68, 68, 0.1)"],
+] as const;
+
+interface EmailStatsChartProps {
+  months: OrganizationAnalyticsMonth[];
+  loading?: boolean;
+}
+
+export function EmailStatsChart({ months, loading }: EmailStatsChartProps) {
   const t = useTranslation();
+  const labels = months.map((item) => {
+    const monthIndex = Number(item.month.slice(5, 7)) - 1;
+    return t(monthKeys[monthIndex] ?? "charts.jan");
+  });
   const data = {
-    labels: [
-      t("charts.jan"),
-      t("charts.feb"),
-      t("charts.mar"),
-      t("charts.apr"),
-      t("charts.may"),
-      t("charts.jun"),
-    ],
-    datasets: [
-      {
-        label: t("charts.sent"),
-        data: [1200, 1900, 1500, 2100, 1800, 2400],
-        borderColor: "#29b8ff",
-        backgroundColor: "rgba(41, 184, 255, 0.1)",
-        tension: 0.3,
-      },
-      {
-        label: t("charts.opened"),
-        data: [800, 1200, 1000, 1500, 1200, 1800],
-        borderColor: "#15e5d4",
-        backgroundColor: "rgba(21, 229, 212, 0.1)",
-        tension: 0.3,
-      },
-      {
-        label: t("charts.clicked"),
-        data: [400, 600, 500, 800, 600, 900],
-        borderColor: "#5c73ff",
-        backgroundColor: "rgba(92, 115, 255, 0.1)",
-        tension: 0.3,
-      },
-      {
-        label: t("charts.submitted"),
-        data: [50, 80, 60, 100, 70, 120],
-        borderColor: "#7b5cff",
-        backgroundColor: "rgba(123, 92, 255, 0.1)",
-        tension: 0.3,
-      },
-      {
-        label: t("charts.reported"),
-        data: [20, 30, 25, 40, 35, 50],
-        borderColor: "#f59e0b",
-        backgroundColor: "rgba(245, 158, 11, 0.1)",
-        tension: 0.3,
-      },
-      {
-        label: t("charts.errored"),
-        data: [5, 10, 8, 12, 7, 15],
-        borderColor: "#ef4444",
-        backgroundColor: "rgba(239, 68, 68, 0.1)",
-        tension: 0.3,
-      },
-    ],
+    labels,
+    datasets: series.map(([field, label, borderColor, backgroundColor]) => ({
+      label: t(label),
+      data: months.map((item) => item[field]),
+      borderColor,
+      backgroundColor,
+      tension: 0.3,
+    })),
   };
 
   return (
@@ -103,7 +92,11 @@ export function EmailStatsChart() {
         {t("charts.emailStatsLast6Months")}
       </h3>
       <div className="h-[250px]">
-        <Chart type="line" data={data} options={options} />
+        {loading ? (
+          <Skeleton width="100%" height="250px" borderRadius="0.75rem" />
+        ) : (
+          <Chart type="line" data={data} options={options} />
+        )}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import { useDataTable } from "@/src/hooks/use-data-table";
 import { trpc } from "@/src/lib/trpc";
 import type { MemberView } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
+import { OrganizationSettings } from "@/src/components/organisms/organization-settings";
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
 
@@ -93,6 +94,9 @@ export default function OrganizationManagerPage() {
       ...membersQueryInput,
     });
 
+  const { data: analytics, isLoading: analyticsLoading } =
+    trpc.organization.analytics.useQuery({ organizationId: id });
+
   const members = membersData?.members ?? [];
   const membersTotal = membersData?.total ?? 0;
 
@@ -127,9 +131,24 @@ export default function OrganizationManagerPage() {
         </p>
       </div>
 
+      {org.$me.role !== "member" && (
+        <section className="mb-6">
+          <h2 className="mb-4 text-lg font-semibold text-white">
+            {t("organizations.settingsTitle")}
+          </h2>
+          <OrganizationSettings organization={org} />
+        </section>
+      )}
+
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <CampaignsChart />
-        <EmailStatsChart />
+        <CampaignsChart
+          months={analytics?.months ?? []}
+          loading={analyticsLoading}
+        />
+        <EmailStatsChart
+          months={analytics?.months ?? []}
+          loading={analyticsLoading}
+        />
       </div>
 
       <div>

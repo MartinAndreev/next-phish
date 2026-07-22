@@ -143,7 +143,7 @@ Successful responses return a single text content item containing a JSON-stringi
 
 ## Tool Reference
 
-This is the complete list of 23 MCP tools registered by the NextPhish server. Tools are grouped by domain.
+This is the complete list of 34 MCP tools registered by the NextPhish server. Tools are grouped by domain.
 
 ### Organizations (4 tools)
 
@@ -417,6 +417,24 @@ This is the complete list of 23 MCP tools registered by the NextPhish server. To
 | `firstName` | string | Yes      | Trimmed, must be non-empty.    |
 | `lastName`  | string | Yes      | Trimmed, must be non-empty.    |
 | `position`  | string | No       | Trimmed when provided.         |
+
+### Tasks and workflow statuses (11 tools)
+
+| Tool                    | Purpose                                                        |
+| ----------------------- | -------------------------------------------------------------- |
+| `list_tasks`            | List tasks with optional status, assignee, and search filters. |
+| `get_task`              | Get one task.                                                  |
+| `create_task`           | Create a task with an optional related resource.               |
+| `update_task`           | Partially update a task.                                       |
+| `move_task`             | Move a task to another status.                                 |
+| `delete_task`           | Delete a task.                                                 |
+| `list_task_statuses`    | List ordered statuses and task counts.                         |
+| `create_task_status`    | Create a status (owner/admin permission).                      |
+| `update_task_status`    | Update a status (owner/admin permission).                      |
+| `reorder_task_statuses` | Set the complete status order (owner/admin permission).        |
+| `delete_task_status`    | Delete a status, optionally moving tasks to a replacement.     |
+
+All task tools require `organizationId`. Task fields include `title`, `description`, `statusId`, `priority`, optional `assigneeId`, optional ISO `dueAt`, and optional `relation: { type, id }`. Relation types are `CAMPAIGN`, `SCHEDULE`, `PAGE`, `EMAIL_TEMPLATE`, `TARGET_GROUP`, and `SENDING_PROFILE`. Statuses use `marksTaskDone` to control completion behavior and a six-digit hex `colorToken` such as `#5c73ff`.
 
 ## What Is Not Available Through MCP
 

@@ -39,6 +39,7 @@ function buildMenuItems(
             />
             <Link
               href={item.href}
+              prefetch={false}
               className={`nav-icon-${item.icon.replace(/\s+/g, "-")} flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
                 isActive
                   ? "bg-white/10 text-white"
@@ -53,6 +54,7 @@ function buildMenuItems(
       return (
         <Link
           href={item.href}
+          prefetch={false}
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
             isActive
               ? "bg-white/10 text-white"

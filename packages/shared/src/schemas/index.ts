@@ -10,8 +10,16 @@ export {
 } from "./auth.schema";
 export type { LoginInput, SetupInput } from "./auth.schema";
 
-export { createOrganizationSchema } from "./organization.schema";
-export type { CreateOrganizationInput } from "./organization.schema";
+export {
+  createOrganizationSchema,
+  updateOrganizationSchema,
+  ignoredNetworkSchema,
+} from "./organization.schema";
+export type {
+  CreateOrganizationInput,
+  UpdateOrganizationInput,
+  IgnoredNetworkInput,
+} from "./organization.schema";
 
 export {
   emailTemplateStatusSchema,
@@ -59,6 +67,14 @@ export {
   mcpCreateSendingProfileSchema,
   mcpUpdateSendingProfileSchema,
   mcpCreateTargetGroupSchema,
+  mcpListTasksSchema,
+  mcpCreateTaskSchema,
+  mcpUpdateTaskSchema,
+  mcpMoveTaskSchema,
+  mcpCreateTaskStatusSchema,
+  mcpUpdateTaskStatusSchema,
+  mcpReorderTaskStatusesSchema,
+  mcpDeleteTaskStatusSchema,
 } from "./mcp.schema";
 
 export {
@@ -79,7 +95,24 @@ export { sendingProfileFormSchema } from "./sending-profile.schema";
 
 export { campaignFormSchema, scheduleFormSchema } from "./campaign.schema";
 export type { CampaignFormValues, ScheduleFormValues } from "./campaign.schema";
+
+export {
+  taskPrioritySchema,
+  taskStatusColorSchema,
+  taskResourceTypeSchema,
+  taskRelationSchema,
+  taskFormSchema,
+  taskStatusFormSchema,
+} from "./task.schema";
+export type {
+  TaskFormValues,
+  TaskStatusFormValues,
+  TaskResourceType,
+} from "./task.schema";
 export type { SendingProfileFormValues } from "./sending-profile.schema";
+
+export { adminCreateUserSchema, welcomeUserPayloadSchema } from "./user.schema";
+export type { AdminCreateUserInput, WelcomeUserPayload } from "./user.schema";
 
 export {
   campaignEventTypeSchema,

@@ -1,15 +1,16 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "./auth";
+import { getRequestAuthSnapshot } from "./request-auth";
 
 export async function getRequiredSession() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const { session, userState } = await getRequestAuthSnapshot();
 
   if (!session) {
     redirect("/login");
   }
 
-  return session;
+  if (!userState || userState.disabledAt) {
+    redirect("/signout");
+  }
+
+  return { ...session, userState };
 }

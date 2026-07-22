@@ -4,6 +4,7 @@
 @source "../node_modules/primereact/**/*.{js,mjs,cjs,jsx,tsx}";
 @import "tailwindcss/utilities" layer(utilities);
 @import "primeicons/primeicons.css" layer(primeicons);
+@import "quill/dist/quill.snow.css";
 
 @theme {
   --color-brand-cyan: #15e5d4;
@@ -50,6 +51,18 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.task-color-picker-panel.p-colorpicker-panel {
+  border: 1px solid #1c2945;
+  border-radius: 0.75rem;
+  background: #07142e;
+  box-shadow: 0 20px 45px rgb(2 11 29 / 45%);
+}
+
+.task-color-picker-panel .p-colorpicker-hue-handle,
+.task-color-picker-panel .p-colorpicker-color-handle {
+  border-color: #fff;
 }
 
 .auth-card {

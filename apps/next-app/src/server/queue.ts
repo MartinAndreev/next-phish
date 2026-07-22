@@ -3,3 +3,6 @@ import { redis } from "./redis-connection";
 
 export const jobQueue = new Queue("jobs", { connection: redis });
 export const importQueue = new Queue("imports", { connection: redis });
+export const userNotificationQueue = new Queue("user-notifications", {
+  connection: redis,
+});

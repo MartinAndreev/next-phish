@@ -54,17 +54,16 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   const migrationSql = collectMigrationSql();
   await db.exec(migrationSql);
 
-  const port = 15432 + Math.floor(Math.random() * 1000);
   const server = new PGLiteSocketServer({
     db,
-    port,
+    port: 0,
     host: "127.0.0.1",
   });
   await server.start();
-  // Wait longer for the server to be ready in CI environments
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const url = `postgresql://postgres:postgres@127.0.0.1:${port}/postgres?sslmode=disable`;
+  // PGlite serializes queries through one socket connection. Match Prisma's
+  // pool to that boundary instead of letting extra connections be rejected.
+  const url = `postgresql://postgres:postgres@${server.getServerConn()}/postgres?sslmode=disable&connection_limit=1`;
   const prisma = new PrismaClient({
     datasources: { db: { url } },
   });

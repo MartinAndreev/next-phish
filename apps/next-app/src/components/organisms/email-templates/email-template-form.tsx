@@ -144,10 +144,14 @@ export function EmailTemplateForm({
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
-                      <label className="block text-sm font-medium text-zinc-100">
+                      <label
+                        htmlFor="email-template-tags"
+                        className="block text-sm font-medium text-zinc-100"
+                      >
                         {t("emailTemplates.tags")}
                       </label>
                       <Chips
+                        inputId="email-template-tags"
                         value={values.tags}
                         size={"small" as never}
                         separator=","
@@ -158,10 +162,14 @@ export function EmailTemplateForm({
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-zinc-100">
+                      <label
+                        htmlFor="email-template-status"
+                        className="block text-sm font-medium text-zinc-100"
+                      >
                         {t("emailTemplates.status")}
                       </label>
                       <Dropdown
+                        inputId="email-template-status"
                         pt={selectSmall}
                         value={values.status}
                         options={statusOptions.map((option) => ({

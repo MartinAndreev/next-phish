@@ -61,10 +61,14 @@ export function TargetGroupFormPresentation({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="target-group-name"
+            className="mb-2 block text-sm font-medium text-zinc-300"
+          >
             {t("targetGroups.name")}
           </label>
           <Field
+            id="target-group-name"
             as={InputText}
             name="name"
             size="small"
@@ -74,10 +78,14 @@ export function TargetGroupFormPresentation({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="target-group-status"
+            className="mb-2 block text-sm font-medium text-zinc-300"
+          >
             {t("targetGroups.status")}
           </label>
           <Field
+            inputId="target-group-status"
             as={Dropdown}
             pt={selectSmall}
             name="status"
@@ -108,65 +116,85 @@ export function TargetGroupFormPresentation({
           )}
 
           <div className="flex flex-col gap-3">
-            {values.users.map((user, index) => (
-              <div
-                key={user._key}
-                className="grid grid-cols-1 gap-3 rounded-lg border border-[#1C2945] bg-brand-navy/50 p-4 md:grid-cols-4"
-              >
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-400">
-                    {t("targetGroups.email")} *
-                  </label>
-                  <Field
-                    as={InputText}
-                    name={`users.${index}.email`}
-                    placeholder="email@example.com"
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-400">
-                    {t("targetGroups.firstName")} *
-                  </label>
-                  <Field
-                    as={InputText}
-                    name={`users.${index}.firstName`}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-400">
-                    {t("targetGroups.lastName")} *
-                  </label>
-                  <Field
-                    as={InputText}
-                    name={`users.${index}.lastName`}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
-                    <label className="mb-1 block text-xs font-medium text-zinc-400">
-                      {t("targetGroups.position")}
+            {values.users.map((user, index) => {
+              const fieldId = (field: string) =>
+                `target-group-user-${user._key}-${field}`;
+              return (
+                <div
+                  key={user._key}
+                  className="grid grid-cols-1 gap-3 rounded-lg border border-[#1C2945] bg-brand-navy/50 p-4 md:grid-cols-4"
+                >
+                  <div>
+                    <label
+                      htmlFor={fieldId("email")}
+                      className="mb-1 block text-xs font-medium text-zinc-400"
+                    >
+                      {t("targetGroups.email")} *
                     </label>
                     <Field
+                      id={fieldId("email")}
                       as={InputText}
-                      name={`users.${index}.position`}
-                      placeholder={t("targetGroups.positionPlaceholder")}
+                      name={`users.${index}.email`}
+                      placeholder="email@example.com"
                       className="w-full"
                     />
                   </div>
-                  <Button
-                    type="button"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    onClick={() => removeUser(index)}
-                    aria-label={t("targetGroups.removeUser")}
-                  />
+                  <div>
+                    <label
+                      htmlFor={fieldId("first-name")}
+                      className="mb-1 block text-xs font-medium text-zinc-400"
+                    >
+                      {t("targetGroups.firstName")} *
+                    </label>
+                    <Field
+                      id={fieldId("first-name")}
+                      as={InputText}
+                      name={`users.${index}.firstName`}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor={fieldId("last-name")}
+                      className="mb-1 block text-xs font-medium text-zinc-400"
+                    >
+                      {t("targetGroups.lastName")} *
+                    </label>
+                    <Field
+                      id={fieldId("last-name")}
+                      as={InputText}
+                      name={`users.${index}.lastName`}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <label
+                        htmlFor={fieldId("position")}
+                        className="mb-1 block text-xs font-medium text-zinc-400"
+                      >
+                        {t("targetGroups.position")}
+                      </label>
+                      <Field
+                        id={fieldId("position")}
+                        as={InputText}
+                        name={`users.${index}.position`}
+                        placeholder={t("targetGroups.positionPlaceholder")}
+                        className="w-full"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      text
+                      onClick={() => removeUser(index)}
+                      aria-label={t("targetGroups.removeUser")}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

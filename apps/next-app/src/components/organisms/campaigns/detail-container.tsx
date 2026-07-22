@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { Badge } from "primereact/badge";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import type { inferRouterOutputs } from "@trpc/server";
 import { FormMessage } from "@/src/components/atoms/form-message";
+import type { AppRouter } from "@/src/server/trpc/router";
 import { trpc } from "@/src/lib/trpc";
 
 function formatLabel(value: string): string {
@@ -98,6 +100,238 @@ function ResourceRow({
         <i className="pi pi-angle-right text-zinc-500" aria-hidden="true" />
       ) : null}
     </button>
+  );
+}
+
+type CampaignDetail = NonNullable<
+  inferRouterOutputs<AppRouter>["campaign"]["getById"]
+>;
+
+function CampaignDetailContent({
+  data,
+  recipientCount,
+  schedules,
+  onNavigate,
+}: {
+  data: CampaignDetail;
+  recipientCount: number;
+  schedules: CampaignDetail["scheduleSources"][number]["schedule"][];
+  onNavigate: (path: string) => void;
+}) {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.6fr)]">
+      <div className="space-y-6">
+        <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
+          <h2 className="text-lg font-semibold text-white">Overview</h2>
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailItem label="Campaign type" value={formatLabel(data.type)} />
+            <DetailItem label="Target timezone" value={data.targetTimezone} />
+            <DetailItem
+              label="Automatic completion"
+              value={
+                data.autoCompleteAfterDays
+                  ? `${data.autoCompleteAfterDays} days after start`
+                  : "Disabled"
+              }
+            />
+            <DetailItem
+              label="Created by"
+              value={data.createdBy.name || data.createdBy.email}
+            />
+            <DetailItem
+              label="Created"
+              value={formatDate(data.createdAt, data.targetTimezone)}
+            />
+            <DetailItem
+              label="Last updated"
+              value={formatDate(data.updatedAt, data.targetTimezone)}
+            />
+            {data.sourceCampaign ? (
+              <DetailItem
+                label="Cloned from"
+                value={
+                  <button
+                    type="button"
+                    className="cursor-pointer text-brand-blue hover:text-brand-azure"
+                    onClick={() =>
+                      onNavigate(`/campaigns/${data.sourceCampaign?.id}`)
+                    }
+                  >
+                    {data.sourceCampaign.name}
+                  </button>
+                }
+              />
+            ) : null}
+            <DetailItem label="Clones" value={data._count.clones} />
+            <DetailItem label="Campaign ID" value={data.id} />
+          </dl>
+          <div className="mt-5 border-t border-white/10 pt-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+              Tags
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {data.tags.length ? (
+                data.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-brand-blue/10 px-2.5 py-1 text-xs font-medium text-brand-blue"
+                  >
+                    #{tag}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-zinc-500">No tags</span>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
+          <h2 className="text-lg font-semibold text-white">Campaign assets</h2>
+          <p className="mt-1 text-sm text-zinc-400">
+            Content and delivery identity used by this campaign.
+          </p>
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            <ResourceRow
+              icon="pi pi-envelope"
+              label="Email template"
+              name={data.emailTemplate?.name ?? "Not selected"}
+              detail={data.emailTemplate?.tags.join(", ") || undefined}
+              status={data.emailTemplate?.status}
+              onOpen={
+                data.emailTemplate
+                  ? () =>
+                      onNavigate(`/email-templates/${data.emailTemplate?.id}`)
+                  : undefined
+              }
+            />
+            <ResourceRow
+              icon="pi pi-window-maximize"
+              label="Landing page"
+              name={data.page?.name ?? "Not selected"}
+              detail={data.page ? formatLabel(data.page.type) : undefined}
+              status={data.page?.status}
+              onOpen={
+                data.page
+                  ? () => onNavigate(`/pages/${data.page?.id}`)
+                  : undefined
+              }
+            />
+            <ResourceRow
+              icon="pi pi-send"
+              label="Sending profile"
+              name={data.mailSendingProfile?.name ?? "Not selected"}
+              detail={
+                data.mailSendingProfile
+                  ? `${formatLabel(data.mailSendingProfile.providerType)} · ${data.mailSendingProfile.fromName} <${data.mailSendingProfile.fromEmail}>`
+                  : undefined
+              }
+              onOpen={
+                data.mailSendingProfile
+                  ? () =>
+                      onNavigate(
+                        `/sending-profiles/${data.mailSendingProfile?.id}`,
+                      )
+                  : undefined
+              }
+            />
+            <ResourceRow
+              icon="pi pi-users"
+              label="Target group"
+              name={
+                data.targetGroup?.name ??
+                (data.type === "TEMPLATE"
+                  ? "Selected when scheduled"
+                  : "Not selected")
+              }
+              detail={
+                data.targetGroup ? `${recipientCount} recipients` : undefined
+              }
+              status={data.targetGroup?.status}
+              onOpen={
+                data.targetGroup
+                  ? () => onNavigate(`/target-groups/${data.targetGroup?.id}`)
+                  : undefined
+              }
+            />
+          </div>
+        </section>
+      </div>
+
+      <div className="space-y-6">
+        <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-white">Audience</h2>
+            <i className="pi pi-users text-brand-blue" aria-hidden="true" />
+          </div>
+          <dl className="mt-5 space-y-4">
+            <DetailItem
+              label="Target group"
+              value={data.targetGroup?.name ?? "Inherited when scheduled"}
+            />
+            <DetailItem label="Recipients" value={recipientCount || "—"} />
+            <DetailItem label="Timezone" value={data.targetTimezone} />
+          </dl>
+        </section>
+
+        <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-white">Schedule</h2>
+            <i className="pi pi-calendar text-brand-blue" aria-hidden="true" />
+          </div>
+          {schedules.length ? (
+            <div className="mt-4 space-y-3">
+              {schedules.map((schedule) => (
+                <button
+                  key={schedule.id}
+                  type="button"
+                  onClick={() => onNavigate(`/schedule/${schedule.id}`)}
+                  className="w-full cursor-pointer rounded-xl border border-white/10 bg-brand-navy/30 p-4 text-left transition hover:border-brand-blue/50"
+                >
+                  <span className="flex items-start justify-between gap-3">
+                    <span>
+                      <span className="block text-sm font-medium text-white">
+                        {schedule.name}
+                      </span>
+                      <span className="mt-1 block text-xs text-zinc-400">
+                        {formatDate(schedule.startsAt, schedule.targetTimezone)}
+                      </span>
+                    </span>
+                    <Badge
+                      value={formatLabel(schedule.status)}
+                      severity={statusSeverity(schedule.status)}
+                    />
+                  </span>
+                  <span className="mt-3 block text-xs text-zinc-500">
+                    {formatLabel(schedule.deliveryMode)} ·{" "}
+                    {schedule.targetTimezone}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center">
+              <i
+                className="pi pi-calendar-times text-2xl text-zinc-600"
+                aria-hidden="true"
+              />
+              <p className="mt-2 text-sm text-zinc-400">
+                No schedule is attached.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {data.brokenAt || data.brokenReason ? (
+          <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
+            <h2 className="font-semibold text-red-300">Campaign health</h2>
+            <p className="mt-2 text-sm text-red-200/80">
+              {data.brokenReason ?? "Campaign resources require attention."}
+            </p>
+          </section>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -272,233 +506,12 @@ export function CampaignDetailContainer({
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.6fr)]">
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
-            <h2 className="text-lg font-semibold text-white">Overview</h2>
-            <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailItem
-                label="Campaign type"
-                value={formatLabel(data.type)}
-              />
-              <DetailItem label="Target timezone" value={data.targetTimezone} />
-              <DetailItem
-                label="Automatic completion"
-                value={
-                  data.autoCompleteAfterDays
-                    ? `${data.autoCompleteAfterDays} days after start`
-                    : "Disabled"
-                }
-              />
-              <DetailItem
-                label="Created by"
-                value={data.createdBy.name || data.createdBy.email}
-              />
-              <DetailItem
-                label="Created"
-                value={formatDate(data.createdAt, data.targetTimezone)}
-              />
-              <DetailItem
-                label="Last updated"
-                value={formatDate(data.updatedAt, data.targetTimezone)}
-              />
-              {data.sourceCampaign ? (
-                <DetailItem
-                  label="Cloned from"
-                  value={
-                    <button
-                      type="button"
-                      className="cursor-pointer text-brand-blue hover:text-brand-azure"
-                      onClick={() =>
-                        router.push(`/campaigns/${data.sourceCampaign?.id}`)
-                      }
-                    >
-                      {data.sourceCampaign.name}
-                    </button>
-                  }
-                />
-              ) : null}
-              <DetailItem label="Clones" value={data._count.clones} />
-              <DetailItem label="Campaign ID" value={data.id} />
-            </dl>
-            <div className="mt-5 border-t border-white/10 pt-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                Tags
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {data.tags.length ? (
-                  data.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-brand-blue/10 px-2.5 py-1 text-xs font-medium text-brand-blue"
-                    >
-                      #{tag}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-zinc-500">No tags</span>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
-            <h2 className="text-lg font-semibold text-white">
-              Campaign assets
-            </h2>
-            <p className="mt-1 text-sm text-zinc-400">
-              Content and delivery identity used by this campaign.
-            </p>
-            <div className="mt-5 grid gap-3 lg:grid-cols-2">
-              <ResourceRow
-                icon="pi pi-envelope"
-                label="Email template"
-                name={data.emailTemplate?.name ?? "Not selected"}
-                detail={data.emailTemplate?.tags.join(", ") || undefined}
-                status={data.emailTemplate?.status}
-                onOpen={
-                  data.emailTemplate
-                    ? () =>
-                        router.push(
-                          `/email-templates/${data.emailTemplate?.id}`,
-                        )
-                    : undefined
-                }
-              />
-              <ResourceRow
-                icon="pi pi-window-maximize"
-                label="Landing page"
-                name={data.page?.name ?? "Not selected"}
-                detail={data.page ? formatLabel(data.page.type) : undefined}
-                status={data.page?.status}
-                onOpen={
-                  data.page
-                    ? () => router.push(`/pages/${data.page?.id}`)
-                    : undefined
-                }
-              />
-              <ResourceRow
-                icon="pi pi-send"
-                label="Sending profile"
-                name={data.mailSendingProfile?.name ?? "Not selected"}
-                detail={
-                  data.mailSendingProfile
-                    ? `${formatLabel(data.mailSendingProfile.providerType)} · ${data.mailSendingProfile.fromName} <${data.mailSendingProfile.fromEmail}>`
-                    : undefined
-                }
-                onOpen={
-                  data.mailSendingProfile
-                    ? () =>
-                        router.push(
-                          `/sending-profiles/${data.mailSendingProfile?.id}`,
-                        )
-                    : undefined
-                }
-              />
-              <ResourceRow
-                icon="pi pi-users"
-                label="Target group"
-                name={
-                  data.targetGroup?.name ??
-                  (data.type === "TEMPLATE"
-                    ? "Selected when scheduled"
-                    : "Not selected")
-                }
-                detail={
-                  data.targetGroup ? `${recipientCount} recipients` : undefined
-                }
-                status={data.targetGroup?.status}
-                onOpen={
-                  data.targetGroup
-                    ? () =>
-                        router.push(`/target-groups/${data.targetGroup?.id}`)
-                    : undefined
-                }
-              />
-            </div>
-          </section>
-        </div>
-
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white">Audience</h2>
-              <i className="pi pi-users text-brand-blue" aria-hidden="true" />
-            </div>
-            <dl className="mt-5 space-y-4">
-              <DetailItem
-                label="Target group"
-                value={data.targetGroup?.name ?? "Inherited when scheduled"}
-              />
-              <DetailItem label="Recipients" value={recipientCount || "—"} />
-              <DetailItem label="Timezone" value={data.targetTimezone} />
-            </dl>
-          </section>
-
-          <section className="rounded-2xl border border-[#1C2945] bg-brand-dark p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white">Schedule</h2>
-              <i
-                className="pi pi-calendar text-brand-blue"
-                aria-hidden="true"
-              />
-            </div>
-            {schedules.length ? (
-              <div className="mt-4 space-y-3">
-                {schedules.map((schedule) => (
-                  <button
-                    key={schedule.id}
-                    type="button"
-                    onClick={() => router.push(`/schedule/${schedule.id}`)}
-                    className="w-full cursor-pointer rounded-xl border border-white/10 bg-brand-navy/30 p-4 text-left transition hover:border-brand-blue/50"
-                  >
-                    <span className="flex items-start justify-between gap-3">
-                      <span>
-                        <span className="block text-sm font-medium text-white">
-                          {schedule.name}
-                        </span>
-                        <span className="mt-1 block text-xs text-zinc-400">
-                          {formatDate(
-                            schedule.startsAt,
-                            schedule.targetTimezone,
-                          )}
-                        </span>
-                      </span>
-                      <Badge
-                        value={formatLabel(schedule.status)}
-                        severity={statusSeverity(schedule.status)}
-                      />
-                    </span>
-                    <span className="mt-3 block text-xs text-zinc-500">
-                      {formatLabel(schedule.deliveryMode)} ·{" "}
-                      {schedule.targetTimezone}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center">
-                <i
-                  className="pi pi-calendar-times text-2xl text-zinc-600"
-                  aria-hidden="true"
-                />
-                <p className="mt-2 text-sm text-zinc-400">
-                  No schedule is attached.
-                </p>
-              </div>
-            )}
-          </section>
-
-          {data.brokenAt || data.brokenReason ? (
-            <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
-              <h2 className="font-semibold text-red-300">Campaign health</h2>
-              <p className="mt-2 text-sm text-red-200/80">
-                {data.brokenReason ?? "Campaign resources require attention."}
-              </p>
-            </section>
-          ) : null}
-        </div>
-      </div>
+      <CampaignDetailContent
+        data={data}
+        recipientCount={recipientCount}
+        schedules={schedules}
+        onNavigate={(path) => router.push(path)}
+      />
     </div>
   );
 }

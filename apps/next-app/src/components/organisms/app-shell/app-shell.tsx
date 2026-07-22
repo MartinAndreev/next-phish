@@ -22,7 +22,7 @@ export function AppShell({ user, organizations, children }: AppShellProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-brand-navy">
+    <div className="flex h-dvh overflow-hidden bg-brand-navy">
       <Sidebar
         key={`${pathname}-${isMobile}`}
         user={user}

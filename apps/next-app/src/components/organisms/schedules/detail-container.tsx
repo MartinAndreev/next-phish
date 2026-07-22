@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import type { inferRouterOutputs } from "@trpc/server";
 import { FormMessage } from "@/src/components/atoms/form-message";
+import type { AppRouter } from "@/src/server/trpc/router";
 import { trpc } from "@/src/lib/trpc";
 
 const dateFormatters = new Map<string, Intl.DateTimeFormat>();
@@ -114,6 +116,197 @@ function recurrenceSummary(data: {
     parts.push(`${hours}:${minutes}`);
   }
   return parts.join(" · ");
+}
+
+type ScheduleDetail = NonNullable<
+  inferRouterOutputs<AppRouter>["campaign"]["getSchedule"]
+>;
+
+function ScheduleDetailContent({
+  data,
+  onNavigate,
+}: {
+  data: ScheduleDetail;
+  onNavigate: (path: string) => void;
+}) {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
+      <div className="space-y-6">
+        <Panel
+          title="Schedule overview"
+          description="The next occurrence and delivery configuration."
+        >
+          <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailItem
+              label="First occurrence"
+              value={formatDate(data.startsAt, data.targetTimezone)}
+            />
+            <DetailItem
+              label="Next occurrence"
+              value={formatDate(data.nextOccurrenceAt, data.targetTimezone)}
+            />
+            <DetailItem label="Timezone" value={data.targetTimezone} />
+            <DetailItem
+              label="Delivery"
+              value={formatEnum(data.deliveryMode)}
+              helper={deliverySummary(data)}
+            />
+            <DetailItem
+              label="Target group"
+              value={data.targetGroup?.name ?? "Inherited from campaign"}
+              helper={
+                data.targetGroup
+                  ? `${data.targetGroup._count?.users ?? 0} recipients`
+                  : undefined
+              }
+            />
+            <DetailItem
+              label="Auto-complete"
+              value={
+                data.autoCompleteAfterDays
+                  ? `${data.autoCompleteAfterDays} days after start`
+                  : "Disabled"
+              }
+            />
+          </dl>
+        </Panel>
+
+        <Panel
+          title="Campaign sources"
+          description="Published campaigns used to create each occurrence."
+        >
+          <div className="space-y-3">
+            {data.sources.map((source, index) => (
+              <div
+                key={source.campaignId}
+                className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#07142B] p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-zinc-500">
+                      #{index + 1}
+                    </span>
+                    <h3 className="font-medium text-white">
+                      {source.campaign.name}
+                    </h3>
+                    <Tag
+                      value={formatEnum(source.campaign.type)}
+                      severity="secondary"
+                      rounded
+                    />
+                  </div>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {formatEnum(source.campaign.status)} · Updated{" "}
+                    {formatDate(source.campaign.updatedAt, data.targetTimezone)}
+                  </p>
+                </div>
+                <Button
+                  size="small"
+                  text
+                  label="View campaign"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  onClick={() => onNavigate(`/campaigns/${source.campaignId}`)}
+                />
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel
+          title="Generated campaigns"
+          description="Campaign occurrences materialized from this schedule."
+        >
+          {data.campaigns.length ? (
+            <div className="space-y-3">
+              {data.campaigns.map((campaign) => (
+                <button
+                  key={campaign.id}
+                  type="button"
+                  onClick={() => onNavigate(`/campaigns/${campaign.id}`)}
+                  className="flex w-full flex-col gap-2 rounded-xl border border-white/10 bg-[#07142B] p-4 text-left transition hover:border-brand-blue/60 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-white">{campaign.name}</p>
+                    <p className="mt-1 text-sm text-zinc-400">
+                      {formatDate(campaign.occurrenceAt, data.targetTimezone)}
+                    </p>
+                  </div>
+                  <Tag
+                    value={formatEnum(campaign.status)}
+                    severity={statusSeverity(campaign.status)}
+                    rounded
+                  />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-zinc-400">
+              No campaigns have been generated yet.
+            </p>
+          )}
+        </Panel>
+      </div>
+
+      <div className="space-y-6">
+        <Panel title="Recurrence">
+          <dl className="space-y-5">
+            <DetailItem label="Pattern" value={recurrenceSummary(data)} />
+            <DetailItem
+              label="Selection strategy"
+              value={
+                data.selectionStrategy
+                  ? formatEnum(data.selectionStrategy)
+                  : "Not applicable"
+              }
+              helper={
+                data.selectionStrategy === "DECK"
+                  ? data.shuffleDeck
+                    ? "Deck is shuffled before selection"
+                    : "Uses source order"
+                  : undefined
+              }
+            />
+            <DetailItem
+              label="Maximum campaigns"
+              value={data.maxCampaigns?.toString() ?? "No limit"}
+            />
+            <DetailItem
+              label="Ends"
+              value={formatDate(data.endsAt, data.targetTimezone)}
+            />
+          </dl>
+        </Panel>
+
+        <Panel title="Lifecycle and metadata">
+          <dl className="space-y-5">
+            <DetailItem
+              label="Created by"
+              value={data.createdBy.name || data.createdBy.email}
+              helper={data.createdBy.email}
+            />
+            <DetailItem
+              label="Created"
+              value={formatDate(data.createdAt, data.targetTimezone)}
+            />
+            <DetailItem
+              label="Last updated"
+              value={formatDate(data.updatedAt, data.targetTimezone)}
+            />
+            <DetailItem
+              label="Completed"
+              value={formatDate(data.completedAt, data.targetTimezone)}
+            />
+            <DetailItem
+              label="Cancelled"
+              value={formatDate(data.cancelledAt, data.targetTimezone)}
+            />
+            <DetailItem label="Schedule ID" value={data.id} />
+          </dl>
+        </Panel>
+      </div>
+    </div>
+  );
 }
 
 export function ScheduleDetailContainer({
@@ -233,187 +426,10 @@ export function ScheduleDetailContainer({
         <FormMessage variant="error">{data.brokenReason}</FormMessage>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
-        <div className="space-y-6">
-          <Panel
-            title="Schedule overview"
-            description="The next occurrence and delivery configuration."
-          >
-            <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              <DetailItem
-                label="First occurrence"
-                value={formatDate(data.startsAt, data.targetTimezone)}
-              />
-              <DetailItem
-                label="Next occurrence"
-                value={formatDate(data.nextOccurrenceAt, data.targetTimezone)}
-              />
-              <DetailItem label="Timezone" value={data.targetTimezone} />
-              <DetailItem
-                label="Delivery"
-                value={formatEnum(data.deliveryMode)}
-                helper={deliverySummary(data)}
-              />
-              <DetailItem
-                label="Target group"
-                value={data.targetGroup?.name ?? "Inherited from campaign"}
-                helper={
-                  data.targetGroup
-                    ? `${data.targetGroup._count?.users ?? 0} recipients`
-                    : undefined
-                }
-              />
-              <DetailItem
-                label="Auto-complete"
-                value={
-                  data.autoCompleteAfterDays
-                    ? `${data.autoCompleteAfterDays} days after start`
-                    : "Disabled"
-                }
-              />
-            </dl>
-          </Panel>
-
-          <Panel
-            title="Campaign sources"
-            description="Published campaigns used to create each occurrence."
-          >
-            <div className="space-y-3">
-              {data.sources.map((source, index) => (
-                <div
-                  key={source.campaignId}
-                  className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#07142B] p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-medium text-zinc-500">
-                        #{index + 1}
-                      </span>
-                      <h3 className="font-medium text-white">
-                        {source.campaign.name}
-                      </h3>
-                      <Tag
-                        value={formatEnum(source.campaign.type)}
-                        severity="secondary"
-                        rounded
-                      />
-                    </div>
-                    <p className="mt-1 text-sm text-zinc-400">
-                      {formatEnum(source.campaign.status)} · Updated{" "}
-                      {formatDate(
-                        source.campaign.updatedAt,
-                        data.targetTimezone,
-                      )}
-                    </p>
-                  </div>
-                  <Button
-                    size="small"
-                    text
-                    label="View campaign"
-                    icon="pi pi-arrow-right"
-                    iconPos="right"
-                    onClick={() =>
-                      router.push(`/campaigns/${source.campaignId}`)
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel
-            title="Generated campaigns"
-            description="Campaign occurrences materialized from this schedule."
-          >
-            {data.campaigns.length ? (
-              <div className="space-y-3">
-                {data.campaigns.map((campaign) => (
-                  <button
-                    key={campaign.id}
-                    type="button"
-                    onClick={() => router.push(`/campaigns/${campaign.id}`)}
-                    className="flex w-full flex-col gap-2 rounded-xl border border-white/10 bg-[#07142B] p-4 text-left transition hover:border-brand-blue/60 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-medium text-white">{campaign.name}</p>
-                      <p className="mt-1 text-sm text-zinc-400">
-                        {formatDate(campaign.occurrenceAt, data.targetTimezone)}
-                      </p>
-                    </div>
-                    <Tag
-                      value={formatEnum(campaign.status)}
-                      severity={statusSeverity(campaign.status)}
-                      rounded
-                    />
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-zinc-400">
-                No campaigns have been generated yet.
-              </p>
-            )}
-          </Panel>
-        </div>
-
-        <div className="space-y-6">
-          <Panel title="Recurrence">
-            <dl className="space-y-5">
-              <DetailItem label="Pattern" value={recurrenceSummary(data)} />
-              <DetailItem
-                label="Selection strategy"
-                value={
-                  data.selectionStrategy
-                    ? formatEnum(data.selectionStrategy)
-                    : "Not applicable"
-                }
-                helper={
-                  data.selectionStrategy === "DECK"
-                    ? data.shuffleDeck
-                      ? "Deck is shuffled before selection"
-                      : "Uses source order"
-                    : undefined
-                }
-              />
-              <DetailItem
-                label="Maximum campaigns"
-                value={data.maxCampaigns?.toString() ?? "No limit"}
-              />
-              <DetailItem
-                label="Ends"
-                value={formatDate(data.endsAt, data.targetTimezone)}
-              />
-            </dl>
-          </Panel>
-
-          <Panel title="Lifecycle and metadata">
-            <dl className="space-y-5">
-              <DetailItem
-                label="Created by"
-                value={data.createdBy.name || data.createdBy.email}
-                helper={data.createdBy.email}
-              />
-              <DetailItem
-                label="Created"
-                value={formatDate(data.createdAt, data.targetTimezone)}
-              />
-              <DetailItem
-                label="Last updated"
-                value={formatDate(data.updatedAt, data.targetTimezone)}
-              />
-              <DetailItem
-                label="Completed"
-                value={formatDate(data.completedAt, data.targetTimezone)}
-              />
-              <DetailItem
-                label="Cancelled"
-                value={formatDate(data.cancelledAt, data.targetTimezone)}
-              />
-              <DetailItem label="Schedule ID" value={data.id} />
-            </dl>
-          </Panel>
-        </div>
-      </div>
+      <ScheduleDetailContent
+        data={data}
+        onNavigate={(path) => router.push(path)}
+      />
     </div>
   );
 }

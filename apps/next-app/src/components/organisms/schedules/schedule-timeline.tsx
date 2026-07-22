@@ -8,6 +8,13 @@ import { Skeleton } from "primereact/skeleton";
 import { trpc } from "@/src/lib/trpc";
 
 const DAY_MS = 86_400_000;
+const mediumDateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+});
+const shortDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+});
 
 function addMonths(date: Date, months: number): Date {
   const result = new Date(date);
@@ -133,10 +140,7 @@ export function ScheduleTimeline() {
             label: (context: TooltipItem<"bar">) => {
               const row = rows[context.dataIndex];
               if (!row) return "";
-              const date = new Intl.DateTimeFormat(undefined, {
-                dateStyle: "medium",
-              });
-              return `${row.kind === "schedule" ? "Schedule" : "Campaign"} · ${row.status} · ${date.format(row.start)} – ${date.format(row.end)}`;
+              return `${row.kind === "schedule" ? "Schedule" : "Campaign"} · ${row.status} · ${mediumDateFormatter.format(row.start)} – ${mediumDateFormatter.format(row.end)}`;
             },
           },
         },
@@ -152,10 +156,7 @@ export function ScheduleTimeline() {
             color: "#a1a1aa",
             maxTicksLimit: 7,
             callback: (value) =>
-              new Intl.DateTimeFormat(undefined, {
-                month: "short",
-                day: "numeric",
-              }).format(new Date(Number(value))),
+              shortDateFormatter.format(new Date(Number(value))),
           },
         },
         y: {

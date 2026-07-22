@@ -90,15 +90,3 @@ export function useCampaignAuthoring(campaignId?: string) {
     updateSchedule,
   };
 }
-
-export function useSchedules() {
-  const utils = trpc.useUtils();
-  const list = trpc.campaign.listSchedules.useQuery({ limit: 100, offset: 0 });
-  const cancel = trpc.campaign.cancelSchedule.useMutation({
-    onSuccess: () => utils.campaign.listSchedules.invalidate(),
-  });
-  const duplicate = trpc.campaign.duplicateSchedule.useMutation({
-    onSuccess: () => utils.campaign.listSchedules.invalidate(),
-  });
-  return { ...list, cancel, duplicate };
-}

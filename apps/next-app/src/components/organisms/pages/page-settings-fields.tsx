@@ -73,10 +73,14 @@ export function PageSettingsFields({
   return (
     <div className="flex flex-col gap-3 mb-3">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-zinc-100">
+        <label
+          htmlFor="page-type"
+          className="block text-sm font-medium text-zinc-100"
+        >
           {t("pages.type")}
         </label>
         <Dropdown
+          inputId="page-type"
           pt={selectSmall}
           value={values.type}
           options={typeOptions}
@@ -87,10 +91,14 @@ export function PageSettingsFields({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-zinc-100">
+        <label
+          htmlFor="page-status"
+          className="block text-sm font-medium text-zinc-100"
+        >
           {t("pages.status")}
         </label>
         <Dropdown
+          inputId="page-status"
           pt={selectSmall}
           value={values.status}
           options={statusOptions.map((option) => ({
@@ -127,10 +135,14 @@ export function PageSettingsFields({
 
       <div className="space-y-2 flex flex-col gap-3">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-zinc-100">
+          <label
+            htmlFor="page-redirect-target"
+            className="block text-sm font-medium text-zinc-100"
+          >
             {t("pages.redirectTarget")}
           </label>
           <Dropdown
+            inputId="page-redirect-target"
             pt={selectSmall}
             value={values.redirectTarget}
             options={redirectTargetOptions}
@@ -147,10 +159,14 @@ export function PageSettingsFields({
 
         {values.redirectTarget === "page" && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-zinc-100">
+            <label
+              htmlFor="page-redirect-page"
+              className="block text-sm font-medium text-zinc-100"
+            >
               {t("pages.redirectPage")}
             </label>
             <AutoComplete
+              inputId="page-redirect-page"
               value={pagesAutocompleteValue}
               onChange={async (event) => {
                 setPagesAutocompleteValue(
@@ -172,7 +188,10 @@ export function PageSettingsFields({
 
         {values.redirectTarget === "url" && (
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-zinc-100">
+            <label
+              htmlFor="redirectUrl"
+              className="block text-sm font-medium text-zinc-100"
+            >
               {t("pages.redirectUrl")}
             </label>
             <Field name="redirectUrl">

@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { Badge } from "primereact/badge";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import { TabPanel, TabView } from "primereact/tabview";
 import type { inferRouterOutputs } from "@trpc/server";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import type { AppRouter } from "@/src/server/trpc/router";
 import { trpc } from "@/src/lib/trpc";
+import { CampaignRecipientsTab } from "./recipients-tab";
+import { CampaignStatisticsTab } from "./statistics-tab";
 
 function formatLabel(value: string): string {
   return value
@@ -106,6 +109,7 @@ function ResourceRow({
 type CampaignDetail = NonNullable<
   inferRouterOutputs<AppRouter>["campaign"]["getById"]
 >;
+type CampaignSchedule = NonNullable<CampaignDetail["schedule"]>;
 
 function CampaignDetailContent({
   data,
@@ -115,7 +119,7 @@ function CampaignDetailContent({
 }: {
   data: CampaignDetail;
   recipientCount: number;
-  schedules: CampaignDetail["scheduleSources"][number]["schedule"][];
+  schedules: CampaignSchedule[];
   onNavigate: (path: string) => void;
 }) {
   return (
@@ -393,7 +397,13 @@ export function CampaignDetailContainer({
           ? "Campaign cloned successfully."
           : "";
   const canEdit = data.status === "DRAFT" || data.status === "PUBLISHED";
-  const schedules = data.scheduleSources.map((source) => source.schedule);
+  const schedules = [
+    ...(data.schedule ? [data.schedule] : []),
+    ...data.scheduleSources.map((source) => source.schedule),
+  ].filter(
+    (schedule, index, all) =>
+      all.findIndex((candidate) => candidate.id === schedule.id) === index,
+  );
   const recipientCount = data.targetGroup?._count.users ?? 0;
 
   return (
@@ -506,12 +516,25 @@ export function CampaignDetailContainer({
         </div>
       ) : null}
 
-      <CampaignDetailContent
-        data={data}
-        recipientCount={recipientCount}
-        schedules={schedules}
-        onNavigate={(path) => router.push(path)}
-      />
+      <TabView>
+        <TabPanel header="Overview" leftIcon="pi pi-info-circle mr-2">
+          <CampaignDetailContent
+            data={data}
+            recipientCount={recipientCount}
+            schedules={schedules}
+            onNavigate={(path) => router.push(path)}
+          />
+        </TabPanel>
+        <TabPanel header="Statistics" leftIcon="pi pi-chart-bar mr-2">
+          <CampaignStatisticsTab campaignId={id} />
+        </TabPanel>
+        <TabPanel header="Recipients" leftIcon="pi pi-users mr-2">
+          <CampaignRecipientsTab
+            campaignId={id}
+            timeZone={data.targetTimezone}
+          />
+        </TabPanel>
+      </TabView>
     </div>
   );
 }

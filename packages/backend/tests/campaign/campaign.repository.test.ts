@@ -235,6 +235,16 @@ describe("CampaignRepository", () => {
       endsAt: null,
       autoCompleteAfterDays: 20,
     });
+    await db.targetGroupUser.createMany({
+      data: Array.from({ length: 5 }, (_, index) => ({
+        targetGroupId: refs.targetGroupId,
+        email: `batch-${index}@example.com`,
+        normalizedEmail: `batch-${index}@example.com`,
+        firstName: "Batch",
+        lastName: String(index),
+      })),
+    });
+    process.env.MATERIALIZATION_BATCH_SIZE = "2";
     const run = await repo.materializeOccurrence(
       schedule.id,
       source.id,
@@ -242,6 +252,8 @@ describe("CampaignRepository", () => {
       organizationId,
       userId,
     );
+
+    delete process.env.MATERIALIZATION_BATCH_SIZE;
 
     const repeated = await repo.materializeOccurrence(
       schedule.id,
@@ -261,6 +273,11 @@ describe("CampaignRepository", () => {
     expect(run.tags).toEqual(["awareness"]);
     expect(run.emailTemplate?.visibility).toBe("SHADOW");
     expect(run.targetGroup?.visibility).toBe("SHADOW");
+    expect(run.materializedAt).toBeInstanceOf(Date);
+    expect(run.expectedRecipientCount).toBe(6);
+    expect(
+      await db.campaignRecipient.count({ where: { campaignId: run.id } }),
+    ).toBe(6);
     const files = await db.file.findMany({
       where: { shadowCampaignId: run.id },
     });

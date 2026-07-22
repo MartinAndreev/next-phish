@@ -67,6 +67,7 @@ services:
       - PAGE_SUBMISSION_ENCRYPTION_KEY=${PAGE_SUBMISSION_ENCRYPTION_KEY}
       - PUBLIC_CONTENT_URL=${PUBLIC_CONTENT_URL:-http://content.localhost:3001}
       - TRUSTED_PROXY_NETWORKS=${TRUSTED_PROXY_NETWORKS:-}
+      - DELIVERY_WEBHOOK_SECRET=${DELIVERY_WEBHOOK_SECRET:-development-webhook-secret}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules
@@ -87,6 +88,7 @@ services:
       - PAGE_SUBMISSION_ENCRYPTION_KEY=${PAGE_SUBMISSION_ENCRYPTION_KEY}
       - PUBLIC_CONTENT_URL=${PUBLIC_CONTENT_URL:-http://content.localhost:3001}
       - MESSAGE_ID_DOMAIN=${MESSAGE_ID_DOMAIN:-mail.example.com}
+      - DELIVERY_ENABLED=${DELIVERY_ENABLED:-true}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules

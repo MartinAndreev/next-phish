@@ -152,10 +152,10 @@ describe("MicrosoftGraphProvider", () => {
       expect(provider.capabilities.supportsHtml).toBe(true);
       expect(provider.capabilities.supportsText).toBe(true);
       expect(provider.capabilities.supportsAttachments).toBe(true);
-      expect(provider.capabilities.supportsCustomHeaders).toBe(false);
-      expect(provider.capabilities.supportsReplyTo).toBe(false);
+      expect(provider.capabilities.supportsCustomHeaders).toBe(true);
+      expect(provider.capabilities.supportsReplyTo).toBe(true);
       expect(provider.capabilities.supportsTemplates).toBe(false);
-      expect(provider.capabilities.supportsBatch).toBe(true);
+      expect(provider.capabilities.supportsBatch).toBe(false);
       expect(provider.capabilities.supportsTracking).toBe(false);
       expect(provider.capabilities.supportsRateLimitInfo).toBe(false);
     });

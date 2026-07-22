@@ -1,68 +1,89 @@
-import type {
+import type { CampaignEventType as CampaignEventTypeValue } from "@next-phish/shared";
+import {
   CampaignEventType,
   NegativeEventSeverity,
   RecipientDeliveryStatus,
-} from "@next-phish/shared";
+  type NegativeEventSeverity as NegativeEventSeverityValue,
+  type RecipientDeliveryStatus as RecipientDeliveryStatusValue,
+} from "../execution.enums";
 
-const terminal = new Set<RecipientDeliveryStatus>([
-  "SENT",
-  "FAILED",
-  "DELIVERY_UNKNOWN",
-  "CANCELLED",
+const terminal = new Set<RecipientDeliveryStatusValue>([
+  RecipientDeliveryStatus.SENT,
+  RecipientDeliveryStatus.FAILED,
+  RecipientDeliveryStatus.DELIVERY_UNKNOWN,
+  RecipientDeliveryStatus.CANCELLED,
 ]);
 
-const transitions: Record<RecipientDeliveryStatus, RecipientDeliveryStatus[]> =
-  {
-    PLANNED: ["QUEUED", "CANCELLED"],
-    QUEUED: ["DISPATCHING", "CANCELLED"],
-    DISPATCHING: ["SENT", "RETRYABLE", "FAILED", "DELIVERY_UNKNOWN"],
-    RETRYABLE: ["QUEUED", "CANCELLED"],
-    SENT: [],
-    FAILED: [],
-    DELIVERY_UNKNOWN: [],
-    CANCELLED: [],
-  };
+const transitions: Record<
+  RecipientDeliveryStatusValue,
+  RecipientDeliveryStatusValue[]
+> = {
+  [RecipientDeliveryStatus.PLANNED]: [
+    RecipientDeliveryStatus.QUEUED,
+    RecipientDeliveryStatus.CANCELLED,
+  ],
+  [RecipientDeliveryStatus.QUEUED]: [
+    RecipientDeliveryStatus.DISPATCHING,
+    RecipientDeliveryStatus.CANCELLED,
+  ],
+  [RecipientDeliveryStatus.DISPATCHING]: [
+    RecipientDeliveryStatus.SENT,
+    RecipientDeliveryStatus.RETRYABLE,
+    RecipientDeliveryStatus.FAILED,
+    RecipientDeliveryStatus.DELIVERY_UNKNOWN,
+  ],
+  [RecipientDeliveryStatus.RETRYABLE]: [
+    RecipientDeliveryStatus.QUEUED,
+    RecipientDeliveryStatus.CANCELLED,
+  ],
+  [RecipientDeliveryStatus.SENT]: [],
+  [RecipientDeliveryStatus.FAILED]: [],
+  [RecipientDeliveryStatus.DELIVERY_UNKNOWN]: [],
+  [RecipientDeliveryStatus.CANCELLED]: [],
+};
 
-const severity: Record<NegativeEventSeverity, number> = {
-  NONE: 0,
-  OPENED: 1,
-  CLICKED: 2,
-  SUBMITTED: 3,
+const severity: Record<NegativeEventSeverityValue, number> = {
+  [NegativeEventSeverity.NONE]: 0,
+  [NegativeEventSeverity.OPENED]: 1,
+  [NegativeEventSeverity.CLICKED]: 2,
+  [NegativeEventSeverity.SUBMITTED]: 3,
 };
 
 export function isTerminalDeliveryStatus(
-  status: RecipientDeliveryStatus,
+  status: RecipientDeliveryStatusValue,
 ): boolean {
   return terminal.has(status);
 }
 
 export function canTransitionDelivery(
-  from: RecipientDeliveryStatus,
-  to: RecipientDeliveryStatus,
+  from: RecipientDeliveryStatusValue,
+  to: RecipientDeliveryStatusValue,
 ): boolean {
   return transitions[from].includes(to);
 }
 
 export function assertDeliveryTransition(
-  from: RecipientDeliveryStatus,
-  to: RecipientDeliveryStatus,
+  from: RecipientDeliveryStatusValue,
+  to: RecipientDeliveryStatusValue,
 ): void {
   if (!canTransitionDelivery(from, to))
     throw new Error(`Invalid delivery transition: ${from} -> ${to}`);
 }
 
 export function negativeSeverityForEvent(
-  type: CampaignEventType,
-): NegativeEventSeverity | null {
-  return type === "OPENED" || type === "CLICKED" || type === "SUBMITTED"
+  type: CampaignEventTypeValue,
+): NegativeEventSeverityValue | null {
+  return type === CampaignEventType.OPENED ||
+    type === CampaignEventType.CLICKED ||
+    type === CampaignEventType.SUBMITTED
     ? type
     : null;
 }
 
 export function maxNegativeSeverity(
-  current: NegativeEventSeverity,
-  candidate: NegativeEventSeverity,
-): NegativeEventSeverity {
+  current: NegativeEventSeverityValue,
+  candidate: NegativeEventSeverityValue,
+): NegativeEventSeverityValue {
   return severity[candidate] > severity[current] ? candidate : current;
 }
 

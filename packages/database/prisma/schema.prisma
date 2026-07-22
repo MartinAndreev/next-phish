@@ -192,20 +192,21 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  sessions        Session[]
-  accounts        Account[]
-  twoFactor       TwoFactor?
-  members         Member[]
-  invitations     Invitation[]
-  emailTemplates  EmailTemplate[]              @relation("EmailTemplateCreatedBy")
-  pages           Page[]                       @relation("PageCreatedBy")
-  uploadedFiles   File[]                       @relation("UploadedFiles")
-  jobs            Job[]                        @relation("JobCreatedBy")
-  siteImports     SiteImport[]                 @relation("SiteImportCreatedBy")
-  targetGroups    TargetGroup[]                @relation("TargetGroupCreatedBy")
-  campaigns       Campaign[]                   @relation("CampaignCreatedBy")
-  schedules       Schedule[]                   @relation("ScheduleCreatedBy")
-  ignoredNetworks OrganizationIgnoredNetwork[] @relation("IgnoredNetworkCreatedBy")
+  sessions             Session[]
+  accounts             Account[]
+  twoFactor            TwoFactor?
+  members              Member[]
+  invitations          Invitation[]
+  emailTemplates       EmailTemplate[]              @relation("EmailTemplateCreatedBy")
+  pages                Page[]                       @relation("PageCreatedBy")
+  uploadedFiles        File[]                       @relation("UploadedFiles")
+  jobs                 Job[]                        @relation("JobCreatedBy")
+  siteImports          SiteImport[]                 @relation("SiteImportCreatedBy")
+  targetGroups         TargetGroup[]                @relation("TargetGroupCreatedBy")
+  campaigns            Campaign[]                   @relation("CampaignCreatedBy")
+  schedules            Schedule[]                   @relation("ScheduleCreatedBy")
+  ignoredNetworks      OrganizationIgnoredNetwork[] @relation("IgnoredNetworkCreatedBy")
+  ignoredNetworkAudits IgnoredNetworkAudit[]        @relation("IgnoredNetworkAuditActor")
 
   @@map("user")
 }
@@ -276,28 +277,30 @@ model Organization {
   logo            String?
   metadata        String?
   defaultTimezone String   @default("UTC")
+  deliveryEnabled Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  members             Member[]
-  invitations         Invitation[]
-  emailTemplates      EmailTemplate[]
-  pages               Page[]
-  files               File[]
-  jobs                Job[]
-  siteImports         SiteImport[]
-  targetGroups        TargetGroup[]
-  mailSendingProfiles MailSendingProfile[]
-  campaigns           Campaign[]
-  schedules           Schedule[]
-  storedObjects       StoredObject[]
-  catalogPreviews     CatalogPreview[]
-  campaignRecipients  CampaignRecipient[]
-  campaignEvents      CampaignEvent[]
-  deliveryEvents      DeliveryEvent[]
-  ignoredNetworks     OrganizationIgnoredNetwork[]
-  outboxEvents        OutboxEvent[]
-  scheduleOccurrences ScheduleOccurrence[]
+  members              Member[]
+  invitations          Invitation[]
+  emailTemplates       EmailTemplate[]
+  pages                Page[]
+  files                File[]
+  jobs                 Job[]
+  siteImports          SiteImport[]
+  targetGroups         TargetGroup[]
+  mailSendingProfiles  MailSendingProfile[]
+  campaigns            Campaign[]
+  schedules            Schedule[]
+  storedObjects        StoredObject[]
+  catalogPreviews      CatalogPreview[]
+  campaignRecipients   CampaignRecipient[]
+  campaignEvents       CampaignEvent[]
+  deliveryEvents       DeliveryEvent[]
+  ignoredNetworks      OrganizationIgnoredNetwork[]
+  ignoredNetworkAudits IgnoredNetworkAudit[]
+  outboxEvents         OutboxEvent[]
+  scheduleOccurrences  ScheduleOccurrence[]
 
   @@map("organization")
 }
@@ -704,6 +707,7 @@ model Campaign {
   occurrenceAt           DateTime?      @db.Timestamptz(3)
   materializedAt         DateTime?      @db.Timestamptz(3)
   expectedRecipientCount Int?
+  deliveryEnabled        Boolean        @default(true)
   brokenAt               DateTime?
   brokenReason           String?
   createdAt              DateTime       @default(now())
@@ -860,6 +864,7 @@ model CampaignRecipient {
   @@unique([campaignId, normalizedEmail])
   @@index([organizationId, deliveryStatus, scheduledAt])
   @@index([campaignId, deliveryStatus])
+  @@index([providerMessageId])
   @@index([deliveryStatus, retryAt, leaseExpiresAt])
   @@map("campaign_recipient")
 }
@@ -976,6 +981,24 @@ model OrganizationIgnoredNetwork {
   @@unique([organizationId, normalizedNetwork])
   @@index([organizationId])
   @@map("organization_ignored_network")
+}
+
+model IgnoredNetworkAudit {
+  id                String   @id @default(cuid())
+  organizationId    String
+  ignoredNetworkId  String?
+  action            String
+  normalizedNetwork String
+  description       String?
+  actorId           String
+  createdAt         DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User         @relation("IgnoredNetworkAuditActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+  @@index([ignoredNetworkId])
+  @@map("ignored_network_audit")
 }
 
 model ScheduleSource {

@@ -2,6 +2,13 @@ import { randomUUID } from "node:crypto";
 import { MailDispatcherService } from "../../mail-sending";
 import { DeliveryRepository } from "../repositories/delivery.repository";
 import { calculateRetryAt } from "./delivery-policy.service";
+import { DistributedRateLimiterService } from "./distributed-rate-limiter.service";
+import {
+  CampaignEventType,
+  CampaignStatus,
+  DeliveryEventType,
+  RecipientDeliveryStatus,
+} from "../execution.enums";
 
 function render(html: string, values: Record<string, string>): string {
   return html.replace(/\{\{\s*([a-zA-Z]+)\s*\}\}/g, (match, key: string) =>
@@ -20,6 +27,7 @@ export class DeliveryProcessorService {
   constructor(
     private readonly repository: DeliveryRepository,
     private readonly dispatcher: MailDispatcherService,
+    private readonly rateLimiter: DistributedRateLimiterService,
   ) {}
 
   async process(campaignRecipientId: string): Promise<void> {
@@ -38,13 +46,78 @@ export class DeliveryProcessorService {
     if (
       !recipient?.campaign.emailTemplate ||
       !recipient.campaign.mailSendingProfile ||
-      !["PENDING_START", "ACTIVE"].includes(recipient.campaign.status)
+      !recipient.campaign.deliveryEnabled ||
+      !recipient.campaign.organization.deliveryEnabled ||
+      (recipient.campaign.status !== CampaignStatus.PENDING_START &&
+        recipient.campaign.status !== CampaignStatus.ACTIVE)
     ) {
       await this.repository.transitionRecipient(
         campaignRecipientId,
-        "DISPATCHING",
-        { status: "CANCELLED", lastError: "Campaign is not send-eligible" },
+        RecipientDeliveryStatus.DISPATCHING,
+        {
+          status: RecipientDeliveryStatus.CANCELLED,
+          lastError: "Campaign is not send-eligible",
+        },
       );
+      return;
+    }
+
+    const providerKey = `provider:${recipient.campaign.mailSendingProfile.providerType}`;
+    const circuit = await this.rateLimiter.isCircuitOpen(providerKey);
+    if (circuit.open) {
+      const retryAt = new Date(Date.now() + circuit.retryAfterMs);
+      await this.repository.transitionRecipient(
+        campaignRecipientId,
+        RecipientDeliveryStatus.DISPATCHING,
+        {
+          status: RecipientDeliveryStatus.RETRYABLE,
+          retryAt,
+          lastError: "Provider is deferred",
+        },
+      );
+      await this.repository.recordDeliveryEvent({
+        campaignRecipientId,
+        type: DeliveryEventType.DEFERRED,
+        deduplicationKey: `recipient:${campaignRecipientId}:circuit:${retryAt.getTime()}`,
+        metadata: { reason: "circuit_open" },
+      });
+      return;
+    }
+
+    const rate = await this.rateLimiter.consumeAll([
+      {
+        key: `organization:${recipient.organizationId}`,
+        max: Number(process.env.ORGANIZATION_DELIVERY_RATE_MAX ?? 600),
+        durationMs: 60_000,
+      },
+      {
+        key: providerKey,
+        max: Number(process.env.PROVIDER_DELIVERY_RATE_MAX ?? 300),
+        durationMs: 60_000,
+      },
+      {
+        key: `profile:${recipient.campaign.mailSendingProfile.sourceSendingProfileId ?? recipient.campaign.mailSendingProfile.id}`,
+        max: Number(process.env.PROFILE_DELIVERY_RATE_MAX ?? 120),
+        durationMs: 60_000,
+      },
+    ]);
+    if (!rate.allowed) {
+      const retryAt = new Date(Date.now() + rate.retryAfterMs);
+      await this.repository.transitionRecipient(
+        campaignRecipientId,
+        RecipientDeliveryStatus.DISPATCHING,
+        {
+          status: RecipientDeliveryStatus.RETRYABLE,
+          retryAt,
+          lastError: "Delivery rate deferred",
+        },
+      );
+      await this.repository.recordDeliveryEvent({
+        campaignRecipientId,
+        type: DeliveryEventType.DEFERRED,
+        deduplicationKey: `recipient:${campaignRecipientId}:deferred:${retryAt.getTime()}`,
+        metadata: { reason: "rate_limit" },
+      });
       return;
     }
 
@@ -64,6 +137,8 @@ export class DeliveryProcessorService {
       email: recipient.email,
       position: recipient.position ?? "",
       trackingRef: recipient.trackingRef,
+      url: `${publicHost}/c?ref=${encodeURIComponent(recipient.trackingRef)}`,
+      URL: `${publicHost}/c?ref=${encodeURIComponent(recipient.trackingRef)}`,
     });
     if (recipient.campaign.emailTemplate.trackingPixel) {
       html += `<img src="${publicHost}/p.gif?ref=${encodeURIComponent(recipient.trackingRef)}" alt="" width="1" height="1" style="display:none" />`;
@@ -94,60 +169,72 @@ export class DeliveryProcessorService {
         error instanceof Error ? error.message : "Dispatch setup failed",
       );
       await this.repository.completeAttempt(attempt.id, {
-        outcome: "RETRYABLE",
+        outcome: RecipientDeliveryStatus.RETRYABLE,
         errorCode: "DISPATCH_SETUP_FAILED",
         sanitizedError: sanitized,
       });
       await this.repository.transitionRecipient(
         campaignRecipientId,
-        "DISPATCHING",
-        { status: "RETRYABLE", retryAt, lastError: sanitized },
+        RecipientDeliveryStatus.DISPATCHING,
+        {
+          status: RecipientDeliveryStatus.RETRYABLE,
+          retryAt,
+          lastError: sanitized,
+        },
       );
       await this.repository.recordDeliveryEvent({
         campaignRecipientId,
-        type: "RETRY_SCHEDULED",
+        type: DeliveryEventType.RETRY_SCHEDULED,
         deduplicationKey: `attempt:${attempt.id}:retryable`,
       });
       return;
     }
 
     if (result.success) {
+      await this.rateLimiter.recordSuccess(providerKey);
       await this.repository.completeAttempt(attempt.id, {
-        outcome: "ACCEPTED",
+        outcome: DeliveryEventType.ACCEPTED,
         providerMessageId: result.providerMessageId,
       });
       await this.repository.transitionRecipient(
         campaignRecipientId,
-        "DISPATCHING",
-        { status: "SENT", providerMessageId: result.providerMessageId },
+        RecipientDeliveryStatus.DISPATCHING,
+        {
+          status: RecipientDeliveryStatus.SENT,
+          providerMessageId: result.providerMessageId,
+        },
       );
       await this.repository.recordDeliveryEvent({
         campaignRecipientId,
-        type: "ACCEPTED",
+        type: DeliveryEventType.ACCEPTED,
         deduplicationKey: `attempt:${attempt.id}:accepted`,
       });
       await this.repository.recordCampaignEvent({
         campaignRecipientId,
-        type: "SENT",
+        type: CampaignEventType.SENT,
         deduplicationKey: `recipient:${campaignRecipientId}:sent`,
       });
       return;
     }
 
     const code = result.errorCode ?? "PROVIDER_ERROR";
+    if (result.failureKind === "THROTTLED")
+      await this.rateLimiter.recordThrottle({ key: providerKey });
     const error = sanitizeError(result.errorMessage);
-    const statusCode = Number(code.match(/(\d{3})/)?.[1]);
-    const isThrottle = statusCode === 429;
-    const isServerFailure = statusCode >= 500 && statusCode <= 599;
-    const isSafeRetry =
-      result.provider === "GENERAL_API" &&
-      (code === "API_SEND_FAILED" || isThrottle || isServerFailure);
-    const isPermanent = statusCode >= 400 && statusCode < 500 && !isThrottle;
-    const nextStatus = isSafeRetry
-      ? "RETRYABLE"
-      : isPermanent
-        ? "FAILED"
-        : "DELIVERY_UNKNOWN";
+    const maxAttempts = Math.max(
+      1,
+      Number(process.env.DELIVERY_MAX_ATTEMPTS ?? 5),
+    );
+    const safelyRetryable =
+      result.failureKind === "SAFE_TRANSIENT" ||
+      result.failureKind === "THROTTLED";
+    const retriesExhausted = recipient.attemptCount >= maxAttempts;
+    const nextStatus =
+      safelyRetryable && !retriesExhausted
+        ? RecipientDeliveryStatus.RETRYABLE
+        : result.failureKind === "PERMANENT" || retriesExhausted
+          ? RecipientDeliveryStatus.FAILED
+          : RecipientDeliveryStatus.DELIVERY_UNKNOWN;
 
     await this.repository.completeAttempt(attempt.id, {
       outcome: nextStatus,
@@ -156,11 +243,11 @@ export class DeliveryProcessorService {
     });
     await this.repository.transitionRecipient(
       campaignRecipientId,
-      "DISPATCHING",
+      RecipientDeliveryStatus.DISPATCHING,
       {
         status: nextStatus,
         retryAt:
-          nextStatus === "RETRYABLE"
+          nextStatus === RecipientDeliveryStatus.RETRYABLE
             ? calculateRetryAt(recipient.attemptCount)
             : undefined,
         lastError: error,
@@ -169,17 +256,17 @@ export class DeliveryProcessorService {
     await this.repository.recordDeliveryEvent({
       campaignRecipientId,
       type:
-        nextStatus === "RETRYABLE"
-          ? "RETRY_SCHEDULED"
-          : nextStatus === "FAILED"
-            ? "REJECTED"
-            : "DELIVERY_UNKNOWN",
+        nextStatus === RecipientDeliveryStatus.RETRYABLE
+          ? DeliveryEventType.RETRY_SCHEDULED
+          : nextStatus === RecipientDeliveryStatus.FAILED
+            ? DeliveryEventType.REJECTED
+            : DeliveryEventType.DELIVERY_UNKNOWN,
       deduplicationKey: `attempt:${attempt.id}:${nextStatus.toLowerCase()}`,
     });
-    if (nextStatus === "FAILED")
+    if (nextStatus === RecipientDeliveryStatus.FAILED)
       await this.repository.recordCampaignEvent({
         campaignRecipientId,
-        type: "FAILED",
+        type: CampaignEventType.FAILED,
         deduplicationKey: `recipient:${campaignRecipientId}:failed`,
       });
   }

@@ -55,6 +55,7 @@ export interface SendMailResult {
   rawResponse?: unknown;
   errorCode?: string;
   errorMessage?: string;
+  failureKind?: "SAFE_TRANSIENT" | "THROTTLED" | "PERMANENT" | "AMBIGUOUS";
 }
 
 export interface ConnectionTestResult {

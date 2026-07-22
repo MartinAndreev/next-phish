@@ -176,6 +176,9 @@ importers:
       "@next-phish/database":
         specifier: workspace:*
         version: link:../../packages/database
+      "@next-phish/shared":
+        specifier: workspace:*
+        version: link:../../packages/shared
       hono:
         specifier: ^4.12.25
         version: 4.12.25

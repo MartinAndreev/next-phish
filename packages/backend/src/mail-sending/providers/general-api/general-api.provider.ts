@@ -22,7 +22,7 @@ const GENERAL_API_CAPABILITIES: MailProviderCapabilities = {
   supportsBatch: false,
   supportsTracking: false,
   supportsRateLimitInfo: false,
-  supportsIdempotencyKey: true,
+  supportsIdempotencyKey: false,
 };
 
 interface GeneralApiRequestBody {
@@ -111,6 +111,12 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
               ? rawResponse
               : JSON.stringify(rawResponse),
           rawResponse,
+          failureKind:
+            response.status === 429
+              ? "THROTTLED"
+              : response.status >= 400 && response.status < 500
+                ? "PERMANENT"
+                : "AMBIGUOUS",
         };
       }
 
@@ -132,6 +138,7 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
         success: false,
         errorCode: "API_SEND_FAILED",
         errorMessage: message,
+        failureKind: "AMBIGUOUS",
       };
     }
   }

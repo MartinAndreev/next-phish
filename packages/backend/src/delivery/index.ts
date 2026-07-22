@@ -1,8 +1,25 @@
+export {
+  ScheduleStatus,
+  ScheduleType,
+  ScheduleSelectionStrategy,
+  OccurrenceStatus,
+  RecipientDeliveryStatus,
+  NegativeEventSeverity,
+  CampaignEventType,
+  DeliveryEventType,
+  OutboxStatus,
+} from "./execution.enums";
 export { DeliveryRepository } from "./repositories/delivery.repository";
 export { OutboxRepository } from "./repositories/outbox.repository";
 export { ScheduleExecutionRepository } from "./repositories/schedule-execution.repository";
 export { TrackingService } from "./services/tracking.service";
 export { DeliveryProcessorService } from "./services/delivery-processor.service";
+export { DistributedRateLimiterService } from "./services/distributed-rate-limiter.service";
+export { ProviderWebhookService } from "./services/provider-webhook.service";
+export {
+  createWebhookSignature,
+  verifyWebhookSignature,
+} from "./services/webhook-security.service";
 export {
   generateTrackingRef,
   generateLogicalMessageId,
@@ -27,6 +44,11 @@ export {
   calculateScheduledAt,
   type DeliveryPacing,
 } from "./services/pacing.service";
+export {
+  orderScheduleDeck,
+  selectScheduleSource,
+  type ScheduleSourceCandidate,
+} from "./services/source-selection.service";
 export {
   nextOccurrenceAfter,
   type RecurrenceRule,

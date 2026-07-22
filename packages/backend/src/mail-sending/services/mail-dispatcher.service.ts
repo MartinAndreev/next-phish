@@ -38,6 +38,7 @@ export class MailDispatcherService {
         success: false,
         errorCode: "PROFILE_NOT_FOUND",
         errorMessage: `Mail sending profile ${profileId} not found`,
+        failureKind: "PERMANENT",
       };
     }
 

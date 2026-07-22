@@ -44,7 +44,7 @@ export function initializeContainer(options: ContainerOptions): void {
   registerDeliveryServices(db);
   if (options.redis) {
     registerMailSendingServices(db, options.redis);
-    registerDeliveryWorkerServices();
+    registerDeliveryWorkerServices(options.redis);
   }
   Container.set(MessageBus, new MessageBus(db));
 }

@@ -1,17 +1,254 @@
 import type {
-  CampaignEventType,
-  DeliveryEventType,
-  NegativeEventSeverity,
-  RecipientDeliveryStatus,
+  CampaignEventType as CampaignEventTypeValue,
+  DeliveryEventType as DeliveryEventTypeValue,
 } from "@next-phish/shared";
 import { Prisma, type PrismaClient } from "@prisma/client";
 import {
   maxNegativeSeverity,
   negativeSeverityForEvent,
 } from "../services/delivery-policy.service";
+import {
+  CampaignEventType,
+  CampaignStatus,
+  DeliveryEventType,
+  OccurrenceStatus,
+  OutboxStatus,
+  RecipientDeliveryStatus,
+  ScheduleStatus,
+  type NegativeEventSeverity as NegativeEventSeverityValue,
+  type RecipientDeliveryStatus as RecipientDeliveryStatusValue,
+} from "../execution.enums";
 
 export class DeliveryRepository {
   constructor(private readonly db: PrismaClient) {}
+
+  setOrganizationDeliveryEnabled(
+    organizationId: string,
+    deliveryEnabled: boolean,
+  ) {
+    return this.db.organization.update({
+      where: { id: organizationId },
+      data: { deliveryEnabled },
+      select: { id: true, deliveryEnabled: true },
+    });
+  }
+
+  async setCampaignDeliveryEnabled(
+    organizationId: string,
+    campaignId: string,
+    deliveryEnabled: boolean,
+  ) {
+    const result = await this.db.campaign.updateMany({
+      where: { id: campaignId, organizationId },
+      data: { deliveryEnabled },
+    });
+    if (!result.count) throw new Error("Campaign not found");
+    return { id: campaignId, deliveryEnabled };
+  }
+
+  async listCampaignRecipients(input: {
+    organizationId: string;
+    campaignId: string;
+    limit: number;
+    offset: number;
+  }) {
+    const where = {
+      organizationId: input.organizationId,
+      campaignId: input.campaignId,
+    };
+    const [rows, total] = await Promise.all([
+      this.db.campaignRecipient.findMany({
+        where,
+        orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
+        take: input.limit,
+        skip: input.offset,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          position: true,
+          scheduledAt: true,
+          deliveryStatus: true,
+          sentAt: true,
+          failedAt: true,
+          attemptCount: true,
+          highestNegativeEvent: true,
+          highestNegativeEventAt: true,
+          reported: true,
+          reportedAt: true,
+        },
+      }),
+      this.db.campaignRecipient.count({ where }),
+    ]);
+    return { rows, total };
+  }
+
+  listCampaignEvents(input: {
+    organizationId: string;
+    campaignId: string;
+    campaignRecipientId?: string;
+    limit: number;
+    offset: number;
+  }) {
+    return this.db.campaignEvent.findMany({
+      where: {
+        organizationId: input.organizationId,
+        campaignId: input.campaignId,
+        campaignRecipientId: input.campaignRecipientId,
+      },
+      orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+      take: input.limit,
+      skip: input.offset,
+      select: {
+        id: true,
+        campaignRecipientId: true,
+        type: true,
+        occurredAt: true,
+      },
+    });
+  }
+
+  listDeliveryEvents(input: {
+    organizationId: string;
+    campaignId: string;
+    campaignRecipientId?: string;
+    limit: number;
+    offset: number;
+  }) {
+    return this.db.deliveryEvent.findMany({
+      where: {
+        organizationId: input.organizationId,
+        campaignId: input.campaignId,
+        campaignRecipientId: input.campaignRecipientId,
+      },
+      orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+      take: input.limit,
+      skip: input.offset,
+      select: {
+        id: true,
+        campaignRecipientId: true,
+        type: true,
+        occurredAt: true,
+        metadata: true,
+      },
+    });
+  }
+
+  async getExecutionOperations(organizationId: string) {
+    const now = new Date();
+    const [
+      dueSchedules,
+      oldestDueSchedule,
+      pendingOutbox,
+      oldestOutbox,
+      deliveryUnknown,
+      failedRecipients,
+      occurrenceStates,
+    ] = await Promise.all([
+      this.db.schedule.count({
+        where: {
+          organizationId,
+          executionEnabled: true,
+          status: {
+            in: [ScheduleStatus.SCHEDULED, ScheduleStatus.RUNNING],
+          },
+          nextOccurrenceAt: { lte: now },
+        },
+      }),
+      this.db.schedule.findFirst({
+        where: {
+          organizationId,
+          executionEnabled: true,
+          status: {
+            in: [ScheduleStatus.SCHEDULED, ScheduleStatus.RUNNING],
+          },
+          nextOccurrenceAt: { lte: now },
+        },
+        orderBy: { nextOccurrenceAt: "asc" },
+        select: { nextOccurrenceAt: true },
+      }),
+      this.db.outboxEvent.count({
+        where: {
+          organizationId,
+          status: { in: [OutboxStatus.PENDING, OutboxStatus.FAILED] },
+        },
+      }),
+      this.db.outboxEvent.findFirst({
+        where: {
+          organizationId,
+          status: { in: [OutboxStatus.PENDING, OutboxStatus.FAILED] },
+        },
+        orderBy: { availableAt: "asc" },
+        select: { availableAt: true },
+      }),
+      this.db.campaignRecipient.count({
+        where: {
+          organizationId,
+          deliveryStatus: RecipientDeliveryStatus.DELIVERY_UNKNOWN,
+        },
+      }),
+      this.db.campaignRecipient.count({
+        where: {
+          organizationId,
+          deliveryStatus: RecipientDeliveryStatus.FAILED,
+        },
+      }),
+      this.db.scheduleOccurrence.groupBy({
+        by: ["status"],
+        where: { organizationId },
+        _count: { _all: true },
+      }),
+    ]);
+    return {
+      dueSchedules,
+      scheduleLagMs: oldestDueSchedule?.nextOccurrenceAt
+        ? Math.max(
+            0,
+            now.getTime() - oldestDueSchedule.nextOccurrenceAt.getTime(),
+          )
+        : 0,
+      pendingOutbox,
+      outboxLagMs: oldestOutbox
+        ? Math.max(0, now.getTime() - oldestOutbox.availableAt.getTime())
+        : 0,
+      deliveryUnknown,
+      failedRecipients,
+      occurrenceStates,
+    };
+  }
+
+  async getCampaignExecutionSummary(
+    organizationId: string,
+    campaignId: string,
+  ) {
+    const campaign = await this.db.campaign.findFirst({
+      where: { id: campaignId, organizationId },
+      select: {
+        id: true,
+        status: true,
+        materializedAt: true,
+        expectedRecipientCount: true,
+      },
+    });
+    if (!campaign) return null;
+    const [delivery, negative, reported] = await Promise.all([
+      this.db.campaignRecipient.groupBy({
+        by: ["deliveryStatus"],
+        where: { campaignId, organizationId },
+        _count: { _all: true },
+      }),
+      this.db.campaignRecipient.groupBy({
+        by: ["highestNegativeEvent"],
+        where: { campaignId, organizationId },
+        _count: { _all: true },
+      }),
+      this.db.campaignRecipient.count({
+        where: { campaignId, organizationId, reported: true },
+      }),
+    ]);
+    return { campaign, delivery, negative, reported };
+  }
 
   listIgnoredNetworks(organizationId: string) {
     return this.db.organizationIgnoredNetwork.findMany({
@@ -34,18 +271,64 @@ export class DeliveryRepository {
     normalizedNetwork: string;
     description?: string;
   }) {
-    return this.db.organizationIgnoredNetwork.create({ data });
+    return this.db.$transaction(async (tx) => {
+      const network = await tx.organizationIgnoredNetwork.create({ data });
+      await tx.ignoredNetworkAudit.create({
+        data: {
+          organizationId: data.organizationId,
+          ignoredNetworkId: network.id,
+          action: "CREATED",
+          normalizedNetwork: data.normalizedNetwork,
+          description: data.description,
+          actorId: data.createdById,
+        },
+      });
+      return network;
+    });
   }
 
-  deleteIgnoredNetwork(id: string, organizationId: string) {
-    return this.db.organizationIgnoredNetwork.deleteMany({
-      where: { id, organizationId },
+  deleteIgnoredNetwork(id: string, organizationId: string, actorId: string) {
+    return this.db.$transaction(async (tx) => {
+      const network = await tx.organizationIgnoredNetwork.findFirst({
+        where: { id, organizationId },
+      });
+      if (!network) return { count: 0 };
+      await tx.ignoredNetworkAudit.create({
+        data: {
+          organizationId,
+          ignoredNetworkId: network.id,
+          action: "DELETED",
+          normalizedNetwork: network.normalizedNetwork,
+          description: network.description,
+          actorId,
+        },
+      });
+      return tx.organizationIgnoredNetwork.deleteMany({
+        where: { id, organizationId },
+      });
+    });
+  }
+
+  listIgnoredNetworkAudits(organizationId: string) {
+    return this.db.ignoredNetworkAudit.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      select: {
+        id: true,
+        ignoredNetworkId: true,
+        action: true,
+        normalizedNetwork: true,
+        description: true,
+        actorId: true,
+        createdAt: true,
+      },
     });
   }
 
   async recordCampaignEvent(input: {
     campaignRecipientId: string;
-    type: CampaignEventType;
+    type: CampaignEventTypeValue;
     deduplicationKey: string;
     occurredAt?: Date;
   }): Promise<{ inserted: boolean }> {
@@ -76,7 +359,7 @@ export class DeliveryRepository {
 
           const candidate = negativeSeverityForEvent(input.type);
           const current =
-            recipient.highestNegativeEvent as NegativeEventSeverity;
+            recipient.highestNegativeEvent as NegativeEventSeverityValue;
           const next = candidate
             ? maxNegativeSeverity(current, candidate)
             : current;
@@ -85,9 +368,10 @@ export class DeliveryRepository {
             data: {
               highestNegativeEvent: next,
               highestNegativeEventAt: next !== current ? occurredAt : undefined,
-              reported: input.type === "REPORTED" ? true : undefined,
+              reported:
+                input.type === CampaignEventType.REPORTED ? true : undefined,
               reportedAt:
-                input.type === "REPORTED" && !recipient.reported
+                input.type === CampaignEventType.REPORTED && !recipient.reported
                   ? occurredAt
                   : undefined,
             },
@@ -108,7 +392,7 @@ export class DeliveryRepository {
 
   async recordDeliveryEvent(input: {
     campaignRecipientId: string;
-    type: DeliveryEventType;
+    type: DeliveryEventTypeValue;
     deduplicationKey: string;
     providerEventId?: string;
     metadata?: Prisma.InputJsonValue;
@@ -138,11 +422,45 @@ export class DeliveryRepository {
     }
   }
 
+  async cleanupExecutionHistory(now = new Date()) {
+    const deliveryBefore = new Date(
+      now.getTime() -
+        Number(process.env.DELIVERY_EVENT_RETENTION_DAYS ?? 90) * 86_400_000,
+    );
+    const attemptBefore = new Date(
+      now.getTime() -
+        Number(process.env.DELIVERY_ATTEMPT_RETENTION_DAYS ?? 30) * 86_400_000,
+    );
+    const outboxBefore = new Date(
+      now.getTime() -
+        Number(process.env.OUTBOX_RETENTION_DAYS ?? 7) * 86_400_000,
+    );
+    const [deliveryEvents, attempts, outbox] = await this.db.$transaction([
+      this.db.deliveryEvent.deleteMany({
+        where: { createdAt: { lt: deliveryBefore } },
+      }),
+      this.db.deliveryAttempt.deleteMany({
+        where: { completedAt: { lt: attemptBefore } },
+      }),
+      this.db.outboxEvent.deleteMany({
+        where: {
+          status: OutboxStatus.PUBLISHED,
+          publishedAt: { lt: outboxBefore },
+        },
+      }),
+    ]);
+    return {
+      deliveryEvents: deliveryEvents.count,
+      attempts: attempts.count,
+      outbox: outbox.count,
+    };
+  }
+
   async recoverExpiredLeases(now = new Date()) {
     return this.db.$transaction(async (tx) => {
       const expired = await tx.campaignRecipient.findMany({
         where: {
-          deliveryStatus: "DISPATCHING",
+          deliveryStatus: RecipientDeliveryStatus.DISPATCHING,
           leaseExpiresAt: { lt: now },
         },
         select: { id: true, organizationId: true, campaignId: true },
@@ -150,9 +468,12 @@ export class DeliveryRepository {
       });
       for (const recipient of expired) {
         await tx.campaignRecipient.updateMany({
-          where: { id: recipient.id, deliveryStatus: "DISPATCHING" },
+          where: {
+            id: recipient.id,
+            deliveryStatus: RecipientDeliveryStatus.DISPATCHING,
+          },
           data: {
-            deliveryStatus: "DELIVERY_UNKNOWN",
+            deliveryStatus: RecipientDeliveryStatus.DELIVERY_UNKNOWN,
             failedAt: now,
             leaseOwner: null,
             leaseExpiresAt: null,
@@ -167,7 +488,7 @@ export class DeliveryRepository {
             organizationId: recipient.organizationId,
             campaignId: recipient.campaignId,
             campaignRecipientId: recipient.id,
-            type: "DELIVERY_UNKNOWN",
+            type: DeliveryEventType.DELIVERY_UNKNOWN,
             deduplicationKey: `recipient:${recipient.id}:expired-lease`,
             occurredAt: now,
           },
@@ -175,9 +496,12 @@ export class DeliveryRepository {
         });
       }
       await tx.scheduleOccurrence.updateMany({
-        where: { status: "MATERIALIZING", leaseExpiresAt: { lt: now } },
+        where: {
+          status: OccurrenceStatus.MATERIALIZING,
+          leaseExpiresAt: { lt: now },
+        },
         data: {
-          status: "FAILED",
+          status: OccurrenceStatus.FAILED,
           leaseOwner: null,
           leaseExpiresAt: null,
           lastError: "Materialization lease expired",
@@ -188,31 +512,58 @@ export class DeliveryRepository {
   }
 
   async feedNearTerm(horizon: Date, limit = 500) {
-    const recipients = await this.db.campaignRecipient.findMany({
-      where: {
-        deliveryStatus: "PLANNED",
-        scheduledAt: { lte: horizon },
-        campaign: { status: { in: ["SCHEDULED", "PENDING_START", "ACTIVE"] } },
-      },
-      orderBy: [
-        { organizationId: "asc" },
-        { scheduledAt: "asc" },
-        { id: "asc" },
-      ],
-      take: Math.max(1, Math.min(limit, 2_000)),
-      select: {
-        id: true,
-        organizationId: true,
-        campaignId: true,
-        scheduledAt: true,
-      },
-    });
+    if (process.env.DELIVERY_ENABLED === "false") return 0;
+    const safeLimit = Math.max(1, Math.min(limit, 2_000));
+    const recipients = await this.db.$queryRaw<
+      Array<{
+        id: string;
+        organizationId: string;
+        campaignId: string;
+        scheduledAt: Date;
+      }>
+    >(Prisma.sql`
+      SELECT ranked.id,
+             ranked."organizationId",
+             ranked."campaignId",
+             ranked."scheduledAt"
+      FROM (
+        SELECT recipient.id,
+               recipient."organizationId",
+               recipient."campaignId",
+               recipient."scheduledAt",
+               ROW_NUMBER() OVER (
+                 PARTITION BY recipient."organizationId"
+                 ORDER BY recipient."scheduledAt", recipient.id
+               ) AS tenant_rank
+        FROM "campaign_recipient" recipient
+        JOIN campaign ON campaign.id = recipient."campaignId"
+        JOIN organization ON organization.id = recipient."organizationId"
+        WHERE recipient."deliveryStatus" =
+              ${RecipientDeliveryStatus.PLANNED}::"RecipientDeliveryStatus"
+          AND recipient."scheduledAt" <= ${horizon}
+          AND campaign.status IN (
+            ${CampaignStatus.SCHEDULED}::"CampaignStatus",
+            ${CampaignStatus.PENDING_START}::"CampaignStatus",
+            ${CampaignStatus.ACTIVE}::"CampaignStatus"
+          )
+          AND campaign."deliveryEnabled" = true
+          AND organization."deliveryEnabled" = true
+      ) ranked
+      ORDER BY ranked.tenant_rank, ranked."scheduledAt", ranked.id
+      LIMIT ${safeLimit}
+    `);
     if (!recipients.length) return 0;
     await this.db.$transaction(async (tx) => {
       for (const recipient of recipients) {
         const queued = await tx.campaignRecipient.updateMany({
-          where: { id: recipient.id, deliveryStatus: "PLANNED" },
-          data: { deliveryStatus: "QUEUED", queuedAt: new Date() },
+          where: {
+            id: recipient.id,
+            deliveryStatus: RecipientDeliveryStatus.PLANNED,
+          },
+          data: {
+            deliveryStatus: RecipientDeliveryStatus.QUEUED,
+            queuedAt: new Date(),
+          },
         });
         if (!queued.count) continue;
         await tx.deliveryEvent.upsert({
@@ -221,7 +572,7 @@ export class DeliveryRepository {
             organizationId: recipient.organizationId,
             campaignId: recipient.campaignId,
             campaignRecipientId: recipient.id,
-            type: "QUEUED",
+            type: DeliveryEventType.QUEUED,
             deduplicationKey: `recipient:${recipient.id}:queued`,
             occurredAt: new Date(),
           },
@@ -242,12 +593,19 @@ export class DeliveryRepository {
       await tx.campaign.updateMany({
         where: {
           id: { in: [...new Set(recipients.map((item) => item.campaignId))] },
-          status: "SCHEDULED",
+          status: CampaignStatus.SCHEDULED,
         },
-        data: { status: "PENDING_START" },
+        data: { status: CampaignStatus.PENDING_START },
       });
     });
     return recipients.length;
+  }
+
+  findByProviderMessageId(providerMessageId: string) {
+    return this.db.campaignRecipient.findFirst({
+      where: { providerMessageId },
+      select: { id: true },
+    });
   }
 
   getRecipientForDelivery(id: string) {
@@ -255,7 +613,11 @@ export class DeliveryRepository {
       where: { id },
       include: {
         campaign: {
-          include: { emailTemplate: true, mailSendingProfile: true },
+          include: {
+            emailTemplate: true,
+            mailSendingProfile: true,
+            organization: { select: { deliveryEnabled: true } },
+          },
         },
       },
     });
@@ -312,17 +674,29 @@ export class DeliveryRepository {
     leaseOwner: string,
     leaseMs: number,
   ): Promise<boolean> {
+    if (process.env.DELIVERY_ENABLED === "false") return false;
     const now = new Date();
     const result = await this.db.campaignRecipient.updateMany({
       where: {
         id,
-        deliveryStatus: { in: ["QUEUED", "RETRYABLE"] },
+        deliveryStatus: {
+          in: [
+            RecipientDeliveryStatus.QUEUED,
+            RecipientDeliveryStatus.RETRYABLE,
+          ],
+        },
         scheduledAt: { lte: now },
         OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
-        campaign: { status: { in: ["PENDING_START", "ACTIVE"] } },
+        campaign: {
+          status: {
+            in: [CampaignStatus.PENDING_START, CampaignStatus.ACTIVE],
+          },
+          deliveryEnabled: true,
+          organization: { deliveryEnabled: true },
+        },
       },
       data: {
-        deliveryStatus: "DISPATCHING",
+        deliveryStatus: RecipientDeliveryStatus.DISPATCHING,
         leaseOwner,
         leaseExpiresAt: new Date(now.getTime() + leaseMs),
         dispatchStartedAt: now,
@@ -334,9 +708,9 @@ export class DeliveryRepository {
 
   async transitionRecipient(
     id: string,
-    from: RecipientDeliveryStatus,
+    from: RecipientDeliveryStatusValue,
     data: {
-      status: RecipientDeliveryStatus;
+      status: RecipientDeliveryStatusValue;
       providerMessageId?: string;
       retryAt?: Date;
       lastError?: string;
@@ -353,15 +727,22 @@ export class DeliveryRepository {
           lastError: data.lastError,
           leaseOwner: null,
           leaseExpiresAt: null,
-          sentAt: data.status === "SENT" ? now : undefined,
+          sentAt:
+            data.status === RecipientDeliveryStatus.SENT ? now : undefined,
           failedAt:
-            data.status === "FAILED" || data.status === "DELIVERY_UNKNOWN"
+            data.status === RecipientDeliveryStatus.FAILED ||
+            data.status === RecipientDeliveryStatus.DELIVERY_UNKNOWN
               ? now
               : undefined,
-          cancelledAt: data.status === "CANCELLED" ? now : undefined,
+          cancelledAt:
+            data.status === RecipientDeliveryStatus.CANCELLED ? now : undefined,
         },
       });
-      if (result.count && data.status === "RETRYABLE" && data.retryAt) {
+      if (
+        result.count &&
+        data.status === RecipientDeliveryStatus.RETRYABLE &&
+        data.retryAt
+      ) {
         const recipient = await tx.campaignRecipient.findUniqueOrThrow({
           where: { id },
           select: { organizationId: true, attemptCount: true },

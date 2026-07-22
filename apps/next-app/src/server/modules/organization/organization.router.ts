@@ -71,6 +71,15 @@ export const organizationRouter = router({
       });
     }),
 
+  setDeliveryEnabled: writeProcedure
+    .input(z.object({ deliveryEnabled: z.boolean() }))
+    .mutation(({ ctx, input }) =>
+      Container.get(DeliveryRepository).setOrganizationDeliveryEnabled(
+        ctx.activeOrganizationId,
+        input.deliveryEnabled,
+      ),
+    ),
+
   listIgnoredNetworks: writeProcedure.query(({ ctx }) =>
     Container.get(DeliveryRepository).listIgnoredNetworks(
       ctx.activeOrganizationId,
@@ -95,12 +104,19 @@ export const organizationRouter = router({
       });
     }),
 
+  listIgnoredNetworkAudits: writeProcedure.query(({ ctx }) =>
+    Container.get(DeliveryRepository).listIgnoredNetworkAudits(
+      ctx.activeOrganizationId,
+    ),
+  ),
+
   deleteIgnoredNetwork: writeProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(({ ctx, input }) =>
       Container.get(DeliveryRepository).deleteIgnoredNetwork(
         input.id,
         ctx.activeOrganizationId,
+        ctx.userId,
       ),
     ),
 

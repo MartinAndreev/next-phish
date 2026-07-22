@@ -12,6 +12,7 @@
   "dependencies": {
     "@next-phish/backend": "workspace:*",
     "@next-phish/database": "workspace:*",
+    "@next-phish/shared": "workspace:*",
     "@hono/node-server": "^2",
     "hono": "^4.12.25"
   },

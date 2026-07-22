@@ -1,13 +1,54 @@
-import type { CampaignEventType } from "@next-phish/shared";
+import type { CampaignEventType as CampaignEventTypeValue } from "@next-phish/shared";
 import type { PrismaClient } from "@prisma/client";
 import { DeliveryRepository } from "../repositories/delivery.repository";
 import { networkContains } from "./network.service";
+import {
+  CampaignEventType,
+  CampaignStatus,
+  RecipientDeliveryStatus,
+} from "../execution.enums";
 
 export class TrackingService {
   constructor(
     private readonly db: PrismaClient,
     private readonly deliveryRepository: DeliveryRepository,
   ) {}
+
+  async resolveLandingPage(
+    trackingRef: string,
+  ): Promise<{ html: string; contentType: string } | null> {
+    const recipient =
+      await this.deliveryRepository.findByTrackingRef(trackingRef);
+    if (
+      !recipient?.campaign.pageId ||
+      recipient.deliveryStatus === RecipientDeliveryStatus.CANCELLED
+    )
+      return null;
+    const page = await this.db.page.findFirst({
+      where: {
+        id: recipient.campaign.pageId,
+        organizationId: recipient.organizationId,
+        visibility: "SHADOW",
+      },
+      select: { html: true, contentType: true },
+    });
+    if (!page) return null;
+    const action = `/s?ref=${encodeURIComponent(trackingRef)}`;
+    const html = page.html.replace(
+      /<form\b([^>]*)>/gi,
+      (_match, attributes: string) => {
+        const withoutAction = attributes.replace(
+          /\saction\s*=\s*(["']).*?\1/gi,
+          "",
+        );
+        return `<form${withoutAction} action="${action}" method="post">`;
+      },
+    );
+    return {
+      html,
+      contentType: page.contentType ?? "text/html; charset=utf-8",
+    };
+  }
 
   async resolveLink(
     trackingRef: string,
@@ -28,8 +69,11 @@ export class TrackingService {
   async record(input: {
     trackingRef: string;
     type: Extract<
-      CampaignEventType,
-      "OPENED" | "CLICKED" | "SUBMITTED" | "REPORTED"
+      CampaignEventTypeValue,
+      | typeof CampaignEventType.OPENED
+      | typeof CampaignEventType.CLICKED
+      | typeof CampaignEventType.SUBMITTED
+      | typeof CampaignEventType.REPORTED
     >;
     clientIp: string;
     deduplicationKey: string;
@@ -40,12 +84,13 @@ export class TrackingService {
     );
     if (
       !recipient ||
-      ["COMPLETED", "FAILED"].includes(recipient.campaign.status) ||
-      recipient.deliveryStatus === "CANCELLED"
+      recipient.campaign.status === CampaignStatus.COMPLETED ||
+      recipient.campaign.status === CampaignStatus.FAILED ||
+      recipient.deliveryStatus === RecipientDeliveryStatus.CANCELLED
     )
       return { accepted: false, ignored: false };
 
-    if (input.type !== "REPORTED") {
+    if (input.type !== CampaignEventType.REPORTED) {
       const networks = await this.db.organizationIgnoredNetwork.findMany({
         where: { organizationId: recipient.organizationId },
         select: { normalizedNetwork: true },

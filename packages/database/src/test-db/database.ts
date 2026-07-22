@@ -107,6 +107,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await prisma.campaignRecipient.deleteMany();
       await prisma.outboxEvent.deleteMany();
       await prisma.scheduleOccurrence.deleteMany();
+      await prisma.ignoredNetworkAudit.deleteMany();
       await prisma.organizationIgnoredNetwork.deleteMany();
       await prisma.scheduleSource.deleteMany();
       await prisma.campaign.deleteMany();

@@ -1,4 +1,5 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
+import { OutboxStatus } from "../execution.enums";
 
 export interface ClaimedOutboxEvent {
   id: string;
@@ -20,7 +21,11 @@ export class OutboxRepository {
       const rows = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
         SELECT id
         FROM "outbox_event"
-        WHERE status IN ('PENDING', 'FAILED', 'PUBLISHING')
+        WHERE status IN (
+          ${OutboxStatus.PENDING}::"OutboxStatus",
+          ${OutboxStatus.FAILED}::"OutboxStatus",
+          ${OutboxStatus.PUBLISHING}::"OutboxStatus"
+        )
           AND "availableAt" <= NOW()
           AND ("claimedAt" IS NULL OR "claimedAt" < NOW() - INTERVAL '5 minutes')
         ORDER BY "availableAt", "createdAt"
@@ -32,7 +37,7 @@ export class OutboxRepository {
       await tx.outboxEvent.updateMany({
         where: { id: { in: ids } },
         data: {
-          status: "PUBLISHING",
+          status: OutboxStatus.PUBLISHING,
           claimedBy: workerId,
           claimedAt: new Date(),
           attempts: { increment: 1 },
@@ -54,9 +59,13 @@ export class OutboxRepository {
 
   acknowledge(id: string, workerId: string) {
     return this.db.outboxEvent.updateMany({
-      where: { id, claimedBy: workerId, status: "PUBLISHING" },
+      where: {
+        id,
+        claimedBy: workerId,
+        status: OutboxStatus.PUBLISHING,
+      },
       data: {
-        status: "PUBLISHED",
+        status: OutboxStatus.PUBLISHED,
         publishedAt: new Date(),
         claimedBy: null,
         claimedAt: null,
@@ -67,9 +76,13 @@ export class OutboxRepository {
 
   fail(id: string, workerId: string, error: string) {
     return this.db.outboxEvent.updateMany({
-      where: { id, claimedBy: workerId, status: "PUBLISHING" },
+      where: {
+        id,
+        claimedBy: workerId,
+        status: OutboxStatus.PUBLISHING,
+      },
       data: {
-        status: "FAILED",
+        status: OutboxStatus.FAILED,
         availableAt: new Date(Date.now() + 30_000),
         claimedBy: null,
         claimedAt: null,
@@ -80,7 +93,10 @@ export class OutboxRepository {
 
   cleanup(before: Date) {
     return this.db.outboxEvent.deleteMany({
-      where: { status: "PUBLISHED", publishedAt: { lt: before } },
+      where: {
+        status: OutboxStatus.PUBLISHED,
+        publishedAt: { lt: before },
+      },
     });
   }
 }

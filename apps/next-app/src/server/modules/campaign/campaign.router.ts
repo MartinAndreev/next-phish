@@ -1,4 +1,5 @@
 import { Container } from "@/src/server/container";
+import { z } from "zod";
 import {
   MessageBus,
   ListCampaignsQuery,
@@ -27,6 +28,7 @@ import {
   ScheduleTimelineSchema,
   CreateScheduleSchema,
   UpdateScheduleSchema,
+  DeliveryRepository,
 } from "@next-phish/backend";
 import { toRouterPermissions } from "@next-phish/shared";
 import { createPermissionProcedure, router } from "../../trpc/procedures";
@@ -161,6 +163,77 @@ export const campaignRouter = router({
         ...input,
         organizationId: ctx.activeOrganizationId,
         createdById: ctx.userId,
+      }),
+    ),
+
+  setDeliveryEnabled: writeProcedure
+    .input(
+      z.object({ campaignId: z.string().min(1), deliveryEnabled: z.boolean() }),
+    )
+    .mutation(({ ctx, input }) =>
+      Container.get(DeliveryRepository).setCampaignDeliveryEnabled(
+        ctx.activeOrganizationId,
+        input.campaignId,
+        input.deliveryEnabled,
+      ),
+    ),
+
+  executionOperations: readProcedure.query(({ ctx }) =>
+    Container.get(DeliveryRepository).getExecutionOperations(
+      ctx.activeOrganizationId,
+    ),
+  ),
+
+  executionSummary: readProcedure
+    .input(z.object({ campaignId: z.string().min(1) }))
+    .query(({ ctx, input }) =>
+      Container.get(DeliveryRepository).getCampaignExecutionSummary(
+        ctx.activeOrganizationId,
+        input.campaignId,
+      ),
+    ),
+  listRecipients: readProcedure
+    .input(
+      z.object({
+        campaignId: z.string().min(1),
+        limit: z.number().int().min(1).max(200).default(50),
+        offset: z.number().int().min(0).default(0),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      Container.get(DeliveryRepository).listCampaignRecipients({
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+      }),
+    ),
+  listCampaignEvents: readProcedure
+    .input(
+      z.object({
+        campaignId: z.string().min(1),
+        campaignRecipientId: z.string().min(1).optional(),
+        limit: z.number().int().min(1).max(200).default(50),
+        offset: z.number().int().min(0).default(0),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      Container.get(DeliveryRepository).listCampaignEvents({
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+      }),
+    ),
+  listDeliveryEvents: readProcedure
+    .input(
+      z.object({
+        campaignId: z.string().min(1),
+        campaignRecipientId: z.string().min(1).optional(),
+        limit: z.number().int().min(1).max(200).default(50),
+        offset: z.number().int().min(0).default(0),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      Container.get(DeliveryRepository).listDeliveryEvents({
+        ...input,
+        organizationId: ctx.activeOrganizationId,
       }),
     ),
 });

@@ -1,6 +1,11 @@
-import { randomInt } from "node:crypto";
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { nextOccurrenceAfter } from "../services/recurrence.service";
+import { selectScheduleSource } from "../services/source-selection.service";
+import {
+  ScheduleSelectionStrategy,
+  ScheduleStatus,
+  ScheduleType,
+} from "../execution.enums";
 
 export class ScheduleExecutionRepository {
   constructor(private readonly db: PrismaClient) {}
@@ -11,7 +16,10 @@ export class ScheduleExecutionRepository {
       const due = await tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
         SELECT id
         FROM schedule
-        WHERE status IN ('SCHEDULED', 'RUNNING')
+        WHERE status IN (
+          ${ScheduleStatus.SCHEDULED}::"ScheduleStatus",
+          ${ScheduleStatus.RUNNING}::"ScheduleStatus"
+        )
           AND "executionEnabled" = true
           AND "nextOccurrenceAt" <= ${now}
         ORDER BY "nextOccurrenceAt"
@@ -28,7 +36,7 @@ export class ScheduleExecutionRepository {
 
         let occurrenceAt = schedule.nextOccurrenceAt;
         let nextAt: Date | null = null;
-        if (schedule.type === "RECURRING") {
+        if (schedule.type === ScheduleType.RECURRING) {
           if (!schedule.frequency || schedule.localTimeMinutes === null)
             throw new Error(
               `Schedule ${schedule.id} has an invalid recurrence`,
@@ -55,11 +63,32 @@ export class ScheduleExecutionRepository {
         const completedCount = await tx.scheduleOccurrence.count({
           where: { scheduleId: schedule.id },
         });
-        const sourceIndex =
-          schedule.selectionStrategy === "RANDOM"
-            ? randomInt(schedule.sources.length)
-            : completedCount % schedule.sources.length;
-        const sourceCampaignId = schedule.sources[sourceIndex]!.campaignId;
+        const previousOccurrence = await tx.scheduleOccurrence.findFirst({
+          where: { scheduleId: schedule.id },
+          orderBy: { occurrenceAt: "desc" },
+          select: { sourceCampaignId: true },
+        });
+        const selection = selectScheduleSource({
+          scheduleId: schedule.id,
+          strategy:
+            schedule.selectionStrategy ?? ScheduleSelectionStrategy.DECK,
+          sources: schedule.sources,
+          occurrenceCount: completedCount,
+          previousSourceCampaignId: previousOccurrence?.sourceCampaignId,
+          shuffleDeck: schedule.shuffleDeck,
+        });
+        if (!selection.sourceCampaignId) {
+          await tx.schedule.update({
+            where: { id: schedule.id },
+            data: {
+              status: ScheduleStatus.COMPLETED,
+              completedAt: now,
+              nextOccurrenceAt: null,
+            },
+          });
+          continue;
+        }
+        const sourceCampaignId = selection.sourceCampaignId;
         const reachesMax =
           schedule.maxCampaigns !== null &&
           completedCount + 1 >= schedule.maxCampaigns;
@@ -67,8 +96,12 @@ export class ScheduleExecutionRepository {
           nextAt !== null &&
           schedule.endsAt !== null &&
           nextAt > schedule.endsAt;
+        const deckExhausted = selection.deckExhausted;
         const terminal =
-          schedule.type === "ONE_TIME" || reachesMax || reachesEnd;
+          schedule.type === ScheduleType.ONE_TIME ||
+          reachesMax ||
+          reachesEnd ||
+          deckExhausted;
 
         const occurrence = await tx.scheduleOccurrence.upsert({
           where: {
@@ -101,7 +134,9 @@ export class ScheduleExecutionRepository {
         await tx.schedule.update({
           where: { id: schedule.id },
           data: {
-            status: terminal ? "COMPLETED" : "RUNNING",
+            status: terminal
+              ? ScheduleStatus.COMPLETED
+              : ScheduleStatus.RUNNING,
             completedAt: terminal ? now : null,
             nextOccurrenceAt: terminal ? null : nextAt,
           },

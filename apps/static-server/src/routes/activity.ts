@@ -31,6 +31,21 @@ function dedupe(...values: string[]): string {
   return createHash("sha256").update(values.join("\0")).digest("hex");
 }
 
+activity.get("/c", async (c) => {
+  const ref = c.req.query("ref") ?? "";
+  const page = /^[0-9A-Za-z]{12}$/.test(ref)
+    ? await Container.get(TrackingService).resolveLandingPage(ref)
+    : null;
+  const html =
+    page?.html ??
+    '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>';
+  return c.body(html, 200, {
+    "Content-Type": page?.contentType ?? "text/html; charset=utf-8",
+    "Cache-Control": "no-store, private",
+    "X-Content-Type-Options": "nosniff",
+  });
+});
+
 activity.get("/p.gif", async (c) => {
   const ref = c.req.query("ref") ?? "";
   if (/^[0-9A-Za-z]{12}$/.test(ref)) {

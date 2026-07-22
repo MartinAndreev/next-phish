@@ -145,6 +145,8 @@ const workers: Worker[] = [
   new Worker(
     "outbox",
     strictHandler({
+      maintenance: () =>
+        Container.get(DeliveryRepository).cleanupExecutionHistory(),
       publish: async () => {
         const workerId = `outbox:${process.pid}`;
         const repository = Container.get(OutboxRepository);
@@ -204,6 +206,15 @@ async function bootstrap() {
     "outbox-publisher",
     { every: Number(process.env.OUTBOX_POLL_INTERVAL_MS ?? 5_000) },
     { name: "publish", data: { version: 1 }, opts: commonJobOptions },
+  );
+  await queues.outbox.upsertJobScheduler(
+    "execution-maintenance",
+    {
+      every: Number(
+        process.env.EXECUTION_MAINTENANCE_INTERVAL_MS ?? 86_400_000,
+      ),
+    },
+    { name: "maintenance", data: { version: 1 }, opts: commonJobOptions },
   );
   await queues.feeder.upsertJobScheduler(
     "delivery-feeder",

@@ -10,6 +10,10 @@ import {
   normalizeNetwork,
   resolveClientIp,
   rewriteTrackedLinks,
+  createWebhookSignature,
+  verifyWebhookSignature,
+  selectScheduleSource,
+  DistributedRateLimiterService,
 } from "../../src/delivery";
 
 describe("execution identities", () => {
@@ -51,6 +55,57 @@ describe("delivery policy", () => {
     expect(canTransitionDelivery("SENT", "QUEUED")).toBe(false);
     expect(maxNegativeSeverity("SUBMITTED", "OPENED")).toBe("SUBMITTED");
     expect(maxNegativeSeverity("OPENED", "CLICKED")).toBe("CLICKED");
+  });
+});
+
+describe("schedule source selection", () => {
+  const sources = [
+    { campaignId: "one", position: 0 },
+    { campaignId: "two", position: 1 },
+  ];
+
+  it("exhausts a deck without reusing a source", () => {
+    expect(
+      selectScheduleSource({
+        scheduleId: "schedule",
+        strategy: "DECK",
+        sources,
+        occurrenceCount: 0,
+        shuffleDeck: false,
+      }),
+    ).toEqual({ sourceCampaignId: "one", deckExhausted: false });
+    expect(
+      selectScheduleSource({
+        scheduleId: "schedule",
+        strategy: "DECK",
+        sources,
+        occurrenceCount: 1,
+        shuffleDeck: false,
+      }),
+    ).toEqual({ sourceCampaignId: "two", deckExhausted: true });
+    expect(
+      selectScheduleSource({
+        scheduleId: "schedule",
+        strategy: "DECK",
+        sources,
+        occurrenceCount: 2,
+        shuffleDeck: false,
+      }).sourceCampaignId,
+    ).toBeNull();
+  });
+
+  it("avoids consecutive random repetition", () => {
+    expect(
+      selectScheduleSource({
+        scheduleId: "schedule",
+        strategy: "RANDOM",
+        sources,
+        occurrenceCount: 2,
+        previousSourceCampaignId: "one",
+        shuffleDeck: false,
+        randomIndex: () => 0,
+      }).sourceCampaignId,
+    ).toBe("two");
   });
 });
 
@@ -100,6 +155,54 @@ describe("tracked content", () => {
       },
     ]);
     expect(result.html).not.toContain("example.org");
+  });
+});
+
+describe("distributed rate limiting", () => {
+  it("returns the shared Redis window decision", async () => {
+    const redis = {
+      eval: async () => [0, 4_000],
+    };
+    const limiter = new DistributedRateLimiterService(redis as never);
+    await expect(
+      limiter.consume({ key: "organization:one", max: 10, durationMs: 60_000 }),
+    ).resolves.toEqual({ allowed: false, retryAfterMs: 4_000 });
+  });
+});
+
+describe("provider webhook security", () => {
+  it("validates signatures and rejects stale replay timestamps", () => {
+    const now = new Date("2026-01-01T00:00:00.000Z");
+    const timestamp = String(Math.floor(now.getTime() / 1_000));
+    const rawBody = '{"event":"delivered"}';
+    const signature = createWebhookSignature("secret", timestamp, rawBody);
+    expect(
+      verifyWebhookSignature({
+        secret: "secret",
+        timestamp,
+        rawBody,
+        signature,
+        now,
+      }),
+    ).toBe(true);
+    expect(
+      verifyWebhookSignature({
+        secret: "secret",
+        timestamp,
+        rawBody,
+        signature,
+        now: new Date(now.getTime() + 301_000),
+      }),
+    ).toBe(false);
+    expect(
+      verifyWebhookSignature({
+        secret: "other",
+        timestamp,
+        rawBody,
+        signature,
+        now,
+      }),
+    ).toBe(false);
   });
 });
 

@@ -202,7 +202,7 @@ export function PageSettingsFields({
               {t("pages.redirectPage")}
             </span>
             <div className="rounded-xl border border-white/10 bg-brand-navy/40 p-3">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-white">
                     {selectedPage?.name ?? t("pages.noRedirectPageSelected")}
@@ -224,6 +224,7 @@ export function PageSettingsFields({
                       : t("pages.selectRedirectPage")
                   }
                   onClick={() => setSelectorVisible(true)}
+                  className="w-full justify-center whitespace-nowrap"
                 />
               </div>
               {values.redirectPageId ? (

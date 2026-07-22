@@ -79,6 +79,14 @@ export const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
+          const user = await db.user.findUnique({
+            where: { id: session.userId },
+            select: { disabledAt: true },
+          });
+          if (!user || user.disabledAt) {
+            throw new Error("This account is disabled");
+          }
+
           const orgRepo = Container.get(OrganizationRepository);
           const member = await orgRepo.findFirstByUserId(session.userId);
 
@@ -94,6 +102,7 @@ export const auth = betterAuth({
   },
   plugins: [
     magicLink({
+      disableSignUp: true,
       sendMagicLink: async ({ email: to, url }) => {
         await email.send({
           to,

@@ -11,4 +11,17 @@ export const createOrganizationSchema = z.object({
     ),
 });
 
+export const updateOrganizationSchema = createOrganizationSchema;
+
+export const ignoredNetworkSchema = z.object({
+  network: z
+    .string()
+    .trim()
+    .min(1, "IP address or network is required")
+    .max(64),
+  description: z.string().trim().max(200).optional(),
+});
+
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
+export type IgnoredNetworkInput = z.infer<typeof ignoredNetworkSchema>;

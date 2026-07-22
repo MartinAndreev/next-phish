@@ -7,15 +7,31 @@ import { useMyOrganizations } from "@/src/hooks/use-my-organizations";
 import { CreateOrgModal } from "./create-org-modal";
 import { selectSmallDark } from "@/src/components/ui/theme-constants";
 import { useTranslation } from "@/src/lib/i18n";
+import type { OrganizationView } from "@next-phish/backend";
 
 interface OrgSwitcherProps {
   collapsed?: boolean;
+  organizations?: OrganizationView[];
+  organizationTotal?: number;
 }
 
-export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
+export function OrgSwitcher({
+  collapsed,
+  organizations: initialOrganizations,
+  organizationTotal,
+}: OrgSwitcherProps) {
   const t = useTranslation();
-  const { organizations, activeOrg, setActive, isLoading } =
-    useMyOrganizations();
+  const { organizations, activeOrg, setActive, isLoading } = useMyOrganizations(
+    {
+      limit: 100,
+      initialData: initialOrganizations
+        ? {
+            organizations: initialOrganizations,
+            total: organizationTotal ?? initialOrganizations.length,
+          }
+        : undefined,
+    },
+  );
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const canCreate = organizations.some((org) => org.$me.role === "owner");
@@ -64,13 +80,13 @@ export function OrgSwitcher({ collapsed }: OrgSwitcherProps) {
             );
           }}
           itemTemplate={(option) => (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex w-full min-w-0 items-center gap-3">
+              <div className="flex min-w-0 items-center gap-2">
                 <i className="pi pi-building text-xs text-zinc-400" />
-                <span>{option.name}</span>
+                <span className="truncate">{option.name}</span>
               </div>
               {option.$me.role === "owner" && (
-                <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-medium text-cyan-300">
+                <span className="ml-auto shrink-0 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-800 ring-1 ring-inset ring-indigo-200">
                   {t("organizations.ownerBadge")}
                 </span>
               )}

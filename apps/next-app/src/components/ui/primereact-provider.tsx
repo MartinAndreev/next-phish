@@ -203,6 +203,37 @@ const customTailwind = {
       className:
         "relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-full border-0 bg-transparent text-gray-600 transition-colors hover:bg-gray-200",
     },
+    buttonbar: {
+      className:
+        "flex items-center justify-between gap-2 border-t border-gray-300 p-2",
+    },
+    todayButton: {
+      root: {
+        className:
+          "h-8 rounded-md px-3 py-1.5 text-xs items-center inline-flex",
+      },
+      label: { className: "text-xs font-semibold" },
+    },
+    clearButton: {
+      root: {
+        className:
+          "h-8 rounded-md px-3 py-1.5 text-xs items-center inline-flex",
+      },
+      label: { className: "text-xs font-semibold" },
+    },
+  },
+
+  // Editor
+  editor: {
+    ...Tailwind.editor,
+    toolbar: {
+      className:
+        "rounded-t-lg border border-gray-300 bg-gray-100 px-2 py-1 font-sans",
+    },
+    content: {
+      className:
+        "rounded-b-lg border border-t-0 border-gray-300 bg-white text-slate-700",
+    },
   },
 
   // Dropdown

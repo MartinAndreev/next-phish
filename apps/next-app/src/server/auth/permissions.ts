@@ -24,6 +24,10 @@ export const owner = ac.newRole({
   files: ["read", "write"],
   jobs: ["read"],
   campaigns: ["read", "write"],
+  "target-groups": ["read", "write"],
+  "mail-sending": ["read", "write"],
+  tasks: ["read", "write"],
+  "task-statuses": ["read", "write"],
 } as unknown as Parameters<typeof ac.newRole>[0]);
 
 export const admin = ac.newRole({
@@ -34,6 +38,10 @@ export const admin = ac.newRole({
   files: ["read", "write"],
   jobs: ["read"],
   campaigns: ["read", "write"],
+  "target-groups": ["read", "write"],
+  "mail-sending": ["read", "write"],
+  tasks: ["read", "write"],
+  "task-statuses": ["read", "write"],
 } as unknown as Parameters<typeof ac.newRole>[0]);
 
 export const member = ac.newRole({
@@ -44,4 +52,8 @@ export const member = ac.newRole({
   files: ["read"],
   jobs: ["read"],
   campaigns: ["read"],
+  "target-groups": ["read"],
+  "mail-sending": ["read"],
+  tasks: ["read", "write"],
+  "task-statuses": ["read"],
 } as unknown as Parameters<typeof ac.newRole>[0]);

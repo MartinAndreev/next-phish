@@ -1,16 +1,14 @@
 "use client";
 
 import { Chart } from "primereact/chart";
+import { Skeleton } from "primereact/skeleton";
+import type { OrganizationAnalyticsMonth } from "@next-phish/backend";
 import { useTranslation } from "@/src/lib/i18n";
 
 const options = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
+  plugins: { legend: { display: false } },
   scales: {
     x: {
       ticks: { color: "rgba(255,255,255,0.5)", font: { size: 11 } },
@@ -22,7 +20,7 @@ const options = {
       ticks: {
         color: "rgba(255,255,255,0.5)",
         font: { size: 11 },
-        stepSize: 2,
+        precision: 0,
       },
       grid: { color: "rgba(255,255,255,0.06)" },
       border: { display: false },
@@ -30,21 +28,38 @@ const options = {
   },
 };
 
-export function CampaignsChart() {
+const monthKeys = [
+  "charts.jan",
+  "charts.feb",
+  "charts.mar",
+  "charts.apr",
+  "charts.may",
+  "charts.jun",
+  "charts.jul",
+  "charts.aug",
+  "charts.sep",
+  "charts.oct",
+  "charts.nov",
+  "charts.dec",
+] as const;
+
+interface CampaignsChartProps {
+  months: OrganizationAnalyticsMonth[];
+  loading?: boolean;
+}
+
+export function CampaignsChart({ months, loading }: CampaignsChartProps) {
   const t = useTranslation();
+  const labels = months.map((item) => {
+    const monthIndex = Number(item.month.slice(5, 7)) - 1;
+    return t(monthKeys[monthIndex] ?? "charts.jan");
+  });
   const data = {
-    labels: [
-      t("charts.jan"),
-      t("charts.feb"),
-      t("charts.mar"),
-      t("charts.apr"),
-      t("charts.may"),
-      t("charts.jun"),
-    ],
+    labels,
     datasets: [
       {
         label: t("charts.campaigns"),
-        data: [3, 7, 4, 8, 5, 12],
+        data: months.map((item) => item.campaigns),
         backgroundColor: "rgba(41, 184, 255, 0.8)",
         borderColor: "#29b8ff",
         borderWidth: 1,
@@ -59,7 +74,11 @@ export function CampaignsChart() {
         {t("charts.campaignsLast6Months")}
       </h3>
       <div className="h-[250px]">
-        <Chart type="bar" data={data} options={options} />
+        {loading ? (
+          <Skeleton width="100%" height="250px" borderRadius="0.75rem" />
+        ) : (
+          <Chart type="bar" data={data} options={options} />
+        )}
       </div>
     </div>
   );

@@ -18,9 +18,15 @@ interface SidebarProps {
   user: SidebarUser;
   isMobile: boolean;
   organizations?: OrganizationView[];
+  organizationTotal?: number;
 }
 
-export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
+export function Sidebar({
+  user,
+  isMobile,
+  organizations,
+  organizationTotal,
+}: SidebarProps) {
   const t = useTranslation();
   const [userExpanded, setUserExpanded] = useState(false);
   const expand = useCallback(() => setUserExpanded(true), []);
@@ -65,7 +71,12 @@ export function Sidebar({ user, isMobile, organizations }: SidebarProps) {
           role={user.role}
           organizations={organizations}
         />
-        <SidebarProfile user={user} collapsed={collapsed} />
+        <SidebarProfile
+          user={user}
+          collapsed={collapsed}
+          organizations={organizations}
+          organizationTotal={organizationTotal}
+        />
       </aside>
     </>
   );

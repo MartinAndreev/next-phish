@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Avatar } from "primereact/avatar";
 import { OrgSwitcher } from "./org-switcher";
 import { useTranslation } from "@/src/lib/i18n";
+import type { OrganizationView } from "@next-phish/backend";
 
 interface SidebarProfileProps {
   user: {
@@ -12,9 +13,16 @@ interface SidebarProfileProps {
     image?: string | null;
   };
   collapsed?: boolean;
+  organizations?: OrganizationView[];
+  organizationTotal?: number;
 }
 
-export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
+export function SidebarProfile({
+  user,
+  collapsed,
+  organizations,
+  organizationTotal,
+}: SidebarProfileProps) {
   const t = useTranslation();
 
   if (collapsed) {
@@ -29,9 +37,10 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
             className="profile-avatar bg-cyan-600 text-white"
           />
           <Link
-            href="/settings"
+            href="/profile"
+            prefetch={false}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
-            title={t("common.settings")}
+            title={t("settings.accountTitle")}
           >
             <i className="pi pi-cog text-sm" />
           </Link>
@@ -52,7 +61,10 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
 
   return (
     <div className="border-t border-white/10">
-      <OrgSwitcher />
+      <OrgSwitcher
+        organizations={organizations}
+        organizationTotal={organizationTotal}
+      />
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3">
           <Avatar
@@ -71,11 +83,12 @@ export function SidebarProfile({ user, collapsed }: SidebarProfileProps) {
         </div>
         <div className="mt-3 flex gap-2">
           <Link
-            href="/settings"
+            href="/profile"
+            prefetch={false}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
           >
-            <i className="pi pi-cog text-xs" />
-            {t("common.settings")}
+            <i className="pi pi-user text-xs" />
+            {t("settings.account")}
           </Link>
           <form action="/api/signout" method="post" className="flex flex-1">
             <button

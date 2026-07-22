@@ -5,3 +5,4 @@ export { registerFileTools } from "./file.tools";
 export { registerJobTools } from "./job.tools";
 export { registerSendingProfileTools } from "./sending-profile.tools";
 export { registerTargetGroupTools } from "./target-group.tools";
+export { registerTaskTools } from "./task.tools";

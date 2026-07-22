@@ -1,4 +1,5 @@
 export { initializeContainer, registerAuth, Container } from "./container";
+export * from "./task";
 export type { ContainerOptions } from "./container";
 
 export {
@@ -20,17 +21,35 @@ export type { EncryptedPayload } from "./encryption";
 export {
   UserRepository,
   CreateUserCommand,
+  SetUserDisabledCommand,
+  DeleteUserCommand,
   GetUserCountQuery,
   GetUserByEmailQuery,
-} from "./user";
-export type { CreateUserData, UserView } from "./user";
-export {
+  ListUsersQuery,
+  GetUserDeletionPreviewQuery,
   CreateUserSchema,
+  ListUsersSchema,
+  UserIdSchema,
+  SetUserDisabledSchema,
+  DeleteUserSchema,
+  SetInitialPasswordSchema,
   GetUserByEmailSchema,
   GetUserCountSchema,
 } from "./user";
 export type {
+  CreateUserData,
+  UserView,
+  UserOrganizationView,
+  UserDeletionPreview,
+  WelcomeUserJob,
+  SystemUserRole,
+  UserOrganizationMode,
+  OrphanUserAction,
   CreateUserInput,
+  ListUsersInput,
+  SetUserDisabledInput,
+  DeleteUserInput,
+  SetInitialPasswordInput,
   GetUserByEmailInput,
   GetUserCountInput,
 } from "./user";
@@ -41,14 +60,20 @@ export {
   GetUserOrganizationsQuery,
   GetOrganizationByIdQuery,
   GetOrganizationMembersQuery,
+  GetOrganizationAnalyticsQuery,
+  GetOrganizationDashboardQuery,
   CreateOrganizationCommand,
   DeleteOrganizationCommand,
+  UpdateOrganizationCommand,
 } from "./organization";
 export type {
   OrganizationView,
   CreateOrganizationData,
   OrganizationWithMembers,
   MemberView,
+  OrganizationAnalyticsMonth,
+  OrganizationAnalyticsView,
+  OrganizationDashboardView,
 } from "./organization";
 export {
   GetUserOrganizationsSchema,

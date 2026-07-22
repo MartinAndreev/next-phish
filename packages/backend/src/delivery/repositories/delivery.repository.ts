@@ -250,8 +250,8 @@ export class DeliveryRepository {
     return { campaign, delivery, negative, reported };
   }
 
-  listIgnoredNetworks(organizationId: string) {
-    return this.db.organizationIgnoredNetwork.findMany({
+  listIgnoredNetworks(organizationId: string | null) {
+    return this.db.ignoredNetwork.findMany({
       where: { organizationId },
       orderBy: { createdAt: "desc" },
       select: {
@@ -265,45 +265,53 @@ export class DeliveryRepository {
   }
 
   createIgnoredNetwork(data: {
-    organizationId: string;
+    organizationId: string | null;
     createdById: string;
     network: string;
     normalizedNetwork: string;
     description?: string;
   }) {
     return this.db.$transaction(async (tx) => {
-      const network = await tx.organizationIgnoredNetwork.create({ data });
-      await tx.ignoredNetworkAudit.create({
-        data: {
-          organizationId: data.organizationId,
-          ignoredNetworkId: network.id,
-          action: "CREATED",
-          normalizedNetwork: data.normalizedNetwork,
-          description: data.description,
-          actorId: data.createdById,
-        },
-      });
+      const network = await tx.ignoredNetwork.create({ data });
+      if (data.organizationId) {
+        await tx.ignoredNetworkAudit.create({
+          data: {
+            organizationId: data.organizationId,
+            ignoredNetworkId: network.id,
+            action: "CREATED",
+            normalizedNetwork: data.normalizedNetwork,
+            description: data.description,
+            actorId: data.createdById,
+          },
+        });
+      }
       return network;
     });
   }
 
-  deleteIgnoredNetwork(id: string, organizationId: string, actorId: string) {
+  deleteIgnoredNetwork(
+    id: string,
+    organizationId: string | null,
+    actorId: string,
+  ) {
     return this.db.$transaction(async (tx) => {
-      const network = await tx.organizationIgnoredNetwork.findFirst({
+      const network = await tx.ignoredNetwork.findFirst({
         where: { id, organizationId },
       });
       if (!network) return { count: 0 };
-      await tx.ignoredNetworkAudit.create({
-        data: {
-          organizationId,
-          ignoredNetworkId: network.id,
-          action: "DELETED",
-          normalizedNetwork: network.normalizedNetwork,
-          description: network.description,
-          actorId,
-        },
-      });
-      return tx.organizationIgnoredNetwork.deleteMany({
+      if (organizationId) {
+        await tx.ignoredNetworkAudit.create({
+          data: {
+            organizationId,
+            ignoredNetworkId: network.id,
+            action: "DELETED",
+            normalizedNetwork: network.normalizedNetwork,
+            description: network.description,
+            actorId,
+          },
+        });
+      }
+      return tx.ignoredNetwork.deleteMany({
         where: { id, organizationId },
       });
     });

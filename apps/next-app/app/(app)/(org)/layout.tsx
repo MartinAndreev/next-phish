@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createServerCaller } from "@/src/server/trpc/server";
+import { getRequestOrganizations } from "@/src/server/request-organizations";
 import { AppShell } from "@/src/components/organisms/app-shell";
 import { getRequiredSession } from "@/src/server/get-required-session";
 
@@ -11,22 +11,21 @@ export default async function OrganizationLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [session, caller] = await Promise.all([
+  const [session, { organizations, total }] = await Promise.all([
     getRequiredSession(),
-    createServerCaller(),
+    getRequestOrganizations(100, 0),
   ]);
-
-  const { organizations } = await caller.organization.list({
-    limit: 100,
-    offset: 0,
-  });
 
   if (organizations.length === 0) {
     redirect("/onboarding");
   }
 
   return (
-    <AppShell user={session.user} organizations={organizations}>
+    <AppShell
+      user={session.user}
+      organizations={organizations}
+      organizationTotal={total}
+    >
       {children}
     </AppShell>
   );

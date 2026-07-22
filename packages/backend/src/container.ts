@@ -17,6 +17,7 @@ import { registerApiKeyServices, registerApiKeyAuth } from "./api-key";
 import { registerTargetGroupServices } from "./target-group";
 import { registerMailSendingServices } from "./mail-sending";
 import { registerCampaignServices } from "./campaign";
+import { registerTaskServices } from "./task";
 import {
   registerDeliveryServices,
   registerDeliveryWorkerServices,
@@ -41,6 +42,7 @@ export function initializeContainer(options: ContainerOptions): void {
   registerApiKeyServices(db);
   registerTargetGroupServices(db);
   registerCampaignServices(db);
+  registerTaskServices(db);
   registerDeliveryServices(db);
   if (options.redis) {
     registerMailSendingServices(db, options.redis);

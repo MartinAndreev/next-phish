@@ -98,6 +98,8 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await db.close();
     },
     async resetData() {
+      await prisma.task.deleteMany();
+      await prisma.taskStatus.deleteMany();
       await prisma.catalogPreview.deleteMany();
       await prisma.campaignEvent.deleteMany();
       await prisma.deliveryEvent.deleteMany();
@@ -107,7 +109,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await prisma.outboxEvent.deleteMany();
       await prisma.scheduleOccurrence.deleteMany();
       await prisma.ignoredNetworkAudit.deleteMany();
-      await prisma.organizationIgnoredNetwork.deleteMany();
+      await prisma.ignoredNetwork.deleteMany();
       await prisma.scheduleSource.deleteMany();
       await prisma.campaign.deleteMany();
       await prisma.schedule.deleteMany();

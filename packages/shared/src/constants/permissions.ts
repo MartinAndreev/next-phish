@@ -33,6 +33,12 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     read: "read:campaigns",
     write: "write:campaigns",
   },
+  { resource: "tasks", read: "read:tasks", write: "write:tasks" },
+  {
+    resource: "task-statuses",
+    read: "read:task-statuses",
+    write: "write:task-statuses",
+  },
 ];
 
 export type PermissionResource = (typeof PERMISSION_GROUPS)[number]["resource"];

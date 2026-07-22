@@ -180,8 +180,13 @@ export class TrackingService {
       return { accepted: false, ignored: false };
 
     if (input.type !== CampaignEventType.REPORTED) {
-      const networks = await this.db.organizationIgnoredNetwork.findMany({
-        where: { organizationId: recipient.organizationId },
+      const networks = await this.db.ignoredNetwork.findMany({
+        where: {
+          OR: [
+            { organizationId: recipient.organizationId },
+            { organizationId: null },
+          ],
+        },
         select: { normalizedNetwork: true },
       });
       if (

@@ -11,6 +11,7 @@ import {
 } from "./page.schema";
 import { listFilesSchema } from "./file.schema";
 import { createTargetGroupSchema } from "./target-group.schema";
+import { taskFormSchema, taskStatusFormSchema } from "./task.schema";
 
 const organizationId = z.string().describe("The organization ID.");
 
@@ -123,4 +124,40 @@ export const mcpUpdateSendingProfileSchema = z.object({
 
 export const mcpCreateTargetGroupSchema = createTargetGroupSchema.extend({
   organizationId,
+});
+
+export const mcpListTasksSchema = z.object({
+  organizationId,
+  statusIds: z.array(z.string()).optional(),
+  assigneeId: z.string().optional(),
+  search: z.string().optional(),
+  limit: z.number().min(1).max(100).optional(),
+  offset: z.number().min(0).optional(),
+});
+
+export const mcpCreateTaskSchema = taskFormSchema.extend({ organizationId });
+export const mcpUpdateTaskSchema = taskFormSchema.partial().extend({
+  id: z.string(),
+  organizationId,
+});
+export const mcpMoveTaskSchema = z.object({
+  id: z.string(),
+  organizationId,
+  statusId: z.string(),
+});
+export const mcpCreateTaskStatusSchema = taskStatusFormSchema.extend({
+  organizationId,
+});
+export const mcpUpdateTaskStatusSchema = taskStatusFormSchema.partial().extend({
+  id: z.string(),
+  organizationId,
+});
+export const mcpReorderTaskStatusesSchema = z.object({
+  organizationId,
+  statusIds: z.array(z.string()).min(1),
+});
+export const mcpDeleteTaskStatusSchema = z.object({
+  id: z.string(),
+  organizationId,
+  replacementStatusId: z.string().optional(),
 });

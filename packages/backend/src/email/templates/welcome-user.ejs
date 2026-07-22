@@ -1,0 +1,11 @@
+<p>Hi <%= name %>,</p>
+<p>Welcome to Next Phish. Your administrator has created an account for you.</p>
+<p>Use the secure link below to sign in and set your initial password. You will not be able to access the application until your password is configured.</p>
+<p style="text-align: center;">
+  <a class="button" href="<%= magicLink %>">Set up my account</a>
+</p>
+<hr />
+<p style="font-size: 13px; color: #64748b;">
+  This link expires in 24 hours. If you were not expecting this invitation, contact your administrator.<br />
+  <a href="<%= magicLink %>" style="color: #64748b;"><%= magicLink %></a>
+</p>

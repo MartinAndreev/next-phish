@@ -14,10 +14,16 @@ interface AppShellProps {
     role?: string | null;
   };
   organizations?: OrganizationView[];
+  organizationTotal?: number;
   children: React.ReactNode;
 }
 
-export function AppShell({ user, organizations, children }: AppShellProps) {
+export function AppShell({
+  user,
+  organizations,
+  organizationTotal,
+  children,
+}: AppShellProps) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
@@ -28,6 +34,7 @@ export function AppShell({ user, organizations, children }: AppShellProps) {
         user={user}
         isMobile={isMobile}
         organizations={organizations}
+        organizationTotal={organizationTotal}
       />
 
       <main className={`flex-1 overflow-y-auto`}>{children}</main>

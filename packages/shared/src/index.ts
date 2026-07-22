@@ -10,8 +10,16 @@ export {
 } from "./schemas";
 export type { LoginInput, SetupInput } from "./schemas";
 
-export { createOrganizationSchema } from "./schemas";
-export type { CreateOrganizationInput } from "./schemas";
+export {
+  createOrganizationSchema,
+  updateOrganizationSchema,
+  ignoredNetworkSchema,
+} from "./schemas";
+export type {
+  CreateOrganizationInput,
+  UpdateOrganizationInput,
+  IgnoredNetworkInput,
+} from "./schemas";
 
 export {
   emailTemplateStatusSchema,
@@ -79,6 +87,14 @@ export {
   mcpCreateSendingProfileSchema,
   mcpUpdateSendingProfileSchema,
   mcpCreateTargetGroupSchema,
+  mcpListTasksSchema,
+  mcpCreateTaskSchema,
+  mcpUpdateTaskSchema,
+  mcpMoveTaskSchema,
+  mcpCreateTaskStatusSchema,
+  mcpUpdateTaskStatusSchema,
+  mcpReorderTaskStatusesSchema,
+  mcpDeleteTaskStatusSchema,
 } from "./schemas";
 
 export {
@@ -115,6 +131,20 @@ export { campaignFormSchema, scheduleFormSchema } from "./schemas";
 export type { CampaignFormValues, ScheduleFormValues } from "./schemas";
 
 export {
+  taskPrioritySchema,
+  taskStatusColorSchema,
+  taskResourceTypeSchema,
+  taskRelationSchema,
+  taskFormSchema,
+  taskStatusFormSchema,
+} from "./schemas";
+export type {
+  TaskFormValues,
+  TaskStatusFormValues,
+  TaskResourceType,
+} from "./schemas";
+
+export {
   campaignEventTypeSchema,
   deliveryEventTypeSchema,
   recipientDeliveryStatusSchema,
@@ -126,6 +156,9 @@ export {
   processTrackingEventPayloadSchema,
   executionQueuePayloadSchema,
 } from "./schemas";
+export { adminCreateUserSchema, welcomeUserPayloadSchema } from "./schemas";
+export type { AdminCreateUserInput, WelcomeUserPayload } from "./schemas";
+
 export type {
   CampaignEventType,
   DeliveryEventType,

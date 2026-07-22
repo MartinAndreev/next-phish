@@ -1,11 +1,7 @@
-import { getTranslator } from "@/src/lib/i18n/server";
+import { TasksContainer } from "@/src/components/organisms/tasks";
 
-export default async function TasksPage() {
-  const t = await getTranslator();
+export const dynamic = "force-dynamic";
 
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-zinc-400">{t("pages.tasksSoon")}</p>
-    </div>
-  );
+export default function TasksPage() {
+  return <TasksContainer />;
 }

@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { trpc } from "@/src/lib/trpc";
 import { ScheduleTable } from "./schedule-table";
 import { ScheduleTimeline } from "./schedule-timeline";
+import { ExecutionOperations } from "./execution-operations";
 
 export function SchedulesOverview() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export function SchedulesOverview() {
         />
       </header>
 
+      <ExecutionOperations />
       <ScheduleTable
         onChanged={() => utils.campaign.getScheduleTimeline.invalidate()}
       />

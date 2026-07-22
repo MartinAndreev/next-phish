@@ -1,6 +1,7 @@
-import { $Enums } from "@prisma/client";
+import * as PrismaClientRuntime from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 
-export const MailProviderType = $Enums.MailProviderType;
+export const MailProviderType = PrismaClientRuntime.$Enums.MailProviderType;
 export type MailProviderType = $Enums.MailProviderType;
 
 export interface MailProviderCapabilities {

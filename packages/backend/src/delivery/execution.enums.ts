@@ -1,15 +1,18 @@
-import { $Enums } from "@prisma/client";
+import * as PrismaClientRuntime from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 
-export const CampaignStatus = $Enums.CampaignStatus;
-export const ScheduleStatus = $Enums.ScheduleStatus;
-export const ScheduleType = $Enums.ScheduleType;
-export const ScheduleSelectionStrategy = $Enums.ScheduleSelectionStrategy;
-export const OccurrenceStatus = $Enums.OccurrenceStatus;
-export const RecipientDeliveryStatus = $Enums.RecipientDeliveryStatus;
-export const NegativeEventSeverity = $Enums.NegativeEventSeverity;
-export const CampaignEventType = $Enums.CampaignEventType;
-export const DeliveryEventType = $Enums.DeliveryEventType;
-export const OutboxStatus = $Enums.OutboxStatus;
+const PrismaEnums = PrismaClientRuntime.$Enums;
+
+export const CampaignStatus = PrismaEnums.CampaignStatus;
+export const ScheduleStatus = PrismaEnums.ScheduleStatus;
+export const ScheduleType = PrismaEnums.ScheduleType;
+export const ScheduleSelectionStrategy = PrismaEnums.ScheduleSelectionStrategy;
+export const OccurrenceStatus = PrismaEnums.OccurrenceStatus;
+export const RecipientDeliveryStatus = PrismaEnums.RecipientDeliveryStatus;
+export const NegativeEventSeverity = PrismaEnums.NegativeEventSeverity;
+export const CampaignEventType = PrismaEnums.CampaignEventType;
+export const DeliveryEventType = PrismaEnums.DeliveryEventType;
+export const OutboxStatus = PrismaEnums.OutboxStatus;
 
 export type CampaignStatus = $Enums.CampaignStatus;
 export type ScheduleStatus = $Enums.ScheduleStatus;

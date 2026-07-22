@@ -1,4 +1,5 @@
-import { $Enums, Prisma, type PrismaClient } from "@prisma/client";
+import * as PrismaClientRuntime from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { CampaignService } from "../services";
 import {
   calculateScheduledAt,
@@ -21,7 +22,8 @@ import type {
 } from "../validations";
 
 type Tx = Prisma.TransactionClient;
-const { EmailTemplateStatus, PageStatus, TargetGroupStatus } = $Enums;
+const { EmailTemplateStatus, PageStatus, TargetGroupStatus } =
+  PrismaClientRuntime.$Enums;
 
 const campaignInclude = {
   emailTemplate: {

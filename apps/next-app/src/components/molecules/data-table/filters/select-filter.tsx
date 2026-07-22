@@ -34,7 +34,7 @@ export function SelectFilter({
         optionValue="value"
         placeholder={`All ${label.toLowerCase()}`}
         onChange={(e) => onChange(field, e.value)}
-        showClear
+        showClear={Boolean(value)}
         className="w-40"
         pt={selectSmall}
       />

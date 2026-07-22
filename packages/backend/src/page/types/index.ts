@@ -6,5 +6,4 @@ export type {
   PageView,
   CreatePageData,
   UpdatePageData,
-  CreatePageSubmissionData,
 } from "./page.types";

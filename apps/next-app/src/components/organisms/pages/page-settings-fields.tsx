@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { FieldInputProps } from "formik";
 import { ErrorMessage, Field } from "formik";
 import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -37,7 +36,6 @@ interface PageSettingsFieldsProps {
     path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
-    captureData: boolean;
     redirectTarget: "none" | "page" | "url";
     redirectPageId: string | null;
     redirectUrl: string | null;
@@ -153,26 +151,6 @@ export function PageSettingsFields({
           className="w-full"
         />
       </div>
-
-      {values.type === "LANDING" && (
-        <div className="flex items-center gap-2 md:col-span-2">
-          <Checkbox
-            inputId="captureData"
-            checked={values.captureData}
-            onChange={(e) => setFieldValue("captureData", e.checked ?? false)}
-          />
-          <label
-            htmlFor="captureData"
-            className="text-sm font-medium text-zinc-100 cursor-pointer"
-          >
-            {t("pages.captureData")}
-          </label>
-          <i
-            className="capture-data-hint pi pi-info-circle cursor-help text-zinc-400"
-            data-pr-tooltip={t("pages.captureDataHint")}
-          />
-        </div>
-      )}
 
       <div className="space-y-2 flex flex-col gap-3">
         <div className="space-y-2">

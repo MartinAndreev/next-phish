@@ -350,9 +350,13 @@ describe("CampaignRepository", () => {
       where: { campaignId: run.id },
     });
     const tracking = new TrackingService(db, new DeliveryRepository(db));
-    expect(
-      await tracking.resolveLandingPage(recipient.trackingRef, "account/login"),
-    ).not.toBeNull();
+    const landingPage = await tracking.resolveLandingPage(
+      recipient.trackingRef,
+      "account/login",
+    );
+    expect(landingPage?.html).toContain("/s?ref=");
+    expect(landingPage?.html).toContain("method:'POST'");
+    expect(landingPage?.html).not.toContain("FormData");
     expect(
       await tracking.resolveLandingPage(recipient.trackingRef, "different"),
     ).toBeNull();

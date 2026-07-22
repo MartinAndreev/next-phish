@@ -7,7 +7,6 @@ import {
   CreatePageCommand,
   UpdatePageCommand,
   DeletePageCommand,
-  CreatePageSubmissionCommand,
   CreateSiteImportCommand,
   GetSiteImportByJobIdQuery,
   ListSiteImportsQuery,
@@ -18,15 +17,10 @@ import {
   UpdatePageCommandSchema,
   DeletePageCommandSchema,
   ImportPageFromUrlSchema,
-  CreatePageSubmissionSchema,
   CatalogPreviewService,
   UploadCatalogPreviewSchema,
 } from "@next-phish/backend";
-import {
-  createPermissionProcedure,
-  publicProcedure,
-  router,
-} from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 import { jobQueue } from "../../queue";
 import { toRouterPermissions } from "@next-phish/shared";
 
@@ -84,7 +78,6 @@ export const pageRouter = router({
           html: input.html,
           design: input.design,
           status: input.status,
-          captureData: input.captureData,
           redirectUrl: input.redirectUrl ?? null,
           redirectPageId: input.redirectPageId ?? null,
         },
@@ -168,18 +161,6 @@ export const pageRouter = router({
         organizationId: ctx.activeOrganizationId,
         search: input?.search,
         limit: input?.limit,
-      });
-    }),
-
-  submit: publicProcedure
-    .input(CreatePageSubmissionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const handler = Container.get(CreatePageSubmissionCommand);
-      return bus.dispatch(handler, {
-        pageId: input.pageId,
-        data: input.data,
-        ipAddress: ctx.headers?.get("x-forwarded-for") ?? null,
-        userAgent: ctx.headers?.get("user-agent") ?? null,
       });
     }),
 });

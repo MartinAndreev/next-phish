@@ -6,7 +6,6 @@ import type {
   PageView,
   UpdatePageData,
 } from "../types";
-import type { EncryptedPayload } from "../../encryption";
 
 interface FindByOrganizationIdInput {
   search?: string;
@@ -164,7 +163,6 @@ export class PageRepository {
           html: data.html,
           design: this.toInputJsonValue(data.design ?? {}),
           status: data.status,
-          captureData: data.captureData,
           redirectUrl: data.redirectUrl,
           redirectPageId: data.redirectPageId,
           organizationId: data.organizationId,
@@ -204,7 +202,6 @@ export class PageRepository {
           html: data.html,
           design: this.toInputJsonValue(data.design ?? {}),
           status: data.status,
-          captureData: data.captureData,
           redirectUrl: data.redirectUrl,
           redirectPageId: data.redirectPageId,
           contentRevision: { increment: 1 },
@@ -220,31 +217,6 @@ export class PageRepository {
     const row = await this.findById(id, organizationId);
     if (!row) throw new Error("Page not found");
     return row;
-  }
-
-  async findByPublicId(id: string): Promise<PageView | null> {
-    return this.db.page.findUnique({
-      where: { id },
-      include: { createdBy: true },
-    }) as Promise<PageView | null>;
-  }
-
-  async createSubmission(data: {
-    pageId: string;
-    encryptedData: EncryptedPayload;
-    ipAddress: string | null;
-    userAgent: string | null;
-  }): Promise<string> {
-    const row = await this.db.pageSubmission.create({
-      data: {
-        pageId: data.pageId,
-        data: data.encryptedData as unknown as Prisma.InputJsonValue,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-      },
-    });
-
-    return row.id;
   }
 
   async delete(id: string, organizationId: string): Promise<boolean> {

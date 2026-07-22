@@ -121,7 +121,6 @@ export {
   CreatePageCommand,
   UpdatePageCommand,
   DeletePageCommand,
-  CreatePageSubmissionCommand,
 } from "./page";
 export type {
   PageType,
@@ -131,7 +130,6 @@ export type {
   PageView,
   CreatePageData,
   UpdatePageData,
-  CreatePageSubmissionData,
 } from "./page";
 export {
   pageTypeSchema,
@@ -142,7 +140,6 @@ export {
   GetPageByIdSchema,
   DeletePageCommandSchema,
   ImportPageFromUrlSchema,
-  CreatePageSubmissionSchema,
 } from "./page";
 export type {
   GetPagesInput,
@@ -151,7 +148,6 @@ export type {
   GetPageByIdInput,
   DeletePageCommandInput,
   ImportPageFromUrlInput,
-  CreatePageSubmissionInput,
 } from "./page";
 export { registerPageServices } from "./page";
 

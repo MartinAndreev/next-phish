@@ -60,14 +60,20 @@ activity.get("/r/:linkId", async (c) => {
 
 activity.post("/s", async (c) => {
   const ref = c.req.query("ref") ?? "";
-  if (/^[0-9A-Za-z]{12}$/.test(ref))
+  const validRef = /^[0-9A-Za-z]{12}$/.test(ref);
+  const redirectUrl = validRef
+    ? await Container.get(TrackingService).resolveSubmissionRedirect(ref)
+    : null;
+  if (validRef)
     enqueueTrackingEvent(c, {
       trackingRef: ref,
       type: "SUBMITTED",
       deduplicationKey: dedupe(ref, "SUBMITTED"),
     });
-  // The request body is deliberately not parsed or persisted.
-  return c.body(null, 204, { "Cache-Control": "no-store" });
+  return c.body(null, 204, {
+    "Cache-Control": "no-store",
+    ...(redirectUrl ? { "X-Redirect-To": redirectUrl } : {}),
+  });
 });
 
 activity.post("/a", async (c) => {

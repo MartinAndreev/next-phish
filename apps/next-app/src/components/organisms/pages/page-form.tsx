@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from "react";
 import { Form, Formik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
-import { Tooltip } from "primereact/tooltip";
 import { createPageSchema } from "@next-phish/shared";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
@@ -20,7 +19,6 @@ interface PageFormValues {
   path: string | null;
   type: "LANDING" | "REDIRECT";
   status: "DRAFT" | "ACTIVE";
-  captureData: boolean;
   redirectTarget: "none" | "page" | "url";
   redirectPageId: string | null;
   redirectUrl: string | null;
@@ -76,8 +74,6 @@ export function PageForm({
 
   return (
     <div className="px-6 py-8">
-      <Tooltip target=".capture-data-hint" position="top" />
-
       <div className="mb-6">
         <BreadCrumb home={breadcrumbHome} model={breadcrumbItems} />
         <h1 className="mt-2 text-2xl font-semibold text-white">
@@ -97,7 +93,6 @@ export function PageForm({
             path: true,
             type: true,
             status: true,
-            captureData: true,
           }),
         )}
         onSubmit={onSubmit}

@@ -30,7 +30,6 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     path: initialValues.path,
     type: initialValues.type,
     status: initialValues.status,
-    captureData: initialValues.captureData,
     redirectTarget: (() => {
       if (initialValues.redirectPageId) return "page" as const;
       if (initialValues.redirectUrl) return "url" as const;
@@ -57,7 +56,6 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
-    captureData: boolean;
     redirectTarget: "none" | "page" | "url";
     redirectPageId: string | null;
     redirectUrl: string | null;
@@ -67,7 +65,6 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
       path: values.path,
       type: values.type,
       status: values.status,
-      captureData: values.captureData,
       redirectUrl: values.redirectTarget === "url" ? values.redirectUrl : null,
       redirectPageId:
         values.redirectTarget === "page" ? values.redirectPageId : null,

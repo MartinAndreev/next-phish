@@ -12,7 +12,10 @@ export {
 export { DeliveryRepository } from "./repositories/delivery.repository";
 export { OutboxRepository } from "./repositories/outbox.repository";
 export { ScheduleExecutionRepository } from "./repositories/schedule-execution.repository";
-export { TrackingService } from "./services/tracking.service";
+export {
+  TrackingService,
+  attachSubmissionTracking,
+} from "./services/tracking.service";
 export {
   DeliveryProcessorService,
   renderDeliveryHtml,

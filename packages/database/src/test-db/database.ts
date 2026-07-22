@@ -119,7 +119,6 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await prisma.emailTemplateFile.deleteMany();
       await prisma.file.deleteMany();
       await prisma.storedObject.deleteMany();
-      await prisma.pageSubmission.deleteMany();
       await prisma.page.deleteMany();
       await prisma.emailTemplate.deleteMany();
       await prisma.mailSendingProfile.deleteMany();

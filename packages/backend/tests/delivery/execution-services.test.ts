@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  attachSubmissionTracking,
   calculateScheduledAt,
   canTransitionDelivery,
   generateLogicalMessageId,
@@ -152,6 +153,18 @@ describe("calendar recurrence", () => {
 });
 
 describe("tracked content", () => {
+  it("attaches submission tracking to button-only landing pages", () => {
+    const html = attachSubmissionTracking(
+      '<div><input placeholder="Email"><button type="button">Continue</button></div>',
+      "/s?ref=AbCdEf123456",
+    );
+    expect(html).toContain("/s?ref=AbCdEf123456");
+    expect(html).toContain('input[type="button"]');
+    expect(html).toContain("method:'POST'");
+    expect(html).not.toContain("FormData");
+    expect(html).not.toContain(".value");
+  });
+
   it("renders the configured page path and an invisible tracking pixel", () => {
     const html = renderDeliveryHtml({
       templateHtml:

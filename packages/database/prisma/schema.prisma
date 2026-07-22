@@ -447,7 +447,6 @@ model Page {
   html             String             @default("")
   design           Json?
   status           PageStatus         @default(DRAFT)
-  captureData      Boolean            @default(false)
   redirectUrl      String?
   redirectPageId   String?
   redirectPage     Page?              @relation("PageRedirect", fields: [redirectPageId], references: [id])
@@ -464,7 +463,6 @@ model Page {
 
   organization        Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdBy           User             @relation("PageCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
-  submissions         PageSubmission[]
   shadowCampaign      Campaign?        @relation("CampaignShadowPages", fields: [shadowCampaignId], references: [id], onDelete: Cascade)
   sourcePage          Page?            @relation("PageShadowSource", fields: [sourcePageId], references: [id], onDelete: SetNull)
   shadowCopies        Page[]           @relation("PageShadowSource")
@@ -476,20 +474,6 @@ model Page {
   @@index([createdById])
   @@index([status])
   @@map("page")
-}
-
-model PageSubmission {
-  id        String   @id @default(cuid())
-  pageId    String
-  data      Json
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-
-  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
-
-  @@index([pageId])
-  @@map("page_submission")
 }
 
 model Job {

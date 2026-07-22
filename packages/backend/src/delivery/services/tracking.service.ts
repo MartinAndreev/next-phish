@@ -24,6 +24,16 @@ type TrackingRecordInput = {
   occurredAt?: Date;
 };
 
+export function attachSubmissionTracking(
+  html: string,
+  endpoint: string,
+): string {
+  const script = `<script>(()=>{const endpoint=${JSON.stringify(endpoint)};async function send(){try{const response=await fetch(endpoint,{method:'POST',credentials:'omit',redirect:'manual',keepalive:true}),target=response.headers.get('X-Redirect-To');if(target)window.location.assign(target)}catch{}}document.addEventListener('submit',(event)=>{event.preventDefault();void send()},true);document.addEventListener('click',(event)=>{const button=event.target.closest('button,input[type="submit"],input[type="button"]');if(!button||button.closest('form'))return;let root=button.parentElement;while(root&&root!==document.body&&!root.querySelector('input,select,textarea'))root=root.parentElement;if(!root||!root.querySelector('input,select,textarea'))return;event.preventDefault();void send()},true)})();</script>`;
+  return /<\/body\s*>/i.test(html)
+    ? html.replace(/<\/body\s*>/i, `${script}</body>`)
+    : `${html}${script}`;
+}
+
 export class TrackingService {
   constructor(
     private readonly db: PrismaClient,
@@ -56,7 +66,7 @@ export class TrackingService {
     )
       return null;
     const action = `/s?ref=${encodeURIComponent(trackingRef)}`;
-    const html = page.html.replace(
+    const formHtml = page.html.replace(
       /<form\b([^>]*)>/gi,
       (_match, attributes: string) => {
         const withoutAction = attributes.replace(
@@ -67,9 +77,31 @@ export class TrackingService {
       },
     );
     return {
-      html,
+      html: attachSubmissionTracking(formHtml, action),
       contentType: page.contentType ?? "text/html; charset=utf-8",
     };
+  }
+
+  async resolveSubmissionRedirect(trackingRef: string): Promise<string | null> {
+    const recipient =
+      await this.deliveryRepository.findByTrackingRef(trackingRef);
+    if (
+      !recipient?.campaign.pageId ||
+      recipient.deliveryStatus === RecipientDeliveryStatus.CANCELLED
+    )
+      return null;
+    const page = await this.db.page.findFirst({
+      where: {
+        id: recipient.campaign.pageId,
+        organizationId: recipient.organizationId,
+        visibility: "SHADOW",
+      },
+      select: {
+        redirectUrl: true,
+        redirectPage: { select: { redirectUrl: true } },
+      },
+    });
+    return page?.redirectUrl ?? page?.redirectPage?.redirectUrl ?? null;
   }
 
   async resolveLink(

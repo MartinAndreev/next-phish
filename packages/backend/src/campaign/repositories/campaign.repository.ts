@@ -1228,7 +1228,6 @@ export class CampaignRepository {
         html: source.html,
         design: source.design ?? undefined,
         status: source.status,
-        captureData: source.captureData,
         redirectUrl: source.redirectUrl,
         contentType: source.contentType,
         organizationId,

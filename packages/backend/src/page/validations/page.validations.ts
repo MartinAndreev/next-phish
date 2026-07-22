@@ -41,7 +41,6 @@ const pageBaseSchema = z.object({
   html: z.string().default(""),
   design: z.unknown().default({}),
   status: pageStatusSchema.default("DRAFT"),
-  captureData: z.boolean().default(false),
   redirectUrl: z.string().nullable().optional(),
   redirectPageId: z.string().nullable().optional(),
 });
@@ -65,17 +64,9 @@ export const ImportPageFromUrlSchema = z.object({
   includeAssets: z.boolean().default(false),
 });
 
-export const CreatePageSubmissionSchema = z.object({
-  pageId: z.string().min(1, "Page ID is required"),
-  data: z.record(z.unknown()),
-});
-
 export type GetPagesInput = z.infer<typeof GetPagesSchema>;
 export type CreatePageCommandInput = z.infer<typeof CreatePageCommandSchema>;
 export type UpdatePageCommandInput = z.infer<typeof UpdatePageCommandSchema>;
 export type GetPageByIdInput = z.infer<typeof GetPageByIdSchema>;
 export type DeletePageCommandInput = z.infer<typeof DeletePageCommandSchema>;
 export type ImportPageFromUrlInput = z.infer<typeof ImportPageFromUrlSchema>;
-export type CreatePageSubmissionInput = z.infer<
-  typeof CreatePageSubmissionSchema
->;

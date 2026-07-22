@@ -29,7 +29,6 @@ export interface PageListItemView {
 export interface PageView extends PageListItemView {
   html: string;
   design: unknown;
-  captureData: boolean;
   redirectUrl: string | null;
   redirectPageId: string | null;
 }
@@ -41,7 +40,6 @@ export interface CreatePageData {
   html: string;
   design: unknown;
   status: PageStatus;
-  captureData: boolean;
   redirectUrl: string | null;
   redirectPageId: string | null;
   organizationId: string;
@@ -55,14 +53,6 @@ export interface UpdatePageData {
   html: string;
   design: unknown;
   status: PageStatus;
-  captureData: boolean;
   redirectUrl: string | null;
   redirectPageId: string | null;
-}
-
-export interface CreatePageSubmissionData {
-  pageId: string;
-  data: Record<string, unknown>;
-  ipAddress: string | null;
-  userAgent: string | null;
 }

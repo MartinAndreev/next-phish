@@ -59,7 +59,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
-    captureData: boolean;
     redirectUrl: string | null;
     redirectPageId: string | null;
   }) {
@@ -72,7 +71,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
       html: editorHtmlRef.current,
       design: editorDesignRef.current,
       status: values.status,
-      captureData: values.captureData,
       redirectUrl: values.redirectUrl ?? null,
       redirectPageId: values.redirectPageId ?? null,
     };
@@ -105,7 +103,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
         path: data.path,
         type: data.type,
         status: data.status,
-        captureData: data.captureData,
         redirectUrl: data.redirectUrl,
         redirectPageId: data.redirectPageId,
       }
@@ -114,7 +111,6 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
         path: null as string | null,
         type: "LANDING" as const,
         status: "DRAFT" as const,
-        captureData: false,
         redirectUrl: null as string | null,
         redirectPageId: null as string | null,
       };

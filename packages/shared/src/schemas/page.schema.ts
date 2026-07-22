@@ -39,7 +39,6 @@ export const createPageSchema = z.object({
   html: z.string().default(""),
   design: z.unknown().default({}),
   status: pageStatusSchema.default("DRAFT"),
-  captureData: z.boolean().default(false),
   redirectUrl: z.string().nullable().optional(),
   redirectPageId: z.string().nullable().optional(),
 });

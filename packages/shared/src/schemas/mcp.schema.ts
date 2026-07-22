@@ -60,7 +60,6 @@ export const mcpCreatePageSchema = z.object({
   type: pageTypeSchema.optional(),
   html: z.string().optional(),
   status: pageStatusSchema.optional(),
-  captureData: z.boolean().optional(),
   redirectUrl: z.string().optional(),
 });
 
@@ -72,7 +71,6 @@ export const mcpUpdatePageSchema = z.object({
   type: pageTypeSchema.optional(),
   html: z.string().optional(),
   status: pageStatusSchema.optional(),
-  captureData: z.boolean().optional(),
   redirectUrl: z.string().optional(),
 });
 

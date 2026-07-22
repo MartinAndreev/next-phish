@@ -296,8 +296,6 @@
     "path": "Public path (optional)",
     "pathPlaceholder": "login or account/verify",
     "pathHint": "Shown in recipient links. Leave empty to use the neutral /c path.",
-    "captureData": "Capture submitted data",
-    "captureDataHint": "Captures form submission data from this page and stores it encrypted in the database.",
     "redirectTarget": "Redirect to",
     "redirectNone": "No redirect",
     "redirectPage": "Redirect page",

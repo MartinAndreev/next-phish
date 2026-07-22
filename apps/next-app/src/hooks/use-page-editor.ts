@@ -27,7 +27,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
   const createMutation = trpc.page.create.useMutation({
     onSuccess: async () => {
       await utils.page.list.invalidate();
-      setSuccess(t("pages.savePage"));
+      setSuccess(t("pages.createSuccess"));
     },
   });
 
@@ -39,7 +39,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
           ? utils.page.getById.invalidate({ id: pageId })
           : Promise.resolve(),
       ]);
-      setSuccess(t("pages.updatePage"));
+      setSuccess(t("pages.updateSuccess"));
     },
   });
 

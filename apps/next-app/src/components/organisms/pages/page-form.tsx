@@ -179,14 +179,20 @@ export function PageForm({
                     />
                   </div>
 
-                  {status.type === "error" && (
-                    <FormMessage variant="error">{status.message}</FormMessage>
-                  )}
-                  {status.type === "success" && (
-                    <FormMessage variant="success">
-                      {status.message}
-                    </FormMessage>
-                  )}
+                  {status.type === "error" ? (
+                    <div className="mt-3">
+                      <FormMessage variant="error">
+                        {status.message}
+                      </FormMessage>
+                    </div>
+                  ) : null}
+                  {status.type === "success" ? (
+                    <div className="mt-3">
+                      <FormMessage variant="success">
+                        {status.message}
+                      </FormMessage>
+                    </div>
+                  ) : null}
                 </section>
               </div>
             </div>

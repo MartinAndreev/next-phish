@@ -11,7 +11,7 @@ import type {
 } from "@next-phish/shared";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import type { CatalogPageState } from "@/src/hooks/use-campaign-catalog-state";
-import { AssetCatalogTab } from "./asset-catalog-tab";
+import { AssetCatalogTab } from "@/src/components/organisms/catalog/asset-catalog";
 import { GeneralTab } from "./general-tab";
 import { ScheduleTab } from "./schedule-tab";
 import { SendingProfileTab } from "./sending-profile-tab";

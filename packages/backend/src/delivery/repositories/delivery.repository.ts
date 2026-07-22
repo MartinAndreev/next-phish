@@ -507,6 +507,13 @@ export class DeliveryRepository {
           lastError: "Materialization lease expired",
         },
       });
+      await tx.campaign.updateMany({
+        where: {
+          status: CampaignStatus.PENDING_START,
+          recipients: { some: { dispatchStartedAt: { not: null } } },
+        },
+        data: { status: CampaignStatus.ACTIVE },
+      });
       return expired.length;
     });
   }
@@ -676,34 +683,49 @@ export class DeliveryRepository {
   ): Promise<boolean> {
     if (process.env.DELIVERY_ENABLED === "false") return false;
     const now = new Date();
-    const result = await this.db.campaignRecipient.updateMany({
-      where: {
-        id,
-        deliveryStatus: {
-          in: [
-            RecipientDeliveryStatus.QUEUED,
-            RecipientDeliveryStatus.RETRYABLE,
-          ],
-        },
-        scheduledAt: { lte: now },
-        OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
-        campaign: {
-          status: {
-            in: [CampaignStatus.PENDING_START, CampaignStatus.ACTIVE],
+    return this.db.$transaction(async (tx) => {
+      const result = await tx.campaignRecipient.updateMany({
+        where: {
+          id,
+          deliveryStatus: {
+            in: [
+              RecipientDeliveryStatus.QUEUED,
+              RecipientDeliveryStatus.RETRYABLE,
+            ],
           },
-          deliveryEnabled: true,
-          organization: { deliveryEnabled: true },
+          scheduledAt: { lte: now },
+          OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
+          campaign: {
+            status: {
+              in: [CampaignStatus.PENDING_START, CampaignStatus.ACTIVE],
+            },
+            deliveryEnabled: true,
+            organization: { deliveryEnabled: true },
+          },
         },
-      },
-      data: {
-        deliveryStatus: RecipientDeliveryStatus.DISPATCHING,
-        leaseOwner,
-        leaseExpiresAt: new Date(now.getTime() + leaseMs),
-        dispatchStartedAt: now,
-        attemptCount: { increment: 1 },
-      },
+        data: {
+          deliveryStatus: RecipientDeliveryStatus.DISPATCHING,
+          leaseOwner,
+          leaseExpiresAt: new Date(now.getTime() + leaseMs),
+          dispatchStartedAt: now,
+          attemptCount: { increment: 1 },
+        },
+      });
+      if (!result.count) return false;
+
+      const recipient = await tx.campaignRecipient.findUniqueOrThrow({
+        where: { id },
+        select: { campaignId: true },
+      });
+      await tx.campaign.updateMany({
+        where: {
+          id: recipient.campaignId,
+          status: CampaignStatus.PENDING_START,
+        },
+        data: { status: CampaignStatus.ACTIVE },
+      });
+      return true;
     });
-    return result.count === 1;
   }
 
   async transitionRecipient(

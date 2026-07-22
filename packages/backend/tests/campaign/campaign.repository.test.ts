@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 import { CampaignRepository } from "../../src/campaign/repositories";
+import { DeliveryRepository } from "../../src/delivery/repositories/delivery.repository";
 import { EmailTemplateRepository } from "../../src/email-template/repositories/email-template.repository";
 import { PageRepository } from "../../src/page/repositories/page.repository";
 import { getFactories, getPrisma } from "../setup";
@@ -287,5 +288,43 @@ describe("CampaignRepository", () => {
     });
     expect(files).toHaveLength(1);
     expect(files[0].storedObjectId).toBe(original.file.storedObjectId);
+
+    const recipient = await db.campaignRecipient.findFirstOrThrow({
+      where: { campaignId: run.id },
+    });
+    await db.campaign.update({
+      where: { id: run.id },
+      data: { status: "PENDING_START" },
+    });
+    await db.campaignRecipient.update({
+      where: { id: recipient.id },
+      data: { deliveryStatus: "QUEUED", scheduledAt: new Date(0) },
+    });
+
+    const claimed = await new DeliveryRepository(db).claimRecipient(
+      recipient.id,
+      "test-worker",
+      30_000,
+    );
+
+    expect(claimed).toBe(true);
+    expect(
+      await db.campaign.findUniqueOrThrow({
+        where: { id: run.id },
+        select: { status: true },
+      }),
+    ).toEqual({ status: "ACTIVE" });
+
+    await db.campaign.update({
+      where: { id: run.id },
+      data: { status: "PENDING_START" },
+    });
+    await new DeliveryRepository(db).recoverExpiredLeases();
+    expect(
+      await db.campaign.findUniqueOrThrow({
+        where: { id: run.id },
+        select: { status: true },
+      }),
+    ).toEqual({ status: "ACTIVE" });
   });
 });

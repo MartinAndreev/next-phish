@@ -14,6 +14,8 @@ import {
   CreateScheduleCommand,
   UpdateScheduleCommand,
   CancelScheduleCommand,
+  ActivateScheduleCommand,
+  DeleteScheduleCommand,
   PauseCampaignCommand,
   ResumeCampaignCommand,
   CompleteCampaignCommand,
@@ -159,6 +161,22 @@ export const campaignRouter = router({
     .input(CampaignIdSchema)
     .mutation(({ ctx, input }) =>
       bus.dispatch(Container.get(CancelScheduleCommand), {
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+      }),
+    ),
+  activateSchedule: writeProcedure
+    .input(CampaignIdSchema)
+    .mutation(({ ctx, input }) =>
+      bus.dispatch(Container.get(ActivateScheduleCommand), {
+        ...input,
+        organizationId: ctx.activeOrganizationId,
+      }),
+    ),
+  deleteSchedule: writeProcedure
+    .input(CampaignIdSchema)
+    .mutation(({ ctx, input }) =>
+      bus.dispatch(Container.get(DeleteScheduleCommand), {
         ...input,
         organizationId: ctx.activeOrganizationId,
       }),

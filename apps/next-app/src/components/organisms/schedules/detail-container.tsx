@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Tag } from "primereact/tag";
 import type { inferRouterOutputs } from "@trpc/server";
 import { FormMessage } from "@/src/components/atoms/form-message";
@@ -334,6 +335,21 @@ export function ScheduleDetailContainer({
       router.push(`/schedule/${result.schedule.id}?saved=duplicated`),
     onError: (error) => setActionError(error.message),
   });
+  const activate = trpc.campaign.activateSchedule.useMutation({
+    onSuccess: async () => {
+      await utils.campaign.getSchedule.invalidate({ id });
+      setActionError("");
+      setActionMessage("Schedule activated successfully.");
+    },
+    onError: (error) => setActionError(error.message),
+  });
+  const deleteSchedule = trpc.campaign.deleteSchedule.useMutation({
+    onSuccess: async () => {
+      await utils.campaign.listSchedules.invalidate();
+      router.push("/schedule");
+    },
+    onError: (error) => setActionError(error.message),
+  });
 
   if (isLoading) return <p className="p-8 text-zinc-400">Loading schedule…</p>;
   if (!data) return <p className="p-8 text-zinc-400">Schedule not found.</p>;
@@ -383,6 +399,15 @@ export function ScheduleDetailContainer({
                 onClick={() => router.push(`/schedule/${id}/edit`)}
               />
             ) : null}
+            {data.status === "DRAFT" ? (
+              <Button
+                size="small"
+                label="Activate"
+                icon="pi pi-play"
+                loading={activate.isPending}
+                onClick={() => activate.mutate({ id })}
+              />
+            ) : null}
             <Button
               size="small"
               outlined
@@ -402,6 +427,23 @@ export function ScheduleDetailContainer({
                 onClick={() => cancel.mutate({ id })}
               />
             ) : null}
+            <Button
+              size="small"
+              outlined
+              severity="danger"
+              label="Delete"
+              icon="pi pi-trash"
+              loading={deleteSchedule.isPending}
+              onClick={() =>
+                confirmDialog({
+                  header: "Delete schedule",
+                  message:
+                    "Deleting this schedule stops all future executions, completes its active campaigns, and cancels all unsent recipients. Generated campaigns remain available in the Campaigns list. This cannot be undone.",
+                  icon: "pi pi-exclamation-triangle",
+                  accept: () => deleteSchedule.mutate({ id }),
+                })
+              }
+            />
             <Button
               size="small"
               text
@@ -429,6 +471,12 @@ export function ScheduleDetailContainer({
       <ScheduleDetailContent
         data={data}
         onNavigate={(path) => router.push(path)}
+      />
+
+      <ConfirmDialog
+        className="max-w-md"
+        draggable={false}
+        dismissableMask={true}
       />
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Badge } from "primereact/badge";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { AppDataTable } from "@/src/components/molecules/data-table";
 import type {
   DataTableAction,
@@ -59,6 +60,18 @@ export function ScheduleTable({ onChanged }: ScheduleTableProps) {
     },
   });
   const duplicate = trpc.campaign.duplicateSchedule.useMutation({
+    onSuccess: async () => {
+      await utils.campaign.listSchedules.invalidate();
+      onChanged();
+    },
+  });
+  const activate = trpc.campaign.activateSchedule.useMutation({
+    onSuccess: async () => {
+      await utils.campaign.listSchedules.invalidate();
+      onChanged();
+    },
+  });
+  const deleteSchedule = trpc.campaign.deleteSchedule.useMutation({
     onSuccess: async () => {
       await utils.campaign.listSchedules.invalidate();
       onChanged();
@@ -179,6 +192,19 @@ export function ScheduleTable({ onChanged }: ScheduleTableProps) {
       onClick: (schedule) => router.push(`/schedule/${schedule.id}`),
     },
     {
+      label: "Edit schedule",
+      icon: "pi pi-pencil",
+      visible: (schedule) =>
+        !["COMPLETED", "CANCELLED"].includes(schedule.status),
+      onClick: (schedule) => router.push(`/schedule/${schedule.id}/edit`),
+    },
+    {
+      label: "Activate schedule",
+      icon: "pi pi-play",
+      visible: (schedule) => schedule.status === "DRAFT",
+      onClick: (schedule) => activate.mutate({ id: schedule.id }),
+    },
+    {
       label: "Duplicate",
       icon: "pi pi-copy",
       onClick: (schedule) => duplicate.mutate({ id: schedule.id }),
@@ -190,6 +216,19 @@ export function ScheduleTable({ onChanged }: ScheduleTableProps) {
       visible: (schedule) =>
         !["COMPLETED", "CANCELLED"].includes(schedule.status),
       onClick: (schedule) => cancel.mutate({ id: schedule.id }),
+    },
+    {
+      label: "Delete schedule",
+      icon: "pi pi-trash",
+      severity: "danger",
+      onClick: (schedule) =>
+        confirmDialog({
+          header: "Delete schedule",
+          message:
+            "Deleting this schedule stops all future executions, completes its active campaigns, and cancels all unsent recipients. Generated campaigns remain available in the Campaigns list. This cannot be undone.",
+          icon: "pi pi-exclamation-triangle",
+          accept: () => deleteSchedule.mutate({ id: schedule.id }),
+        }),
     },
   ];
 
@@ -219,6 +258,11 @@ export function ScheduleTable({ onChanged }: ScheduleTableProps) {
         onSort={setSorts}
         onFilter={setFilterValues}
         onPage={(offset, limit) => setPage({ offset: offset * limit, limit })}
+      />
+      <ConfirmDialog
+        className="max-w-md"
+        draggable={false}
+        dismissableMask={true}
       />
     </section>
   );

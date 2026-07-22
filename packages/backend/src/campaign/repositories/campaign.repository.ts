@@ -425,17 +425,15 @@ export class CampaignRepository {
         where: { id },
         data: {
           ...scheduleData,
-          status:
-            schedule.status === ScheduleStatus.DRAFT
-              ? ScheduleStatus.SCHEDULED
-              : schedule.status,
+          status: schedule.status,
           targetGroupId: this.resolveScheduleTarget(data, sources),
-          nextOccurrenceAt: data.startsAt,
+          nextOccurrenceAt:
+            schedule.status === ScheduleStatus.DRAFT ? null : data.startsAt,
           collisionFingerprint: this.service.createScheduleFingerprint(data),
           brokenAt: null,
           brokenReason: null,
           revision: { increment: 1 },
-          executionEnabled: true,
+          executionEnabled: schedule.status !== ScheduleStatus.DRAFT,
           sources: {
             create: sourceCampaignIds.map((campaignId, position) => ({
               campaignId,
@@ -445,6 +443,97 @@ export class CampaignRepository {
         },
         include: { sources: true },
       });
+    });
+  }
+
+  async activateSchedule(id: string, organizationId: string) {
+    const schedule = await this.db.schedule.findFirst({
+      where: { id, organizationId, status: ScheduleStatus.DRAFT },
+      select: { id: true, startsAt: true },
+    });
+    if (!schedule) throw new Error("Draft schedule not found");
+    if (schedule.startsAt <= new Date())
+      throw new Error("Set a future start time before activating the schedule");
+    return this.db.schedule.update({
+      where: { id: schedule.id },
+      data: {
+        status: ScheduleStatus.SCHEDULED,
+        nextOccurrenceAt: schedule.startsAt,
+        executionEnabled: true,
+      },
+    });
+  }
+
+  async deleteSchedule(id: string, organizationId: string) {
+    return this.db.$transaction(async (tx) => {
+      const schedule = await tx.schedule.findFirst({
+        where: { id, organizationId },
+        select: {
+          id: true,
+          occurrences: { select: { id: true } },
+          campaigns: {
+            select: {
+              id: true,
+              recipients: { select: { id: true } },
+            },
+          },
+        },
+      });
+      if (!schedule) throw new Error("Schedule not found");
+
+      const campaignIds = schedule.campaigns.map((campaign) => campaign.id);
+      const recipientIds = schedule.campaigns.flatMap((campaign) =>
+        campaign.recipients.map((recipient) => recipient.id),
+      );
+      await tx.schedule.update({
+        where: { id: schedule.id },
+        data: { executionEnabled: false, nextOccurrenceAt: null },
+      });
+      await tx.campaign.updateMany({
+        where: {
+          id: { in: campaignIds },
+          status: { notIn: [CampaignStatus.COMPLETED, CampaignStatus.FAILED] },
+        },
+        data: {
+          status: CampaignStatus.COMPLETED,
+          deliveryEnabled: false,
+        },
+      });
+      await tx.campaignRecipient.updateMany({
+        where: {
+          id: { in: recipientIds },
+          deliveryStatus: {
+            in: [
+              RecipientDeliveryStatus.PLANNED,
+              RecipientDeliveryStatus.QUEUED,
+              RecipientDeliveryStatus.DISPATCHING,
+              RecipientDeliveryStatus.RETRYABLE,
+              RecipientDeliveryStatus.DELIVERY_UNKNOWN,
+            ],
+          },
+        },
+        data: {
+          deliveryStatus: RecipientDeliveryStatus.CANCELLED,
+          cancelledAt: new Date(),
+          leaseOwner: null,
+          leaseExpiresAt: null,
+        },
+      });
+      await tx.outboxEvent.deleteMany({
+        where: {
+          deduplicationKey: {
+            in: [
+              ...schedule.occurrences.map(
+                (occurrence) => `occurrence:${occurrence.id}:materialize`,
+              ),
+              ...recipientIds.map(
+                (recipientId) => `recipient:${recipientId}:deliver`,
+              ),
+            ],
+          },
+        },
+      });
+      return tx.schedule.delete({ where: { id: schedule.id } });
     });
   }
 

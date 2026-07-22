@@ -19,6 +19,8 @@ export {
   CreateScheduleCommand,
   UpdateScheduleCommand,
   CancelScheduleCommand,
+  ActivateScheduleCommand,
+  DeleteScheduleCommand,
   DuplicateScheduleCommand,
   MaterializeOccurrenceCommand,
   MaterializeClaimedOccurrenceCommand,

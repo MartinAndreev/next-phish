@@ -273,6 +273,17 @@ describe("CampaignRepository", () => {
       nextOccurrenceAt: null,
       executionEnabled: false,
     });
+    await repo.activateSchedule(duplicate.schedule.id, organizationId);
+    expect(
+      await db.schedule.findUniqueOrThrow({
+        where: { id: duplicate.schedule.id },
+        select: { status: true, executionEnabled: true },
+      }),
+    ).toEqual({ status: "SCHEDULED", executionEnabled: true });
+    await repo.deleteSchedule(duplicate.schedule.id, organizationId);
+    expect(
+      await db.schedule.findUnique({ where: { id: duplicate.schedule.id } }),
+    ).toBeNull();
 
     await db.targetGroupUser.createMany({
       data: Array.from({ length: 5 }, (_, index) => ({
@@ -406,12 +417,32 @@ describe("CampaignRepository", () => {
     await expect(repo.deleteCampaign(run.id, organizationId)).rejects.toThrow(
       "Only draft, published, completed, or failed campaigns can be deleted",
     );
-    await db.campaign.update({
-      where: { id: run.id },
-      data: { status: "COMPLETED" },
+    await repo.deleteSchedule(schedule.id, organizationId);
+    expect(
+      await db.schedule.findUnique({ where: { id: schedule.id } }),
+    ).toBeNull();
+    expect(
+      await db.campaign.findUniqueOrThrow({
+        where: { id: run.id },
+        select: {
+          status: true,
+          scheduleId: true,
+          deliveryEnabled: true,
+        },
+      }),
+    ).toEqual({
+      status: "COMPLETED",
+      scheduleId: null,
+      deliveryEnabled: false,
     });
-    await repo.deleteCampaign(run.id, organizationId);
+    expect(
+      await db.campaignRecipient.findUniqueOrThrow({
+        where: { id: recipient.id },
+        select: { deliveryStatus: true },
+      }),
+    ).toEqual({ deliveryStatus: "CANCELLED" });
 
+    await repo.deleteCampaign(run.id, organizationId);
     expect(await db.campaign.findUnique({ where: { id: run.id } })).toBeNull();
     expect(
       await Promise.all([

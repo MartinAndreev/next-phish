@@ -64,10 +64,12 @@ export function PageSettingsFields({
     trpc.page.list.useQuery(
       {
         search: searchQuery || undefined,
-        selectedId: values.redirectPageId ?? undefined,
+        selectedId: selectorVisible
+          ? undefined
+          : (values.redirectPageId ?? undefined),
         limit: selectorLimit,
         offset: selectorOffset,
-        filters: { status: "ACTIVE" },
+        filters: { status: "ACTIVE", type: "REDIRECT" },
       },
       {
         enabled: selectorVisible || Boolean(values.redirectPageId),

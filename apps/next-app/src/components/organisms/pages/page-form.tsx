@@ -86,18 +86,6 @@ export function PageForm({
         <p className="mt-1 text-sm text-zinc-400">
           {pageId ? t("pages.editSubtitle") : t("pages.createSubtitle")}
         </p>
-        {pageId && onRegeneratePreview ? (
-          <Button
-            type="button"
-            size="small"
-            outlined
-            icon="pi pi-image"
-            label="Regenerate preview"
-            loading={isGeneratingPreview}
-            onClick={() => void onRegeneratePreview()}
-            className="mt-3"
-          />
-        ) : null}
       </div>
 
       <Formik<PageFormValues>
@@ -155,6 +143,18 @@ export function PageForm({
                   />
 
                   <div className="flex flex-col gap-3">
+                    {pageId && onRegeneratePreview ? (
+                      <Button
+                        type="button"
+                        size="small"
+                        outlined
+                        icon="pi pi-image"
+                        label="Regenerate preview"
+                        loading={isGeneratingPreview}
+                        onClick={() => void onRegeneratePreview()}
+                        className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
+                      />
+                    ) : null}
                     <Button
                       size="small"
                       type="submit"

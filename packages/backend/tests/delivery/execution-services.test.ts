@@ -154,7 +154,8 @@ describe("calendar recurrence", () => {
 describe("tracked content", () => {
   it("renders the configured page path and an invisible tracking pixel", () => {
     const html = renderDeliveryHtml({
-      templateHtml: '<a href="{{URL}}">Continue</a>',
+      templateHtml:
+        '<p>Hello {{.FirstName}}</p><a href="{{.URL}}">Continue</a>',
       publicContentUrl: "http://localhost:3001",
       pagePath: "account/login",
       trackingPixel: true,
@@ -166,6 +167,7 @@ describe("tracked content", () => {
         trackingRef: "AbCdEf123456",
       },
     });
+    expect(html).toContain("<p>Hello A</p>");
     expect(html).toContain(
       'href="http://localhost:3001/account/login?ref=AbCdEf123456"',
     );

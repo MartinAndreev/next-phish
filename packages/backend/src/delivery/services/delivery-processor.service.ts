@@ -12,8 +12,9 @@ import {
 } from "../execution.enums";
 
 function render(html: string, values: Record<string, string>): string {
-  return html.replace(/\{\{\s*([a-zA-Z]+)\s*\}\}/g, (match, key: string) =>
-    Object.hasOwn(values, key) ? values[key]! : match,
+  return html.replace(
+    /\{\{\s*\.?\s*([a-zA-Z]+)\s*\}\}/g,
+    (match, key: string) => (Object.hasOwn(values, key) ? values[key]! : match),
   );
 }
 
@@ -34,10 +35,15 @@ export function renderDeliveryHtml(input: {
   const landingUrl = `${input.publicContentUrl}/${landingPath}?ref=${encodeURIComponent(input.recipient.trackingRef)}`;
   let html = render(input.templateHtml, {
     firstName: input.recipient.firstName,
+    FirstName: input.recipient.firstName,
     lastName: input.recipient.lastName,
+    LastName: input.recipient.lastName,
     email: input.recipient.email,
+    Email: input.recipient.email,
     position: input.recipient.position ?? "",
+    Position: input.recipient.position ?? "",
     trackingRef: input.recipient.trackingRef,
+    TrackingRef: input.recipient.trackingRef,
     url: landingUrl,
     URL: landingUrl,
   });

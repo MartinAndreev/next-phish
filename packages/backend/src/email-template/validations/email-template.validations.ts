@@ -11,6 +11,8 @@ const sortSchema = z.object({
 
 export const GetEmailTemplatesSchema = z.object({
   search: z.string().optional(),
+  selectedId: z.string().optional(),
+  includeContent: z.boolean().default(false),
   limit: z.number().min(1).max(100).default(50),
   offset: z.number().min(0).default(0),
   sort: z.array(sortSchema).optional(),

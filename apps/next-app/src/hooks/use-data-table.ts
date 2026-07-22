@@ -17,6 +17,7 @@ export function useDataTable(options?: UseDataTableOptions) {
   });
 
   function buildQueryInput<T extends string>(sortFields: T[]) {
+    const allowedSortFields = new Set(sortFields);
     const normalizedFilters = Object.entries(filterValues).reduce<
       Record<string, string>
     >((acc, [key, value]) => {
@@ -31,7 +32,7 @@ export function useDataTable(options?: UseDataTableOptions) {
       sorts.length > 0
         ? sorts.reduce<Array<{ field: T; order: DataTableSort["order"] }>>(
             (acc, currentSort) => {
-              if (sortFields.includes(currentSort.field as T)) {
+              if (allowedSortFields.has(currentSort.field as T)) {
                 acc.push({
                   field: currentSort.field as T,
                   order: currentSort.order,

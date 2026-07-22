@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { trpc } from "@/src/lib/trpc";
 import { useTranslation } from "@/src/lib/i18n";
 import { useFormStatus } from "@/src/hooks/use-form-status";
+import { createCatalogPreview } from "@/src/lib/catalog-preview";
 
 interface UsePageEditorOptions {
   pageId?: string;
@@ -24,10 +25,9 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
   );
 
   const createMutation = trpc.page.create.useMutation({
-    onSuccess: async (page) => {
+    onSuccess: async () => {
       await utils.page.list.invalidate();
-      router.push(`/pages/${page.id}`);
-      setSuccess(t("pages.savePage"));
+      setSuccess(t("pages.createSuccess"));
     },
   });
 
@@ -39,9 +39,11 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
           ? utils.page.getById.invalidate({ id: pageId })
           : Promise.resolve(),
       ]);
-      setSuccess(t("pages.updatePage"));
+      setSuccess(t("pages.updateSuccess"));
     },
   });
+
+  const previewMutation = trpc.page.uploadPreview.useMutation();
 
   useEffect(() => {
     if (!data) {
@@ -54,9 +56,9 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
 
   async function handleSubmit(values: {
     name: string;
+    path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
-    captureData: boolean;
     redirectUrl: string | null;
     redirectPageId: string | null;
   }) {
@@ -64,22 +66,31 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
 
     const payload = {
       name: values.name.trim(),
+      path: values.path,
       type: values.type,
       html: editorHtmlRef.current,
       design: editorDesignRef.current,
       status: values.status,
-      captureData: values.captureData,
       redirectUrl: values.redirectUrl ?? null,
       redirectPageId: values.redirectPageId ?? null,
     };
 
     try {
-      if (pageId) {
-        await updateMutation.mutateAsync({ id: pageId, ...payload });
-        return;
+      const saved = pageId
+        ? await updateMutation.mutateAsync({ id: pageId, ...payload })
+        : await createMutation.mutateAsync(payload);
+      try {
+        await createCatalogPreview({
+          html: payload.html,
+          resourceId: saved.id,
+          sourceRevision: saved.contentRevision,
+          upload: (preview) => previewMutation.mutateAsync(preview),
+        });
+        await utils.page.list.invalidate();
+      } catch {
+        // Preview generation is best-effort; the persisted page remains valid.
       }
-
-      await createMutation.mutateAsync(payload);
+      if (!pageId) router.push(`/pages/${saved.id}`);
     } catch (error) {
       const fallback = pageId ? t("pages.updateError") : t("pages.createError");
       setError(error instanceof Error ? error.message : fallback);
@@ -89,17 +100,17 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
   const initialValues = data
     ? {
         name: data.name,
+        path: data.path,
         type: data.type,
         status: data.status,
-        captureData: data.captureData,
         redirectUrl: data.redirectUrl,
         redirectPageId: data.redirectPageId,
       }
     : {
         name: "",
+        path: null as string | null,
         type: "LANDING" as const,
         status: "DRAFT" as const,
-        captureData: false,
         redirectUrl: null as string | null,
         redirectPageId: null as string | null,
       };
@@ -125,6 +136,16 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
     setSuccess,
     reset,
     handleSubmit,
+    regeneratePreview: data
+      ? () =>
+          createCatalogPreview({
+            html: data.html,
+            resourceId: data.id,
+            sourceRevision: data.contentRevision,
+            upload: (preview) => previewMutation.mutateAsync(preview),
+          }).then(() => utils.page.list.invalidate())
+      : null,
+    isGeneratingPreview: previewMutation.isPending,
     breadcrumbItems,
     t,
     router,

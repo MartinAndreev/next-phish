@@ -6,11 +6,11 @@ export type {
   PageView,
   CreatePageData,
   UpdatePageData,
-  CreatePageSubmissionData,
 } from "./page.types";
 
 export type {
   EmailTemplateStatus,
+  CatalogPreviewView,
   EmailTemplateAuthorView,
   EmailTemplateListItemView,
   EmailTemplateView,

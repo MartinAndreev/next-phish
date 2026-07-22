@@ -1,5 +1,12 @@
 export type EmailTemplateStatus = "DRAFT" | "ACTIVE";
 
+export interface CatalogPreviewView {
+  id: string;
+  status: "MISSING" | "PENDING" | "READY" | "FAILED" | "STALE";
+  sourceRevision: number;
+  url: string | null;
+}
+
 export interface EmailTemplateAuthorView {
   id: string;
   name: string;
@@ -15,6 +22,10 @@ export interface EmailTemplateListItemView {
   createdById: string;
   createdAt: Date;
   updatedAt: Date;
+  contentRevision: number;
+  /** Included by catalog picker queries for a sandboxed live-preview fallback. */
+  html?: string;
+  preview: CatalogPreviewView | null;
   createdBy: EmailTemplateAuthorView;
 }
 

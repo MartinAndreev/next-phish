@@ -18,6 +18,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
     editorDesignRef,
     status,
     handleSubmit,
+    regeneratePreview,
+    isGeneratingPreview,
     breadcrumbItems,
     t,
     router,
@@ -25,9 +27,9 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
 
   const formInitialValues = {
     name: initialValues.name,
+    path: initialValues.path,
     type: initialValues.type,
     status: initialValues.status,
-    captureData: initialValues.captureData,
     redirectTarget: (() => {
       if (initialValues.redirectPageId) return "page" as const;
       if (initialValues.redirectUrl) return "url" as const;
@@ -51,18 +53,18 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
 
   async function handleFormSubmit(values: {
     name: string;
+    path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
-    captureData: boolean;
     redirectTarget: "none" | "page" | "url";
     redirectPageId: string | null;
     redirectUrl: string | null;
   }) {
     await handleSubmit({
       name: values.name,
+      path: values.path,
       type: values.type,
       status: values.status,
-      captureData: values.captureData,
       redirectUrl: values.redirectTarget === "url" ? values.redirectUrl : null,
       redirectPageId:
         values.redirectTarget === "page" ? values.redirectPageId : null,
@@ -82,6 +84,8 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
       t={t}
       onSubmit={handleFormSubmit}
       onCancel={() => router.push("/pages")}
+      onRegeneratePreview={regeneratePreview ?? undefined}
+      isGeneratingPreview={isGeneratingPreview}
     />
   );
 }

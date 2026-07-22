@@ -22,6 +22,7 @@ const GENERAL_API_CAPABILITIES: MailProviderCapabilities = {
   supportsBatch: false,
   supportsTracking: false,
   supportsRateLimitInfo: false,
+  supportsIdempotencyKey: false,
 };
 
 interface GeneralApiRequestBody {
@@ -32,6 +33,8 @@ interface GeneralApiRequestBody {
   subject: string;
   html?: string;
   text?: string;
+  message_id?: string;
+  idempotency_key?: string;
   attachments?: Array<{
     filename: string;
     content: string;
@@ -88,6 +91,9 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
         method: "POST",
         headers: {
           ...headers,
+          ...(message.idempotencyKey
+            ? { "Idempotency-Key": message.idempotencyKey }
+            : {}),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
@@ -105,6 +111,12 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
               ? rawResponse
               : JSON.stringify(rawResponse),
           rawResponse,
+          failureKind:
+            response.status === 429
+              ? "THROTTLED"
+              : response.status >= 400 && response.status < 500
+                ? "PERMANENT"
+                : "AMBIGUOUS",
         };
       }
 
@@ -126,6 +138,7 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
         success: false,
         errorCode: "API_SEND_FAILED",
         errorMessage: message,
+        failureKind: "AMBIGUOUS",
       };
     }
   }
@@ -144,6 +157,8 @@ export class GeneralApiProvider extends BaseMailProvider<GeneralApiProviderConfi
       from: { name: message.fromName, email: message.fromEmail },
       to: message.to.map((email) => ({ email })),
       subject: message.subject,
+      message_id: message.messageId,
+      idempotency_key: message.idempotencyKey,
     };
 
     if (message.cc?.length) {

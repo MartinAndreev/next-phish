@@ -33,14 +33,14 @@ entries include `organizationId: string` (`R`) unless noted.
 
 ## Pages (6)
 
-| Tool                   | Purpose           | Input beyond common fields                                                                                                                                                                                                     |
-| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `list_pages`           | List pages.       | Common list shape.                                                                                                                                                                                                             |
-| `get_page`             | Get page.         | Common ID-with-org shape.                                                                                                                                                                                                      |
-| `create_page`          | Create page.      | `name` R trimmed non-empty; `type?: "LANDING" \| "REDIRECT"` default `LANDING`; `html?: string` default `""`; `status?: "DRAFT" \| "ACTIVE"` default `DRAFT`; `captureData?: boolean` default `false`; `redirectUrl?: string`. |
-| `update_page`          | Update page.      | `id`, `organizationId` R; optional `name`, `type`, `html`, `status`, `captureData`, `redirectUrl` with create types; omitted name becomes empty string in handler.                                                             |
-| `delete_page`          | Delete page.      | Common ID-with-org shape.                                                                                                                                                                                                      |
-| `import_page_from_url` | Start URL import. | `organizationId` R; `url` R valid URL; `includeAssets?: boolean`.                                                                                                                                                              |
+| Tool                   | Purpose           | Input beyond common fields                                                                                                                                                            |
+| ---------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_pages`           | List pages.       | Common list shape.                                                                                                                                                                    |
+| `get_page`             | Get page.         | Common ID-with-org shape.                                                                                                                                                             |
+| `create_page`          | Create page.      | `name` R trimmed non-empty; `type?: "LANDING" \| "REDIRECT"` default `LANDING`; `html?: string` default `""`; `status?: "DRAFT" \| "ACTIVE"` default `DRAFT`; `redirectUrl?: string`. |
+| `update_page`          | Update page.      | `id`, `organizationId` R; optional `name`, `type`, `html`, `status`, `redirectUrl` with create types; omitted name becomes empty string in handler.                                   |
+| `delete_page`          | Delete page.      | Common ID-with-org shape.                                                                                                                                                             |
+| `import_page_from_url` | Start URL import. | `organizationId` R; `url` R valid URL; `includeAssets?: boolean`.                                                                                                                     |
 
 ## Files and jobs (2)
 

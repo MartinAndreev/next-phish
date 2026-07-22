@@ -87,10 +87,14 @@ export function ApiKeyForm({
     >
       <Form className="flex flex-col gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="api-key-name"
+            className="mb-1 block text-sm font-medium text-zinc-300"
+          >
             {t("apiKeys.name")}
           </label>
           <Field
+            id="api-key-name"
             as={InputText}
             name="name"
             placeholder={t("apiKeys.namePlaceholder")}
@@ -127,10 +131,14 @@ export function ApiKeyForm({
 
         {values.limitToOrganizations && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-300">
+            <label
+              htmlFor="api-key-organizations"
+              className="mb-1 block text-sm font-medium text-zinc-300"
+            >
               {t("apiKeys.organizations")}
             </label>
             <MultiSelect
+              inputId="api-key-organizations"
               pt={selectSmall}
               value={values.organizationIds}
               options={orgOptions}
@@ -143,9 +151,9 @@ export function ApiKeyForm({
         )}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-zinc-300">
+          <p className="mb-2 text-sm font-medium text-zinc-300">
             {t("apiKeys.permissions")}
-          </label>
+          </p>
           <div className="space-y-3 rounded-lg border border-white/10 bg-white/5 p-3">
             {PERMISSION_GROUPS.map((group) => (
               <div key={group.resource}>
@@ -199,10 +207,14 @@ export function ApiKeyForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-zinc-300">
+          <label
+            htmlFor="api-key-expiration"
+            className="mb-1 block text-sm font-medium text-zinc-300"
+          >
             {t("apiKeys.expiration")}
           </label>
           <Dropdown
+            inputId="api-key-expiration"
             pt={selectSmall}
             value={values.expiresInDays}
             options={expiresOptions}
@@ -231,20 +243,32 @@ export function ApiKeyForm({
           {values.rateLimitEnabled && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs text-zinc-400">
+                <label
+                  htmlFor="api-key-rate-limit-max"
+                  className="mb-1 block text-xs text-zinc-400"
+                >
                   {t("apiKeys.maxRequests")}
                 </label>
                 <Field name="rateLimitMax">
                   {({ field }: { field: FieldInputProps<string> }) => (
-                    <InputText size="small" {...field} className="w-full" />
+                    <InputText
+                      id="api-key-rate-limit-max"
+                      size="small"
+                      {...field}
+                      className="w-full"
+                    />
                   )}
                 </Field>
               </div>
               <div>
-                <label className="mb-1 block text-xs text-zinc-400">
+                <label
+                  htmlFor="api-key-rate-limit-window"
+                  className="mb-1 block text-xs text-zinc-400"
+                >
                   {t("apiKeys.timeWindow")}
                 </label>
                 <Dropdown
+                  inputId="api-key-rate-limit-window"
                   pt={selectSmall}
                   value={values.rateLimitTimeWindow}
                   options={timeWindowOptions}

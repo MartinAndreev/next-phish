@@ -5,6 +5,7 @@ import {
 import { afterAll, beforeAll, beforeEach } from "vitest";
 
 let testDb: TestDatabase;
+process.env.PUBLIC_CONTENT_URL ??= "https://content.example.com";
 
 beforeAll(async () => {
   testDb = await createTestDatabase();

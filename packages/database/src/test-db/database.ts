@@ -54,17 +54,16 @@ export async function createTestDatabase(): Promise<TestDatabase> {
   const migrationSql = collectMigrationSql();
   await db.exec(migrationSql);
 
-  const port = 15432 + Math.floor(Math.random() * 1000);
   const server = new PGLiteSocketServer({
     db,
-    port,
+    port: 0,
     host: "127.0.0.1",
   });
   await server.start();
-  // Wait longer for the server to be ready in CI environments
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const url = `postgresql://postgres:postgres@127.0.0.1:${port}/postgres?sslmode=disable`;
+  // PGlite serializes queries through one socket connection. Match Prisma's
+  // pool to that boundary instead of letting extra connections be rejected.
+  const url = `postgresql://postgres:postgres@${server.getServerConn()}/postgres?sslmode=disable&connection_limit=1`;
   const prisma = new PrismaClient({
     datasources: { db: { url } },
   });
@@ -99,14 +98,30 @@ export async function createTestDatabase(): Promise<TestDatabase> {
       await db.close();
     },
     async resetData() {
+      await prisma.catalogPreview.deleteMany();
+      await prisma.campaignEvent.deleteMany();
+      await prisma.deliveryEvent.deleteMany();
+      await prisma.deliveryAttempt.deleteMany();
+      await prisma.campaignTrackingLink.deleteMany();
+      await prisma.campaignRecipient.deleteMany();
+      await prisma.outboxEvent.deleteMany();
+      await prisma.scheduleOccurrence.deleteMany();
+      await prisma.ignoredNetworkAudit.deleteMany();
+      await prisma.organizationIgnoredNetwork.deleteMany();
+      await prisma.scheduleSource.deleteMany();
+      await prisma.campaign.deleteMany();
+      await prisma.schedule.deleteMany();
       await prisma.targetGroupUser.deleteMany();
       await prisma.targetGroup.deleteMany();
       await prisma.siteImportFile.deleteMany();
       await prisma.siteImport.deleteMany();
       await prisma.job.deleteMany();
+      await prisma.emailTemplateFile.deleteMany();
       await prisma.file.deleteMany();
-      await prisma.pageSubmission.deleteMany();
+      await prisma.storedObject.deleteMany();
       await prisma.page.deleteMany();
+      await prisma.emailTemplate.deleteMany();
+      await prisma.mailSendingProfile.deleteMany();
       await prisma.user.deleteMany();
       await prisma.organization.deleteMany();
     },

@@ -6,7 +6,6 @@ export {
   GetPageByIdSchema,
   DeletePageCommandSchema,
   ImportPageFromUrlSchema,
-  CreatePageSubmissionSchema,
 } from "./page.validations";
 export type {
   GetPagesInput,
@@ -15,5 +14,4 @@ export type {
   GetPageByIdInput,
   DeletePageCommandInput,
   ImportPageFromUrlInput,
-  CreatePageSubmissionInput,
 } from "./page.validations";

@@ -16,6 +16,11 @@ import { registerEncryptionServices } from "./encryption";
 import { registerApiKeyServices, registerApiKeyAuth } from "./api-key";
 import { registerTargetGroupServices } from "./target-group";
 import { registerMailSendingServices } from "./mail-sending";
+import { registerCampaignServices } from "./campaign";
+import {
+  registerDeliveryServices,
+  registerDeliveryWorkerServices,
+} from "./delivery/delivery-service.provider";
 import { MessageBus } from "./message-bus";
 
 export interface ContainerOptions {
@@ -35,8 +40,11 @@ export function initializeContainer(options: ContainerOptions): void {
   registerSiteImportServices(db);
   registerApiKeyServices(db);
   registerTargetGroupServices(db);
+  registerCampaignServices(db);
+  registerDeliveryServices(db);
   if (options.redis) {
     registerMailSendingServices(db, options.redis);
+    registerDeliveryWorkerServices(options.redis);
   }
   Container.set(MessageBus, new MessageBus(db));
 }

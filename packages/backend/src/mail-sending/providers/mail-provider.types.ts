@@ -1,6 +1,7 @@
-import { $Enums } from "@prisma/client";
+import * as PrismaClientRuntime from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 
-export const MailProviderType = $Enums.MailProviderType;
+export const MailProviderType = PrismaClientRuntime.$Enums.MailProviderType;
 export type MailProviderType = $Enums.MailProviderType;
 
 export interface MailProviderCapabilities {
@@ -14,6 +15,7 @@ export interface MailProviderCapabilities {
   supportsBatch: boolean;
   supportsTracking: boolean;
   supportsRateLimitInfo: boolean;
+  supportsIdempotencyKey: boolean;
 }
 
 export interface MailAttachment {
@@ -35,6 +37,10 @@ export interface SendMailInput {
   attachments?: MailAttachment[];
   headers?: Record<string, string>;
   metadata?: Record<string, unknown>;
+  /** Stable RFC 5322 identifier for one logical message. */
+  messageId?: string;
+  /** Stable provider idempotency key when the provider supports it. */
+  idempotencyKey?: string;
 }
 
 export interface SendTestMailInput {
@@ -50,6 +56,7 @@ export interface SendMailResult {
   rawResponse?: unknown;
   errorCode?: string;
   errorMessage?: string;
+  failureKind?: "SAFE_TRANSIENT" | "THROTTLED" | "PERMANENT" | "AMBIGUOUS";
 }
 
 export interface ConnectionTestResult {

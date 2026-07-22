@@ -22,12 +22,13 @@ const GRAPH_CAPABILITIES: MailProviderCapabilities = {
   supportsHtml: true,
   supportsText: true,
   supportsAttachments: true,
-  supportsCustomHeaders: false,
-  supportsReplyTo: false,
+  supportsCustomHeaders: true,
+  supportsReplyTo: true,
   supportsTemplates: false,
-  supportsBatch: true,
+  supportsBatch: false,
   supportsTracking: false,
   supportsRateLimitInfo: false,
+  supportsIdempotencyKey: false,
 };
 
 const TOKEN_ENDPOINT = "https://login.microsoftonline.com";
@@ -89,6 +90,12 @@ export class MicrosoftGraphProvider extends BaseMailProvider<MicrosoftGraphProvi
           errorCode: `GRAPH_${response.status}`,
           errorMessage: errorBody,
           rawResponse: errorBody,
+          failureKind:
+            response.status === 429
+              ? "THROTTLED"
+              : response.status >= 400 && response.status < 500
+                ? "PERMANENT"
+                : "AMBIGUOUS",
         };
       }
 
@@ -96,7 +103,7 @@ export class MicrosoftGraphProvider extends BaseMailProvider<MicrosoftGraphProvi
         provider: MailProviderType.MICROSOFT_GRAPH,
         success: true,
         providerMessageId: undefined,
-        accepted: [config.senderMailbox],
+        accepted: [...message.to],
       };
     } catch (error) {
       const message =
@@ -106,6 +113,7 @@ export class MicrosoftGraphProvider extends BaseMailProvider<MicrosoftGraphProvi
         success: false,
         errorCode: "GRAPH_SEND_FAILED",
         errorMessage: message,
+        failureKind: "AMBIGUOUS",
       };
     }
   }

@@ -7,7 +7,6 @@ import {
   CreatePageCommand,
   UpdatePageCommand,
   DeletePageCommand,
-  CreatePageSubmissionCommand,
   CreateSiteImportCommand,
   GetSiteImportByJobIdQuery,
   ListSiteImportsQuery,
@@ -18,13 +17,10 @@ import {
   UpdatePageCommandSchema,
   DeletePageCommandSchema,
   ImportPageFromUrlSchema,
-  CreatePageSubmissionSchema,
+  CatalogPreviewService,
+  UploadCatalogPreviewSchema,
 } from "@next-phish/backend";
-import {
-  createPermissionProcedure,
-  publicProcedure,
-  router,
-} from "../../trpc/procedures";
+import { createPermissionProcedure, router } from "../../trpc/procedures";
 import { jobQueue } from "../../queue";
 import { toRouterPermissions } from "@next-phish/shared";
 
@@ -77,16 +73,27 @@ export const pageRouter = router({
         organizationId: ctx.activeOrganizationId,
         data: {
           name: input.name,
+          path: input.path ?? null,
           type: input.type,
           html: input.html,
           design: input.design,
           status: input.status,
-          captureData: input.captureData,
           redirectUrl: input.redirectUrl ?? null,
           redirectPageId: input.redirectPageId ?? null,
         },
       });
     }),
+
+  uploadPreview: writeProcedure
+    .input(UploadCatalogPreviewSchema)
+    .mutation(({ ctx, input }) =>
+      Container.get(CatalogPreviewService).upload({
+        ...input,
+        resourceType: "PAGE",
+        organizationId: ctx.activeOrganizationId,
+        uploadedById: ctx.userId,
+      }),
+    ),
 
   delete: writeProcedure
     .input(DeletePageCommandSchema)
@@ -154,18 +161,6 @@ export const pageRouter = router({
         organizationId: ctx.activeOrganizationId,
         search: input?.search,
         limit: input?.limit,
-      });
-    }),
-
-  submit: publicProcedure
-    .input(CreatePageSubmissionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const handler = Container.get(CreatePageSubmissionCommand);
-      return bus.dispatch(handler, {
-        pageId: input.pageId,
-        data: input.data,
-        ipAddress: ctx.headers?.get("x-forwarded-for") ?? null,
-        userAgent: ctx.headers?.get("user-agent") ?? null,
       });
     }),
 });

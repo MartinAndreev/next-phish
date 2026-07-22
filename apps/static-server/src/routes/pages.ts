@@ -1,12 +1,30 @@
 import { Hono } from "hono";
+import { Container, TrackingService } from "@next-phish/backend";
+import { dedupe, enqueueTrackingEvent } from "./tracking-request";
 
 const pages = new Hono();
+const emptyPage =
+  '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>';
 
 pages.get("*", async (c) => {
-  const requestPath = c.req.path;
+  const ref = c.req.query("ref") ?? "";
+  const path = c.req.path.replace(/^\/+|\/+$/g, "").toLowerCase();
+  const page =
+    path && /^[0-9A-Za-z]{12}$/.test(ref)
+      ? await Container.get(TrackingService).resolveLandingPage(ref, path)
+      : null;
+  if (page)
+    enqueueTrackingEvent(c, {
+      trackingRef: ref,
+      type: "CLICKED",
+      deduplicationKey: dedupe(ref, "CLICKED", "landing"),
+    });
 
-  // TODO: Page lookup by path was removed. Need a new mechanism.
-  return c.text(`Page not found: ${requestPath}`, 501);
+  return c.body(page?.html ?? emptyPage, 200, {
+    "Content-Type": page?.contentType ?? "text/html; charset=utf-8",
+    "Cache-Control": "no-store, private",
+    "X-Content-Type-Options": "nosniff",
+  });
 });
 
 export { pages };

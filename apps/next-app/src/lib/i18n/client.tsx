@@ -1,8 +1,16 @@
 "use client";
 
-import { createContext, use, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { getMessages } from "./shared";
-import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, type Locale } from "./config";
+import { LOCALE_COOKIE_NAME, type Locale } from "./config";
 import {
   formatMessage,
   resolveMessage,
@@ -37,18 +45,19 @@ export function I18nProvider({ initialLocale, children }: I18nProviderProps) {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  const t: TranslationFunction = (key, params) =>
-    formatMessage(resolveMessage(messages, key), params);
-
-  const value: I18nContextValue = {
-    locale,
-    setLocale: (nextLocale) => {
-      setLocaleState(nextLocale);
-      setMessages(getMessages(nextLocale));
-      writeLocaleCookie(nextLocale);
-    },
-    t,
-  };
+  const t = useCallback<TranslationFunction>(
+    (key, params) => formatMessage(resolveMessage(messages, key), params),
+    [messages],
+  );
+  const setLocale = useCallback((nextLocale: Locale) => {
+    setLocaleState(nextLocale);
+    setMessages(getMessages(nextLocale));
+    writeLocaleCookie(nextLocale);
+  }, []);
+  const value = useMemo<I18nContextValue>(
+    () => ({ locale, setLocale, t }),
+    [locale, setLocale, t],
+  );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
@@ -74,5 +83,3 @@ export function useLocale() {
 export function useSetLocale() {
   return useI18n().setLocale;
 }
-
-export const fallbackLocale = DEFAULT_LOCALE;

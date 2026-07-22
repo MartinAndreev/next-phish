@@ -8,11 +8,8 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./tests/setup.ts"],
     pool: "forks",
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    fileParallelism: false,
+    maxWorkers: 1,
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

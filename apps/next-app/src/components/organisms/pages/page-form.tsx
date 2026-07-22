@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from "react";
 import { Form, Formik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
-import { Tooltip } from "primereact/tooltip";
 import { createPageSchema } from "@next-phish/shared";
 import { FormMessage } from "@/src/components/atoms/form-message";
 import { toFormikValidation } from "@/src/lib/to-formik-validation";
@@ -17,9 +16,9 @@ import type { FormStatus } from "@/src/hooks/use-form-status";
 
 interface PageFormValues {
   name: string;
+  path: string | null;
   type: "LANDING" | "REDIRECT";
   status: "DRAFT" | "ACTIVE";
-  captureData: boolean;
   redirectTarget: "none" | "page" | "url";
   redirectPageId: string | null;
   redirectUrl: string | null;
@@ -37,6 +36,8 @@ interface PageFormProps {
   t: (key: string) => string;
   onSubmit: (values: PageFormValues) => Promise<void>;
   onCancel: () => void;
+  onRegeneratePreview?: () => Promise<void>;
+  isGeneratingPreview?: boolean;
 }
 
 const breadcrumbHome = { icon: "pi pi-home", url: "/" };
@@ -53,6 +54,8 @@ export function PageForm({
   t,
   onSubmit,
   onCancel,
+  onRegeneratePreview,
+  isGeneratingPreview,
 }: PageFormProps) {
   const [importDialogVisible, setImportDialogVisible] = useState(false);
   const editorRef = useRef<Editor | null>(null);
@@ -71,8 +74,6 @@ export function PageForm({
 
   return (
     <div className="px-6 py-8">
-      <Tooltip target=".capture-data-hint" position="top" />
-
       <div className="mb-6">
         <BreadCrumb home={breadcrumbHome} model={breadcrumbItems} />
         <h1 className="mt-2 text-2xl font-semibold text-white">
@@ -89,9 +90,9 @@ export function PageForm({
         validate={toFormikValidation(
           createPageSchema.pick({
             name: true,
+            path: true,
             type: true,
             status: true,
-            captureData: true,
           }),
         )}
         onSubmit={onSubmit}
@@ -137,6 +138,18 @@ export function PageForm({
                   />
 
                   <div className="flex flex-col gap-3">
+                    {pageId && onRegeneratePreview ? (
+                      <Button
+                        type="button"
+                        size="small"
+                        outlined
+                        icon="pi pi-image"
+                        label="Regenerate preview"
+                        loading={isGeneratingPreview}
+                        onClick={() => void onRegeneratePreview()}
+                        className="rounded-xl border-white/10 px-5 py-3 text-sm font-medium text-white"
+                      />
+                    ) : null}
                     <Button
                       size="small"
                       type="submit"
@@ -161,14 +174,20 @@ export function PageForm({
                     />
                   </div>
 
-                  {status.type === "error" && (
-                    <FormMessage variant="error">{status.message}</FormMessage>
-                  )}
-                  {status.type === "success" && (
-                    <FormMessage variant="success">
-                      {status.message}
-                    </FormMessage>
-                  )}
+                  {status.type === "error" ? (
+                    <div className="mt-3">
+                      <FormMessage variant="error">
+                        {status.message}
+                      </FormMessage>
+                    </div>
+                  ) : null}
+                  {status.type === "success" ? (
+                    <div className="mt-3">
+                      <FormMessage variant="success">
+                        {status.message}
+                      </FormMessage>
+                    </div>
+                  ) : null}
                 </section>
               </div>
             </div>

@@ -84,10 +84,15 @@ export class SiteImportRepository {
   }
 
   async findFileById(id: string) {
-    return this.db.siteImportFile.findUnique({
+    const row = await this.db.siteImportFile.findUnique({
       where: { id },
-      include: { file: true },
+      include: { file: { include: { storedObject: true } } },
     });
+    if (!row) return null;
+    return {
+      ...row,
+      file: { ...row.file, remoteId: row.file.storedObject.remoteId },
+    };
   }
 
   async findFilesByImportId(siteImportId: string) {

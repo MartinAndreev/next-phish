@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { pageTypeSchema, pageStatusSchema } from "@next-phish/shared";
+import {
+  pagePathSchema,
+  pageTypeSchema,
+  pageStatusSchema,
+} from "@next-phish/shared";
 
 const sortFieldSchema = z.enum([
   "name",
@@ -17,6 +21,8 @@ const sortSchema = z.object({
 
 export const GetPagesSchema = z.object({
   search: z.string().optional(),
+  selectedId: z.string().optional(),
+  includeContent: z.boolean().default(false),
   limit: z.number().min(1).max(100).default(50),
   offset: z.number().min(0).default(0),
   sort: z.array(sortSchema).optional(),
@@ -30,11 +36,11 @@ export const GetPagesSchema = z.object({
 
 const pageBaseSchema = z.object({
   name: z.string().trim().min(1, "Page name is required"),
+  path: pagePathSchema.default(null),
   type: pageTypeSchema.default("LANDING"),
   html: z.string().default(""),
   design: z.unknown().default({}),
   status: pageStatusSchema.default("DRAFT"),
-  captureData: z.boolean().default(false),
   redirectUrl: z.string().nullable().optional(),
   redirectPageId: z.string().nullable().optional(),
 });
@@ -58,17 +64,9 @@ export const ImportPageFromUrlSchema = z.object({
   includeAssets: z.boolean().default(false),
 });
 
-export const CreatePageSubmissionSchema = z.object({
-  pageId: z.string().min(1, "Page ID is required"),
-  data: z.record(z.unknown()),
-});
-
 export type GetPagesInput = z.infer<typeof GetPagesSchema>;
 export type CreatePageCommandInput = z.infer<typeof CreatePageCommandSchema>;
 export type UpdatePageCommandInput = z.infer<typeof UpdatePageCommandSchema>;
 export type GetPageByIdInput = z.infer<typeof GetPageByIdSchema>;
 export type DeletePageCommandInput = z.infer<typeof DeletePageCommandSchema>;
 export type ImportPageFromUrlInput = z.infer<typeof ImportPageFromUrlSchema>;
-export type CreatePageSubmissionInput = z.infer<
-  typeof CreatePageSubmissionSchema
->;

@@ -1,11 +1,5 @@
-import { getTranslator } from "@/src/lib/i18n/server";
+import { SchedulesOverview } from "@/src/components/organisms/schedules/schedules-overview";
 
-export default async function SchedulePage() {
-  const t = await getTranslator();
-
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-zinc-400">{t("pages.scheduleSoon")}</p>
-    </div>
-  );
+export default function SchedulePage() {
+  return <SchedulesOverview />;
 }

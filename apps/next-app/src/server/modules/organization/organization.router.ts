@@ -10,6 +10,8 @@ import {
   GetUserOrganizationsSchema,
   CreateOrganizationCommandSchema,
   GetOrganizationMembersSchema,
+  DeliveryRepository,
+  normalizeNetwork,
 } from "@next-phish/backend";
 import {
   createPermissionProcedure,
@@ -68,6 +70,55 @@ export const organizationRouter = router({
         headers: ctx.headers,
       });
     }),
+
+  setDeliveryEnabled: writeProcedure
+    .input(z.object({ deliveryEnabled: z.boolean() }))
+    .mutation(({ ctx, input }) =>
+      Container.get(DeliveryRepository).setOrganizationDeliveryEnabled(
+        ctx.activeOrganizationId,
+        input.deliveryEnabled,
+      ),
+    ),
+
+  listIgnoredNetworks: writeProcedure.query(({ ctx }) =>
+    Container.get(DeliveryRepository).listIgnoredNetworks(
+      ctx.activeOrganizationId,
+    ),
+  ),
+
+  createIgnoredNetwork: writeProcedure
+    .input(
+      z.object({
+        network: z.string().trim().min(1).max(64),
+        description: z.string().trim().max(200).optional(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const normalized = normalizeNetwork(input.network).canonical;
+      return Container.get(DeliveryRepository).createIgnoredNetwork({
+        organizationId: ctx.activeOrganizationId,
+        createdById: ctx.userId,
+        network: input.network,
+        normalizedNetwork: normalized,
+        description: input.description,
+      });
+    }),
+
+  listIgnoredNetworkAudits: writeProcedure.query(({ ctx }) =>
+    Container.get(DeliveryRepository).listIgnoredNetworkAudits(
+      ctx.activeOrganizationId,
+    ),
+  ),
+
+  deleteIgnoredNetwork: writeProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(({ ctx, input }) =>
+      Container.get(DeliveryRepository).deleteIgnoredNetwork(
+        input.id,
+        ctx.activeOrganizationId,
+        ctx.userId,
+      ),
+    ),
 
   delete: writeProcedure
     .input(z.object({ organizationId: z.string() }))

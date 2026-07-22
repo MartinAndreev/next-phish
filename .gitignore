@@ -44,3 +44,5 @@ next-env.d.ts
 .conduit/cache/
 .conduit/worktrees/
 .conduit/runs/
+
+.pi-subagents/

@@ -74,7 +74,10 @@ export class MailSendingProfileRepository {
     organizationId: string,
     input: FindByOrganizationIdInput,
   ): Promise<{ rows: MailSendingProfileRow[]; total: number }> {
-    const where: Prisma.MailSendingProfileWhereInput = { organizationId };
+    const where: Prisma.MailSendingProfileWhereInput = {
+      organizationId,
+      visibility: "CATALOG",
+    };
 
     if (input.search) {
       where.OR = [{ name: { contains: input.search, mode: "insensitive" } }];
@@ -106,10 +109,21 @@ export class MailSendingProfileRepository {
     organizationId: string,
   ): Promise<MailSendingProfileRow | null> {
     const row = await this.db.mailSendingProfile.findFirst({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
       select: detailSelect,
     });
 
+    return (row as unknown as MailSendingProfileRow) ?? null;
+  }
+
+  async findExecutionById(
+    id: string,
+    organizationId: string,
+  ): Promise<MailSendingProfileRow | null> {
+    const row = await this.db.mailSendingProfile.findFirst({
+      where: { id, organizationId },
+      select: detailSelect,
+    });
     return (row as unknown as MailSendingProfileRow) ?? null;
   }
 
@@ -117,7 +131,7 @@ export class MailSendingProfileRepository {
     organizationId: string,
   ): Promise<MailSendingProfileRow | null> {
     const row = await this.db.mailSendingProfile.findFirst({
-      where: { organizationId, isDefault: true },
+      where: { organizationId, isDefault: true, visibility: "CATALOG" },
       select: detailSelect,
     });
 
@@ -141,7 +155,7 @@ export class MailSendingProfileRepository {
     data: UpdateMailSendingProfileData,
   ): Promise<MailSendingProfileRow | null> {
     const result = await this.db.mailSendingProfile.updateMany({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
       data: data as unknown as Prisma.MailSendingProfileUpdateManyMutationInput,
     });
 
@@ -154,10 +168,22 @@ export class MailSendingProfileRepository {
 
   async delete(id: string, organizationId: string): Promise<boolean> {
     const result = await this.db.mailSendingProfile.deleteMany({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
     });
 
     return result.count > 0;
+  }
+
+  async getExecutionConfig(
+    id: string,
+    organizationId: string,
+  ): Promise<Record<string, unknown>> {
+    const row = await this.db.mailSendingProfile.findFirst({
+      where: { id, organizationId },
+      select: { providerConfig: true },
+    });
+    if (!row) throw new Error(`MailSendingProfile ${id} not found`);
+    return row.providerConfig as Record<string, unknown>;
   }
 
   async getConfig(
@@ -165,7 +191,7 @@ export class MailSendingProfileRepository {
     organizationId: string,
   ): Promise<Record<string, unknown>> {
     const row = await this.db.mailSendingProfile.findFirst({
-      where: { id, organizationId },
+      where: { id, organizationId, visibility: "CATALOG" },
       select: { providerConfig: true },
     });
 

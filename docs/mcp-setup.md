@@ -272,28 +272,26 @@ This is the complete list of 23 MCP tools registered by the NextPhish server. To
 
 #### Input: `create_page`
 
-| Field            | Type    | Required | Notes                                              |
-| ---------------- | ------- | -------- | -------------------------------------------------- |
-| `organizationId` | string  | Yes      |                                                    |
-| `name`           | string  | Yes      | Trimmed, must be non-empty.                        |
-| `type`           | string  | No       | `"LANDING"` or `"REDIRECT"`. Default: `"LANDING"`. |
-| `html`           | string  | No       | Default: `""`.                                     |
-| `status`         | string  | No       | `"DRAFT"` or `"ACTIVE"`. Default: `"DRAFT"`.       |
-| `captureData`    | boolean | No       | Default: `false`.                                  |
-| `redirectUrl`    | string  | No       | Optional URL for redirect pages.                   |
+| Field            | Type   | Required | Notes                                              |
+| ---------------- | ------ | -------- | -------------------------------------------------- |
+| `organizationId` | string | Yes      |                                                    |
+| `name`           | string | Yes      | Trimmed, must be non-empty.                        |
+| `type`           | string | No       | `"LANDING"` or `"REDIRECT"`. Default: `"LANDING"`. |
+| `html`           | string | No       | Default: `""`.                                     |
+| `status`         | string | No       | `"DRAFT"` or `"ACTIVE"`. Default: `"DRAFT"`.       |
+| `redirectUrl`    | string | No       | Optional URL for redirect pages.                   |
 
 #### Input: `update_page`
 
-| Field            | Type    | Required | Notes                                                                           |
-| ---------------- | ------- | -------- | ------------------------------------------------------------------------------- |
-| `id`             | string  | Yes      |                                                                                 |
-| `organizationId` | string  | Yes      |                                                                                 |
-| `name`           | string  | No       | **Caveat:** if omitted, the handler passes an empty string `""` to the backend. |
-| `type`           | string  | No       | `"LANDING"` or `"REDIRECT"`.                                                    |
-| `html`           | string  | No       |                                                                                 |
-| `status`         | string  | No       | `"DRAFT"` or `"ACTIVE"`.                                                        |
-| `captureData`    | boolean | No       |                                                                                 |
-| `redirectUrl`    | string  | No       |                                                                                 |
+| Field            | Type   | Required | Notes                                                                           |
+| ---------------- | ------ | -------- | ------------------------------------------------------------------------------- |
+| `id`             | string | Yes      |                                                                                 |
+| `organizationId` | string | Yes      |                                                                                 |
+| `name`           | string | No       | **Caveat:** if omitted, the handler passes an empty string `""` to the backend. |
+| `type`           | string | No       | `"LANDING"` or `"REDIRECT"`.                                                    |
+| `html`           | string | No       |                                                                                 |
+| `status`         | string | No       | `"DRAFT"` or `"ACTIVE"`.                                                        |
+| `redirectUrl`    | string | No       |                                                                                 |
 
 > **Important:** When `name` is omitted, the handler substitutes an empty string. The `design` and `redirectPageId` fields are not exposed through MCP.
 

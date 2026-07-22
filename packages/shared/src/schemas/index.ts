@@ -38,6 +38,7 @@ export type {
 export {
   pageTypeSchema,
   pageStatusSchema,
+  pagePathSchema,
   createPageSchema,
   updatePageSchema,
 } from "./page.schema";
@@ -75,4 +76,27 @@ export type {
 } from "./target-group.schema";
 
 export { sendingProfileFormSchema } from "./sending-profile.schema";
+
+export { campaignFormSchema, scheduleFormSchema } from "./campaign.schema";
+export type { CampaignFormValues, ScheduleFormValues } from "./campaign.schema";
 export type { SendingProfileFormValues } from "./sending-profile.schema";
+
+export {
+  campaignEventTypeSchema,
+  deliveryEventTypeSchema,
+  recipientDeliveryStatusSchema,
+  negativeEventSeveritySchema,
+  materializeOccurrencePayloadSchema,
+  feedDeliveriesPayloadSchema,
+  deliverRecipientPayloadSchema,
+  processDeliveryEventPayloadSchema,
+  processTrackingEventPayloadSchema,
+  executionQueuePayloadSchema,
+} from "./execution.schema";
+export type {
+  CampaignEventType,
+  DeliveryEventType,
+  RecipientDeliveryStatus,
+  NegativeEventSeverity,
+  ExecutionQueuePayload,
+} from "./execution.schema";

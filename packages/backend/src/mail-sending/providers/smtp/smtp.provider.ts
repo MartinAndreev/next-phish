@@ -25,6 +25,7 @@ const SMTP_CAPABILITIES: MailProviderCapabilities = {
   supportsBatch: false,
   supportsTracking: false,
   supportsRateLimitInfo: false,
+  supportsIdempotencyKey: false,
 };
 
 export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
@@ -69,6 +70,7 @@ export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
         cc: message.cc?.join(", "),
         bcc: message.bcc?.join(", "),
         subject: message.subject,
+        messageId: message.messageId,
         html: message.html,
         text: message.text,
         headers: message.headers,
@@ -79,22 +81,60 @@ export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
         })),
       });
 
+      const accepted = (result.accepted as string[]).map((value) =>
+        String(value).toLowerCase(),
+      );
+      const rejected = (result.rejected as string[]).map((value) =>
+        String(value).toLowerCase(),
+      );
+      const target = message.to[0]!.toLowerCase();
+      const targetAccepted = accepted.includes(target);
       return {
         provider: MailProviderType.SMTP,
-        success: true,
+        success: targetAccepted,
         providerMessageId: result.messageId,
-        accepted: result.accepted as string[],
-        rejected: result.rejected as string[],
+        accepted,
+        rejected,
         rawResponse: result.response,
+        errorCode: targetAccepted ? undefined : "SMTP_RECIPIENT_REJECTED",
+        errorMessage: targetAccepted
+          ? undefined
+          : "The recipient was not accepted by the SMTP server",
+        failureKind: targetAccepted ? undefined : "PERMANENT",
       };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "SMTP send failed";
+      const details = error as {
+        responseCode?: number;
+        command?: string;
+        code?: string;
+      };
+      const preSubmissionCommands = new Set([
+        "CONN",
+        "EHLO",
+        "HELO",
+        "AUTH",
+        "MAIL FROM",
+        "RCPT TO",
+      ]);
+      const failureKind =
+        details.responseCode && details.responseCode >= 500
+          ? "PERMANENT"
+          : details.responseCode &&
+              details.responseCode >= 400 &&
+              details.responseCode < 500 &&
+              preSubmissionCommands.has(details.command ?? "")
+            ? "SAFE_TRANSIENT"
+            : details.code === "ECONNREFUSED" || details.code === "ENOTFOUND"
+              ? "SAFE_TRANSIENT"
+              : "AMBIGUOUS";
       return {
         provider: MailProviderType.SMTP,
         success: false,
-        errorCode: "SMTP_SEND_FAILED",
+        errorCode: details.code ?? "SMTP_SEND_FAILED",
         errorMessage: message,
+        failureKind,
       };
     } finally {
       transporter.close();
@@ -117,6 +157,12 @@ export class SMTPProvider extends BaseMailProvider<SMTPProviderConfig> {
       host,
       port,
       secure: config.secure,
+      pool: true,
+      maxConnections: Number(process.env.SMTP_MAX_CONNECTIONS ?? 5),
+      connectionTimeout: Number(
+        process.env.SMTP_CONNECTION_TIMEOUT_MS ?? 15_000,
+      ),
+      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT_MS ?? 60_000),
       auth:
         config.username || config.password
           ? { user: config.username, pass: config.password }

@@ -139,32 +139,3 @@ export const organizationMemberProcedure = protectedProcedure
       ctx: { ...ctx },
     });
   });
-
-export const activeOrganizationProcedure = protectedProcedure
-  .input(z.object({ organizationId: z.string().optional() }).optional())
-  .use(async ({ ctx, input, next }) => {
-    const orgRepo = Container.get(OrganizationRepository);
-    const organizationId = await getOrganizationId(ctx, input?.organizationId);
-
-    const org = await orgRepo.findById(organizationId);
-
-    if (!org) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Organization not found",
-      });
-    }
-
-    const member = org.members.find((m) => m.userId === ctx.userId);
-
-    if (!member) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "You are not a member of the active organization",
-      });
-    }
-
-    return next({
-      ctx: { ...ctx, activeOrganizationId: organizationId },
-    });
-  });

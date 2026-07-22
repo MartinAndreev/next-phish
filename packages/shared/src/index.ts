@@ -38,6 +38,7 @@ export type {
 export {
   pageTypeSchema,
   pageStatusSchema,
+  pagePathSchema,
   createPageSchema,
   updatePageSchema,
 } from "./schemas";
@@ -51,11 +52,11 @@ export type {
   PageView,
   CreatePageData,
   UpdatePageData,
-  CreatePageSubmissionData,
 } from "./types";
 
 export type {
   EmailTemplateStatus,
+  CatalogPreviewView,
   EmailTemplateAuthorView,
   EmailTemplateListItemView,
   EmailTemplateView,
@@ -109,6 +110,29 @@ export type { MailProviderType } from "./types";
 
 export { sendingProfileFormSchema } from "./schemas";
 export type { SendingProfileFormValues } from "./schemas";
+
+export { campaignFormSchema, scheduleFormSchema } from "./schemas";
+export type { CampaignFormValues, ScheduleFormValues } from "./schemas";
+
+export {
+  campaignEventTypeSchema,
+  deliveryEventTypeSchema,
+  recipientDeliveryStatusSchema,
+  negativeEventSeveritySchema,
+  materializeOccurrencePayloadSchema,
+  feedDeliveriesPayloadSchema,
+  deliverRecipientPayloadSchema,
+  processDeliveryEventPayloadSchema,
+  processTrackingEventPayloadSchema,
+  executionQueuePayloadSchema,
+} from "./schemas";
+export type {
+  CampaignEventType,
+  DeliveryEventType,
+  RecipientDeliveryStatus,
+  NegativeEventSeverity,
+  ExecutionQueuePayload,
+} from "./schemas";
 
 export {
   PERMISSION_GROUPS,

@@ -942,6 +942,20 @@ model DeliveryEvent {
   @@map("delivery_event")
 }
 
+model TrackingEventInbox {
+  id               String            @id @default(cuid())
+  trackingRef      String            @db.VarChar(12)
+  type             CampaignEventType
+  clientIp         String
+  deduplicationKey String            @unique
+  occurredAt       DateTime          @db.Timestamptz(3)
+  processedAt      DateTime?         @db.Timestamptz(3)
+  createdAt        DateTime          @default(now())
+
+  @@index([processedAt, createdAt])
+  @@map("tracking_event_inbox")
+}
+
 model OutboxEvent {
   id               String       @id @default(cuid())
   organizationId   String?

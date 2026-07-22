@@ -15,6 +15,7 @@ export {
   PauseCampaignCommand,
   ResumeCampaignCommand,
   CompleteCampaignCommand,
+  DeleteCampaignCommand,
   CreateScheduleCommand,
   UpdateScheduleCommand,
   CancelScheduleCommand,

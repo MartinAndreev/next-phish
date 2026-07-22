@@ -124,6 +124,7 @@ export {
   feedDeliveriesPayloadSchema,
   deliverRecipientPayloadSchema,
   processDeliveryEventPayloadSchema,
+  processTrackingEventPayloadSchema,
   executionQueuePayloadSchema,
 } from "./schemas";
 export type {

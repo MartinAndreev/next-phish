@@ -1,41 +1,21 @@
-import { createHash } from "node:crypto";
-import { getConnInfo } from "@hono/node-server/conninfo";
 import { Hono } from "hono";
-import {
-  Container,
-  TrackingService,
-  resolveClientIp,
-} from "@next-phish/backend";
+import { Container, TrackingService } from "@next-phish/backend";
+import { dedupe, enqueueTrackingEvent } from "./tracking-request";
 
 const activity = new Hono();
 const pixel = Buffer.from("R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=", "base64");
-
-function requestIp(c: Parameters<typeof getConnInfo>[0]): string {
-  const directAddress = getConnInfo(c).remote.address ?? "127.0.0.1";
-  const trustedProxyNetworks = (process.env.TRUSTED_PROXY_NETWORKS ?? "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-  try {
-    return resolveClientIp({
-      directAddress,
-      forwardedFor: c.req.header("x-forwarded-for"),
-      trustedProxyNetworks,
-    });
-  } catch {
-    return "127.0.0.1";
-  }
-}
-
-function dedupe(...values: string[]): string {
-  return createHash("sha256").update(values.join("\0")).digest("hex");
-}
 
 activity.get("/c", async (c) => {
   const ref = c.req.query("ref") ?? "";
   const page = /^[0-9A-Za-z]{12}$/.test(ref)
     ? await Container.get(TrackingService).resolveLandingPage(ref)
     : null;
+  if (page)
+    enqueueTrackingEvent(c, {
+      trackingRef: ref,
+      type: "CLICKED",
+      deduplicationKey: dedupe(ref, "CLICKED", "landing"),
+    });
   const html =
     page?.html ??
     '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>';
@@ -48,14 +28,12 @@ activity.get("/c", async (c) => {
 
 activity.get("/p.gif", async (c) => {
   const ref = c.req.query("ref") ?? "";
-  if (/^[0-9A-Za-z]{12}$/.test(ref)) {
-    await Container.get(TrackingService).record({
+  if (/^[0-9A-Za-z]{12}$/.test(ref))
+    enqueueTrackingEvent(c, {
       trackingRef: ref,
       type: "OPENED",
-      clientIp: requestIp(c),
       deduplicationKey: dedupe(ref, "OPENED"),
     });
-  }
   return c.body(pixel, 200, {
     "Content-Type": "image/gif",
     "Cache-Control": "no-store, private",
@@ -71,10 +49,9 @@ activity.get("/r/:linkId", async (c) => {
     const service = Container.get(TrackingService);
     destination = await service.resolveLink(ref, linkId);
     if (destination)
-      await service.record({
+      enqueueTrackingEvent(c, {
         trackingRef: ref,
         type: "CLICKED",
-        clientIp: requestIp(c),
         deduplicationKey: dedupe(ref, "CLICKED", linkId),
       });
   }
@@ -84,10 +61,9 @@ activity.get("/r/:linkId", async (c) => {
 activity.post("/s", async (c) => {
   const ref = c.req.query("ref") ?? "";
   if (/^[0-9A-Za-z]{12}$/.test(ref))
-    await Container.get(TrackingService).record({
+    enqueueTrackingEvent(c, {
       trackingRef: ref,
       type: "SUBMITTED",
-      clientIp: requestIp(c),
       deduplicationKey: dedupe(ref, "SUBMITTED"),
     });
   // The request body is deliberately not parsed or persisted.
@@ -97,10 +73,9 @@ activity.post("/s", async (c) => {
 activity.post("/a", async (c) => {
   const ref = c.req.query("ref") ?? "";
   if (/^[0-9A-Za-z]{12}$/.test(ref))
-    await Container.get(TrackingService).record({
+    enqueueTrackingEvent(c, {
       trackingRef: ref,
       type: "REPORTED",
-      clientIp: requestIp(c),
       deduplicationKey: dedupe(ref, "REPORTED"),
     });
   return c.body(null, 204, { "Cache-Control": "no-store" });

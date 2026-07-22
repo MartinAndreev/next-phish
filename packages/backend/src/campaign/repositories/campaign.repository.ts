@@ -425,6 +425,10 @@ export class CampaignRepository {
         where: { id },
         data: {
           ...scheduleData,
+          status:
+            schedule.status === ScheduleStatus.DRAFT
+              ? ScheduleStatus.SCHEDULED
+              : schedule.status,
           targetGroupId: this.resolveScheduleTarget(data, sources),
           nextOccurrenceAt: data.startsAt,
           collisionFingerprint: this.service.createScheduleFingerprint(data),
@@ -530,6 +534,45 @@ export class CampaignRepository {
     );
   }
 
+  async deleteCampaign(id: string, organizationId: string) {
+    return this.db.$transaction(async (tx) => {
+      const campaign = await tx.campaign.findFirst({
+        where: { id, organizationId },
+        select: {
+          id: true,
+          status: true,
+          recipients: { select: { trackingRef: true } },
+        },
+      });
+      if (!campaign) throw new Error("Campaign not found");
+      if (
+        campaign.status !== CampaignStatus.COMPLETED &&
+        campaign.status !== CampaignStatus.FAILED
+      )
+        throw new Error("Only completed or failed campaigns can be deleted");
+
+      const trackingEvents = await tx.trackingEventInbox.findMany({
+        where: {
+          trackingRef: {
+            in: campaign.recipients.map((recipient) => recipient.trackingRef),
+          },
+        },
+        select: { id: true },
+      });
+      await tx.outboxEvent.deleteMany({
+        where: {
+          deduplicationKey: {
+            in: trackingEvents.map((event) => `tracking-event:${event.id}`),
+          },
+        },
+      });
+      await tx.trackingEventInbox.deleteMany({
+        where: { id: { in: trackingEvents.map((event) => event.id) } },
+      });
+      return tx.campaign.delete({ where: { id: campaign.id } });
+    });
+  }
+
   async duplicateSchedule(
     id: string,
     organizationId: string,
@@ -559,7 +602,32 @@ export class CampaignRepository {
       endsAt: source.endsAt,
       autoCompleteAfterDays: source.autoCompleteAfterDays,
     } satisfies ScheduleDefinitionInput;
-    return this.createSchedule(organizationId, createdById, data);
+    const sources = await this.validateScheduleSources(
+      this.db,
+      organizationId,
+      data,
+    );
+    const { sourceCampaignIds, ...scheduleData } = data;
+    const schedule = await this.db.schedule.create({
+      data: {
+        ...scheduleData,
+        organizationId,
+        createdById,
+        status: ScheduleStatus.DRAFT,
+        nextOccurrenceAt: null,
+        collisionFingerprint: null,
+        executionEnabled: false,
+        targetGroupId: this.resolveScheduleTarget(data, sources),
+        sources: {
+          create: sourceCampaignIds.map((campaignId, position) => ({
+            campaignId,
+            position,
+          })),
+        },
+      },
+      include: { sources: true },
+    });
+    return { schedule, collisionWarning: null };
   }
 
   async materializeClaimedOccurrence(occurrenceId: string) {

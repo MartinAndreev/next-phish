@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "primereact/badge";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { AppDataTable } from "@/src/components/molecules/data-table";
 import type {
   DataTableAction,
@@ -57,6 +58,7 @@ function statusSeverity(status: string) {
 
 export default function CampaignsPage() {
   const router = useRouter();
+  const utils = trpc.useUtils();
   const { setSearch, setSorts, setFilterValues, setPage, buildQueryInput } =
     useDataTable();
   const queryInput = buildQueryInput([
@@ -67,6 +69,9 @@ export default function CampaignsPage() {
     "updatedAt",
   ]);
   const { data, isLoading } = trpc.campaign.list.useQuery(queryInput);
+  const deleteCampaign = trpc.campaign.delete.useMutation({
+    onSuccess: () => utils.campaign.list.invalidate(),
+  });
   const rows = (data?.rows ?? []) as CampaignRow[];
 
   const columns: DataTableColumn<CampaignRow>[] = [
@@ -209,6 +214,20 @@ export default function CampaignsPage() {
         campaign.status === "DRAFT" || campaign.status === "PUBLISHED",
       onClick: (campaign) => router.push(`/campaigns/${campaign.id}/edit`),
     },
+    {
+      label: "Delete campaign",
+      icon: "pi pi-trash",
+      severity: "danger",
+      visible: (campaign) =>
+        campaign.status === "COMPLETED" || campaign.status === "FAILED",
+      onClick: (campaign) =>
+        confirmDialog({
+          header: "Delete campaign",
+          message: `Delete “${campaign.name}” and its execution data? This cannot be undone.`,
+          icon: "pi pi-exclamation-triangle",
+          accept: () => deleteCampaign.mutate({ id: campaign.id }),
+        }),
+    },
   ];
 
   return (
@@ -246,6 +265,12 @@ export default function CampaignsPage() {
         onSort={setSorts}
         onFilter={setFilterValues}
         onPage={(offset, limit) => setPage({ offset: offset * limit, limit })}
+      />
+
+      <ConfirmDialog
+        className="max-w-md"
+        draggable={false}
+        dismissableMask={true}
       />
     </div>
   );

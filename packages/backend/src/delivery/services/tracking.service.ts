@@ -8,6 +8,22 @@ import {
   RecipientDeliveryStatus,
 } from "../execution.enums";
 
+type TrackableCampaignEvent = Extract<
+  CampaignEventTypeValue,
+  | typeof CampaignEventType.OPENED
+  | typeof CampaignEventType.CLICKED
+  | typeof CampaignEventType.SUBMITTED
+  | typeof CampaignEventType.REPORTED
+>;
+
+type TrackingRecordInput = {
+  trackingRef: string;
+  type: TrackableCampaignEvent;
+  clientIp: string;
+  deduplicationKey: string;
+  occurredAt?: Date;
+};
+
 export class TrackingService {
   constructor(
     private readonly db: PrismaClient,
@@ -72,19 +88,54 @@ export class TrackingService {
     return link?.destinationUrl ?? null;
   }
 
-  async record(input: {
-    trackingRef: string;
-    type: Extract<
-      CampaignEventTypeValue,
-      | typeof CampaignEventType.OPENED
-      | typeof CampaignEventType.CLICKED
-      | typeof CampaignEventType.SUBMITTED
-      | typeof CampaignEventType.REPORTED
-    >;
-    clientIp: string;
-    deduplicationKey: string;
-    occurredAt?: Date;
-  }): Promise<{ accepted: boolean; ignored: boolean }> {
+  async enqueueRecord(input: TrackingRecordInput): Promise<void> {
+    await this.db.$transaction(async (tx) => {
+      const event = await tx.trackingEventInbox.upsert({
+        where: { deduplicationKey: input.deduplicationKey },
+        create: {
+          trackingRef: input.trackingRef,
+          type: input.type,
+          clientIp: input.clientIp,
+          deduplicationKey: input.deduplicationKey,
+          occurredAt: input.occurredAt ?? new Date(),
+        },
+        update: {},
+        select: { id: true },
+      });
+      await tx.outboxEvent.upsert({
+        where: { deduplicationKey: `tracking-event:${event.id}` },
+        create: {
+          topic: "tracking-events",
+          deduplicationKey: `tracking-event:${event.id}`,
+          payloadVersion: 1,
+          payload: { version: 1, trackingEventId: event.id },
+        },
+        update: {},
+      });
+    });
+  }
+
+  async processQueuedRecord(trackingEventId: string): Promise<void> {
+    const event = await this.db.trackingEventInbox.findUnique({
+      where: { id: trackingEventId },
+    });
+    if (!event || event.processedAt) return;
+    await this.record({
+      trackingRef: event.trackingRef,
+      type: event.type as TrackableCampaignEvent,
+      clientIp: event.clientIp,
+      deduplicationKey: event.deduplicationKey,
+      occurredAt: event.occurredAt,
+    });
+    await this.db.trackingEventInbox.updateMany({
+      where: { id: event.id, processedAt: null },
+      data: { processedAt: new Date() },
+    });
+  }
+
+  async record(
+    input: TrackingRecordInput,
+  ): Promise<{ accepted: boolean; ignored: boolean }> {
     const recipient = await this.deliveryRepository.findByTrackingRef(
       input.trackingRef,
     );

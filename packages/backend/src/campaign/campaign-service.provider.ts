@@ -20,6 +20,7 @@ import {
   PauseCampaignCommand,
   ResumeCampaignCommand,
   CompleteCampaignCommand,
+  DeleteCampaignCommand,
   DuplicateScheduleCommand,
   MaterializeOccurrenceCommand,
   MaterializeClaimedOccurrenceCommand,
@@ -46,6 +47,7 @@ export function registerCampaignServices(db: PrismaClient): void {
     [PauseCampaignCommand, new PauseCampaignCommand(repo)],
     [ResumeCampaignCommand, new ResumeCampaignCommand(repo)],
     [CompleteCampaignCommand, new CompleteCampaignCommand(repo)],
+    [DeleteCampaignCommand, new DeleteCampaignCommand(repo)],
     [DuplicateScheduleCommand, new DuplicateScheduleCommand(repo)],
     [MaterializeOccurrenceCommand, new MaterializeOccurrenceCommand(repo)],
     [

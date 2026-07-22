@@ -242,6 +242,17 @@ describe("CampaignRepository", () => {
       endsAt: null,
       autoCompleteAfterDays: 20,
     });
+    const duplicate = await repo.duplicateSchedule(
+      schedule.id,
+      organizationId,
+      userId,
+    );
+    expect(duplicate.schedule).toMatchObject({
+      status: "DRAFT",
+      nextOccurrenceAt: null,
+      executionEnabled: false,
+    });
+
     await db.targetGroupUser.createMany({
       data: Array.from({ length: 5 }, (_, index) => ({
         targetGroupId: refs.targetGroupId,
@@ -313,6 +324,29 @@ describe("CampaignRepository", () => {
     expect(
       await tracking.resolveLandingPage(recipient.trackingRef, "different"),
     ).toBeNull();
+    await tracking.enqueueRecord({
+      trackingRef: recipient.trackingRef,
+      type: "CLICKED",
+      clientIp: "127.0.0.1",
+      deduplicationKey: "landing-click-test",
+    });
+    const queuedTrackingEvent = await db.trackingEventInbox.findUniqueOrThrow({
+      where: { deduplicationKey: "landing-click-test" },
+    });
+    expect(
+      await db.outboxEvent.findUnique({
+        where: {
+          deduplicationKey: `tracking-event:${queuedTrackingEvent.id}`,
+        },
+      }),
+    ).not.toBeNull();
+    await tracking.processQueuedRecord(queuedTrackingEvent.id);
+    expect(
+      await db.campaignRecipient.findUniqueOrThrow({
+        where: { id: recipient.id },
+        select: { highestNegativeEvent: true },
+      }),
+    ).toEqual({ highestNegativeEvent: "CLICKED" });
     await db.campaign.update({
       where: { id: run.id },
       data: { status: "PENDING_START" },
@@ -347,5 +381,34 @@ describe("CampaignRepository", () => {
         select: { status: true },
       }),
     ).toEqual({ status: "ACTIVE" });
+
+    await expect(repo.deleteCampaign(run.id, organizationId)).rejects.toThrow(
+      "Only completed or failed campaigns can be deleted",
+    );
+    await db.campaign.update({
+      where: { id: run.id },
+      data: { status: "COMPLETED" },
+    });
+    await repo.deleteCampaign(run.id, organizationId);
+
+    expect(await db.campaign.findUnique({ where: { id: run.id } })).toBeNull();
+    expect(
+      await Promise.all([
+        db.emailTemplate.count({ where: { shadowCampaignId: run.id } }),
+        db.page.count({ where: { shadowCampaignId: run.id } }),
+        db.mailSendingProfile.count({ where: { shadowCampaignId: run.id } }),
+        db.targetGroup.count({ where: { shadowCampaignId: run.id } }),
+        db.file.count({ where: { shadowCampaignId: run.id } }),
+        db.campaignRecipient.count({ where: { campaignId: run.id } }),
+        db.trackingEventInbox.count({
+          where: { trackingRef: recipient.trackingRef },
+        }),
+        db.outboxEvent.count({
+          where: {
+            deduplicationKey: `tracking-event:${queuedTrackingEvent.id}`,
+          },
+        }),
+      ]),
+    ).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 });

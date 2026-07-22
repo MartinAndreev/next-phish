@@ -10,6 +10,7 @@ import {
   OutboxRepository,
   ProcessSiteImportCommand,
   ScheduleExecutionRepository,
+  TrackingService,
   stableJobId,
   assertNeutralDomain,
   getPublicContentUrl,
@@ -18,6 +19,7 @@ import {
   deliverRecipientPayloadSchema,
   feedDeliveriesPayloadSchema,
   materializeOccurrencePayloadSchema,
+  processTrackingEventPayloadSchema,
 } from "@next-phish/shared";
 import { connection } from "./connection";
 
@@ -30,6 +32,7 @@ const queues = {
   feeder: new Queue("delivery-feeder", queueOptions),
   delivery: new Queue("delivery", queueOptions),
   events: new Queue("delivery-events", queueOptions),
+  tracking: new Queue("tracking-events", queueOptions),
   outbox: new Queue("outbox", queueOptions),
 };
 
@@ -144,6 +147,18 @@ const workers: Worker[] = [
     { connection, concurrency: 5 },
   ),
   new Worker(
+    "tracking-events",
+    strictHandler({
+      "process-tracking-event": (job) => {
+        const payload = processTrackingEventPayloadSchema.parse(job.data);
+        return Container.get(TrackingService).processQueuedRecord(
+          payload.trackingEventId,
+        );
+      },
+    }),
+    { connection, concurrency: 10 },
+  ),
+  new Worker(
     "outbox",
     strictHandler({
       maintenance: () =>
@@ -163,7 +178,9 @@ const workers: Worker[] = [
                     ? queues.delivery
                     : row.topic === "delivery-events"
                       ? queues.events
-                      : null;
+                      : row.topic === "tracking-events"
+                        ? queues.tracking
+                        : null;
             if (!target) throw new Error(`Unknown outbox topic: ${row.topic}`);
             const name =
               row.topic === "materialization"
@@ -172,7 +189,9 @@ const workers: Worker[] = [
                   ? "feed-deliveries"
                   : row.topic === "delivery"
                     ? "deliver-recipient"
-                    : "process-delivery-event";
+                    : row.topic === "delivery-events"
+                      ? "process-delivery-event"
+                      : "process-tracking-event";
             await target.add(name, row.payload, {
               ...commonJobOptions,
               jobId: stableJobId(row.deduplicationKey),

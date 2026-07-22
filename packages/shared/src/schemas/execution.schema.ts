@@ -57,6 +57,9 @@ export const deliverRecipientPayloadSchema = versionedPayload
 export const processDeliveryEventPayloadSchema = versionedPayload
   .extend({ deliveryEventId: opaqueId })
   .strict();
+export const processTrackingEventPayloadSchema = versionedPayload
+  .extend({ trackingEventId: opaqueId })
+  .strict();
 
 export const executionQueuePayloadSchema = z.discriminatedUnion("type", [
   z
@@ -81,6 +84,12 @@ export const executionQueuePayloadSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("process-delivery-event"),
       payload: processDeliveryEventPayloadSchema,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("process-tracking-event"),
+      payload: processTrackingEventPayloadSchema,
     })
     .strict(),
 ]);

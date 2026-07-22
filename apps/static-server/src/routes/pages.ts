@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { Container, TrackingService } from "@next-phish/backend";
+import { dedupe, enqueueTrackingEvent } from "./tracking-request";
 
 const pages = new Hono();
 const emptyPage =
@@ -12,6 +13,12 @@ pages.get("*", async (c) => {
     path && /^[0-9A-Za-z]{12}$/.test(ref)
       ? await Container.get(TrackingService).resolveLandingPage(ref, path)
       : null;
+  if (page)
+    enqueueTrackingEvent(c, {
+      trackingRef: ref,
+      type: "CLICKED",
+      deduplicationKey: dedupe(ref, "CLICKED", "landing"),
+    });
 
   return c.body(page?.html ?? emptyPage, 200, {
     "Content-Type": page?.contentType ?? "text/html; charset=utf-8",

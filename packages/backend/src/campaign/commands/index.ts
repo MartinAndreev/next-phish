@@ -5,6 +5,7 @@ export { CloneCampaignCommand } from "./clone-campaign.command";
 export { PauseCampaignCommand } from "./pause-campaign.command";
 export { ResumeCampaignCommand } from "./resume-campaign.command";
 export { CompleteCampaignCommand } from "./complete-campaign.command";
+export { DeleteCampaignCommand } from "./delete-campaign.command";
 export { CreateScheduleCommand } from "./create-schedule.command";
 export { UpdateScheduleCommand } from "./update-schedule.command";
 export { CancelScheduleCommand } from "./cancel-schedule.command";

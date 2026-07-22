@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "primereact/badge";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import type { inferRouterOutputs } from "@trpc/server";
 import { FormMessage } from "@/src/components/atoms/form-message";
@@ -380,6 +381,13 @@ export function CampaignDetailContainer({
   const complete = trpc.campaign.complete.useMutation(
     mutationOptions("Campaign completed successfully."),
   );
+  const deleteCampaign = trpc.campaign.delete.useMutation({
+    onSuccess: async () => {
+      await utils.campaign.list.invalidate();
+      router.push("/campaigns");
+    },
+    onError: (error) => setActionError(error.message),
+  });
   const clone = trpc.campaign.clone.useMutation({
     onSuccess: (copy) => router.push(`/campaigns/${copy.id}?saved=cloned`),
     onError: (error) => setActionError(error.message),
@@ -490,6 +498,24 @@ export function CampaignDetailContainer({
               onClick={() => resume.mutate({ id })}
             />
           ) : null}
+          {["COMPLETED", "FAILED"].includes(data.status) ? (
+            <Button
+              size="small"
+              severity="danger"
+              outlined
+              icon="pi pi-trash"
+              label="Delete"
+              loading={deleteCampaign.isPending}
+              onClick={() =>
+                confirmDialog({
+                  header: "Delete campaign",
+                  message: `Delete “${data.name}” and its execution data? This cannot be undone.`,
+                  icon: "pi pi-exclamation-triangle",
+                  accept: () => deleteCampaign.mutate({ id }),
+                })
+              }
+            />
+          ) : null}
           {["ACTIVE", "PAUSED"].includes(data.status) ? (
             <Button
               size="small"
@@ -535,6 +561,12 @@ export function CampaignDetailContainer({
           />
         </TabPanel>
       </TabView>
+
+      <ConfirmDialog
+        className="max-w-md"
+        draggable={false}
+        dismissableMask={true}
+      />
     </div>
   );
 }

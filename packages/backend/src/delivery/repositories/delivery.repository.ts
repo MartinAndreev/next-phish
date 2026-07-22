@@ -435,23 +435,28 @@ export class DeliveryRepository {
       now.getTime() -
         Number(process.env.OUTBOX_RETENTION_DAYS ?? 7) * 86_400_000,
     );
-    const [deliveryEvents, attempts, outbox] = await this.db.$transaction([
-      this.db.deliveryEvent.deleteMany({
-        where: { createdAt: { lt: deliveryBefore } },
-      }),
-      this.db.deliveryAttempt.deleteMany({
-        where: { completedAt: { lt: attemptBefore } },
-      }),
-      this.db.outboxEvent.deleteMany({
-        where: {
-          status: OutboxStatus.PUBLISHED,
-          publishedAt: { lt: outboxBefore },
-        },
-      }),
-    ]);
+    const [deliveryEvents, attempts, trackingEvents, outbox] =
+      await this.db.$transaction([
+        this.db.deliveryEvent.deleteMany({
+          where: { createdAt: { lt: deliveryBefore } },
+        }),
+        this.db.deliveryAttempt.deleteMany({
+          where: { completedAt: { lt: attemptBefore } },
+        }),
+        this.db.trackingEventInbox.deleteMany({
+          where: { processedAt: { lt: outboxBefore } },
+        }),
+        this.db.outboxEvent.deleteMany({
+          where: {
+            status: OutboxStatus.PUBLISHED,
+            publishedAt: { lt: outboxBefore },
+          },
+        }),
+      ]);
     return {
       deliveryEvents: deliveryEvents.count,
       attempts: attempts.count,
+      trackingEvents: trackingEvents.count,
       outbox: outbox.count,
     };
   }

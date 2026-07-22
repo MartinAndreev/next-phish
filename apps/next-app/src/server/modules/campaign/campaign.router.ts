@@ -17,6 +17,7 @@ import {
   PauseCampaignCommand,
   ResumeCampaignCommand,
   CompleteCampaignCommand,
+  DeleteCampaignCommand,
   DuplicateScheduleCommand,
   ListCampaignsSchema,
   CampaignIdSchema,
@@ -108,6 +109,12 @@ export const campaignRouter = router({
         organizationId: ctx.activeOrganizationId,
       }),
     ),
+  delete: writeProcedure.input(CampaignIdSchema).mutation(({ ctx, input }) =>
+    bus.dispatch(Container.get(DeleteCampaignCommand), {
+      ...input,
+      organizationId: ctx.activeOrganizationId,
+    }),
+  ),
 
   listSchedules: readProcedure
     .input(ListSchedulesSchema)

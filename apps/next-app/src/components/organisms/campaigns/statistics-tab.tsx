@@ -75,8 +75,8 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
 
   if (summary.isLoading)
     return (
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {["sent", "clicked", "submitted", "reported"].map((key) => (
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {["sent", "opened", "clicked", "submitted", "reported"].map((key) => (
           <Skeleton key={key} height="11rem" borderRadius="1rem" />
         ))}
       </div>
@@ -105,6 +105,10 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
     summary.data.campaign.expectedRecipientCount ??
     Object.values(deliveryCounts).reduce((sum, count) => sum + count, 0);
   const sent = deliveryCounts.SENT ?? 0;
+  const opened =
+    (negativeCounts.OPENED ?? 0) +
+    (negativeCounts.CLICKED ?? 0) +
+    (negativeCounts.SUBMITTED ?? 0);
   const clicked =
     (negativeCounts.CLICKED ?? 0) + (negativeCounts.SUBMITTED ?? 0);
   const submitted = negativeCounts.SUBMITTED ?? 0;
@@ -138,13 +142,20 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
             Unique recipients reaching each campaign milestone.
           </p>
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricCard
             label="Emails sent"
             value={sent}
             total={total}
             description="Recipients accepted by the configured sending provider."
             color="#15E5D4"
+          />
+          <MetricCard
+            label="Opened"
+            value={opened}
+            total={total}
+            description="Recipients who loaded the campaign tracking pixel."
+            color="#8B5CF6"
           />
           <MetricCard
             label="Clicked"
@@ -165,7 +176,7 @@ export function CampaignStatisticsTab({ campaignId }: { campaignId: string }) {
             value={summary.data.reported}
             total={total}
             description="Recipients who reported the simulation as suspicious."
-            color="#8B5CF6"
+            color="#EF4444"
           />
         </div>
       </section>

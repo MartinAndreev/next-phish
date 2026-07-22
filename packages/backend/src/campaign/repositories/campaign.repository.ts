@@ -98,7 +98,6 @@ export class CampaignRepository {
       name: input.search
         ? { contains: input.search, mode: "insensitive" }
         : undefined,
-      scheduleId: null,
     };
     return Promise.all([
       this.db.campaign.findMany({

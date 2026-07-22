@@ -282,6 +282,13 @@ describe("CampaignRepository", () => {
     expect(run.targetGroup?.visibility).toBe("SHADOW");
     expect(run.page?.path).toBe("account/login");
     expect(run.materializedAt).toBeInstanceOf(Date);
+    const listedCampaigns = await repo.listCampaigns(organizationId, {
+      limit: 100,
+      offset: 0,
+    });
+    expect(listedCampaigns.rows.map((campaign) => campaign.id)).toContain(
+      run.id,
+    );
     expect(run.expectedRecipientCount).toBe(6);
     expect(
       await db.campaignRecipient.count({ where: { campaignId: run.id } }),

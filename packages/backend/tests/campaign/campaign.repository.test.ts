@@ -119,6 +119,27 @@ describe("CampaignRepository", () => {
     ).rejects.toThrow(/organization/);
   });
 
+  it("deletes standalone draft campaign templates", async () => {
+    const campaign = await repo.createCampaign(organizationId, userId, {
+      name: "Disposable template",
+      tags: [],
+      type: "TEMPLATE",
+      status: "DRAFT",
+      emailTemplateId: refs.emailTemplateId,
+      pageId: refs.pageId,
+      mailSendingProfileId: refs.mailSendingProfileId,
+      targetGroupId: null,
+      targetTimezone: "UTC",
+      autoCompleteAfterDays: 20,
+    });
+
+    await repo.deleteCampaign(campaign.id, organizationId);
+
+    expect(
+      await db.campaign.findUnique({ where: { id: campaign.id } }),
+    ).toBeNull();
+  });
+
   it("hides shadow templates from catalog repositories", async () => {
     const shadowOwner = await db.campaign.create({
       data: {
@@ -383,7 +404,7 @@ describe("CampaignRepository", () => {
     ).toEqual({ status: "ACTIVE" });
 
     await expect(repo.deleteCampaign(run.id, organizationId)).rejects.toThrow(
-      "Only completed or failed campaigns can be deleted",
+      "Only draft, published, completed, or failed campaigns can be deleted",
     );
     await db.campaign.update({
       where: { id: run.id },

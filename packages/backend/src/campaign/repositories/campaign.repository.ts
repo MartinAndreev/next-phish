@@ -541,15 +541,32 @@ export class CampaignRepository {
         select: {
           id: true,
           status: true,
+          scheduleId: true,
           recipients: { select: { trackingRef: true } },
+          _count: {
+            select: { scheduleSources: true, occurrenceSources: true },
+          },
         },
       });
       if (!campaign) throw new Error("Campaign not found");
+      const isEditableCatalogCampaign =
+        campaign.scheduleId === null &&
+        (campaign.status === CampaignStatus.DRAFT ||
+          campaign.status === CampaignStatus.PUBLISHED);
+      const isTerminalCampaign =
+        campaign.status === CampaignStatus.COMPLETED ||
+        campaign.status === CampaignStatus.FAILED;
+      if (!isEditableCatalogCampaign && !isTerminalCampaign)
+        throw new Error(
+          "Only draft, published, completed, or failed campaigns can be deleted",
+        );
       if (
-        campaign.status !== CampaignStatus.COMPLETED &&
-        campaign.status !== CampaignStatus.FAILED
+        campaign._count.scheduleSources > 0 ||
+        campaign._count.occurrenceSources > 0
       )
-        throw new Error("Only completed or failed campaigns can be deleted");
+        throw new Error(
+          "Campaign is referenced by a schedule and cannot be deleted",
+        );
 
       const trackingEvents = await tx.trackingEventInbox.findMany({
         where: {

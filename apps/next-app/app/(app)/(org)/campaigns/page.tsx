@@ -219,7 +219,7 @@ export default function CampaignsPage() {
       icon: "pi pi-trash",
       severity: "danger",
       visible: (campaign) =>
-        campaign.status === "COMPLETED" || campaign.status === "FAILED",
+        ["DRAFT", "PUBLISHED", "COMPLETED", "FAILED"].includes(campaign.status),
       onClick: (campaign) =>
         confirmDialog({
           header: "Delete campaign",

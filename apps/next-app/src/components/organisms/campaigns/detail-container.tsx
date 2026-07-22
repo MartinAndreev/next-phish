@@ -498,7 +498,9 @@ export function CampaignDetailContainer({
               onClick={() => resume.mutate({ id })}
             />
           ) : null}
-          {["COMPLETED", "FAILED"].includes(data.status) ? (
+          {["DRAFT", "PUBLISHED", "COMPLETED", "FAILED"].includes(
+            data.status,
+          ) ? (
             <Button
               size="small"
               severity="danger"

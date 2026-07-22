@@ -1,19 +1,19 @@
-import { Hono } from "hono";
 import {
-  Container,
   ProviderWebhookService,
   verifyWebhookSignature,
 } from "@next-phish/backend";
 import { deliveryEventTypeSchema } from "@next-phish/shared";
+import { Container } from "@/src/server/container";
 
-const providerEvents = new Hono();
+export const runtime = "nodejs";
 
-providerEvents.post("/w", async (c) => {
+export async function POST(request: Request) {
   const secret = process.env.DELIVERY_WEBHOOK_SECRET;
-  if (!secret) return c.body(null, 503);
-  const timestamp = c.req.header("x-event-timestamp") ?? "";
-  const signature = c.req.header("x-event-signature") ?? "";
-  const rawBody = await c.req.text();
+  if (!secret) return new Response(null, { status: 503 });
+
+  const timestamp = request.headers.get("x-event-timestamp") ?? "";
+  const signature = request.headers.get("x-event-signature") ?? "";
+  const rawBody = await request.text();
   if (
     !verifyWebhookSignature({
       secret,
@@ -22,15 +22,17 @@ providerEvents.post("/w", async (c) => {
       rawBody,
     })
   )
-    return c.body(null, 401);
+    return new Response(null, { status: 401 });
 
   let payload: unknown;
   try {
     payload = JSON.parse(rawBody);
   } catch {
-    return c.body(null, 400);
+    return new Response(null, { status: 400 });
   }
-  if (!payload || typeof payload !== "object") return c.body(null, 400);
+  if (!payload || typeof payload !== "object")
+    return new Response(null, { status: 400 });
+
   const value = payload as Record<string, unknown>;
   const type = deliveryEventTypeSchema.safeParse(value.type);
   if (
@@ -39,9 +41,12 @@ providerEvents.post("/w", async (c) => {
     typeof value.providerEventId !== "string" ||
     typeof value.occurredAt !== "string"
   )
-    return c.body(null, 400);
+    return new Response(null, { status: 400 });
+
   const occurredAt = new Date(value.occurredAt);
-  if (Number.isNaN(occurredAt.getTime())) return c.body(null, 400);
+  if (Number.isNaN(occurredAt.getTime()))
+    return new Response(null, { status: 400 });
+
   const allowedMetadata = new Set([
     "statusCode",
     "responseCode",
@@ -61,6 +66,7 @@ providerEvents.post("/w", async (c) => {
           ),
         )
       : undefined;
+
   await Container.get(ProviderWebhookService).accept({
     providerMessageId: value.providerMessageId,
     providerEventId: value.providerEventId,
@@ -68,7 +74,9 @@ providerEvents.post("/w", async (c) => {
     occurredAt,
     metadata,
   });
-  return c.body(null, 202, { "Cache-Control": "no-store" });
-});
 
-export { providerEvents };
+  return new Response(null, {
+    status: 202,
+    headers: { "Cache-Control": "no-store" },
+  });
+}

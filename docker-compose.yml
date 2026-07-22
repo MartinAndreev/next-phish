@@ -41,6 +41,7 @@ services:
       - DB_HOST=postgres
       - REDIS_HOST=redis
       - SMTP_HOST=fakesmtp
+      - DELIVERY_WEBHOOK_SECRET=${DELIVERY_WEBHOOK_SECRET:-development-webhook-secret}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules
@@ -67,7 +68,6 @@ services:
       - PAGE_SUBMISSION_ENCRYPTION_KEY=${PAGE_SUBMISSION_ENCRYPTION_KEY}
       - PUBLIC_CONTENT_URL=${PUBLIC_CONTENT_URL:-http://content.localhost:3001}
       - TRUSTED_PROXY_NETWORKS=${TRUSTED_PROXY_NETWORKS:-}
-      - DELIVERY_WEBHOOK_SECRET=${DELIVERY_WEBHOOK_SECRET:-development-webhook-secret}
     volumes:
       - .:/app
       - app-node-modules:/app/node_modules

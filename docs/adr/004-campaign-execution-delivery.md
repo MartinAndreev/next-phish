@@ -28,6 +28,10 @@ Campaign resources and recipient fields are copied before delivery. A campaign b
 
 Recipient-facing references are random 12-character Base62 values. Public routes have neutral names and constant-shape invalid behavior. Click destinations are stored server-side; requests cannot supply a redirect URL. Submitted request bodies are not parsed or retained by default.
 
+### Provider webhook ingress
+
+Provider delivery events enter through the authenticated Next.js application at `POST /api/webhooks/delivery`. The neutral Hono content server is reserved for recipient-facing campaign content and tracking routes. Webhook requests are verified against their raw body before parsing, reject stale or replayed signatures, and retain only allowlisted provider metadata.
+
 ## Consequences
 
 - Redis loss can delay work but cannot erase committed intent.

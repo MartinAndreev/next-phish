@@ -74,6 +74,7 @@ export class PageRepository {
           select: {
             id: true,
             name: true,
+            path: true,
             type: true,
             status: true,
             organizationId: true,
@@ -106,6 +107,7 @@ export class PageRepository {
             select: {
               id: true,
               name: true,
+              path: true,
               type: true,
               status: true,
               organizationId: true,
@@ -157,6 +159,7 @@ export class PageRepository {
       return tx.page.create({
         data: {
           name: data.name,
+          path: data.path,
           type: data.type,
           html: data.html,
           design: this.toInputJsonValue(data.design ?? {}),
@@ -196,6 +199,7 @@ export class PageRepository {
         where: { id, organizationId, visibility: "CATALOG" },
         data: {
           name: data.name,
+          path: data.path,
           type: data.type,
           html: data.html,
           design: this.toInputJsonValue(data.design ?? {}),

@@ -4,11 +4,13 @@ import {
   canTransitionDelivery,
   generateLogicalMessageId,
   generateTrackingRef,
+  getPublicContentUrl,
   maxNegativeSeverity,
   networkContains,
   nextOccurrenceAfter,
   normalizeNetwork,
   resolveClientIp,
+  renderDeliveryHtml,
   rewriteTrackedLinks,
   createWebhookSignature,
   verifyWebhookSignature,
@@ -28,6 +30,16 @@ describe("execution identities", () => {
       /^<[a-z0-9_-]+@mail\.customer\.example>$/,
     );
     expect(() => generateLogicalMessageId("phish.example")).toThrow();
+  });
+
+  it("requires a configured neutral public content URL", () => {
+    const previous = process.env.PUBLIC_CONTENT_URL;
+    delete process.env.PUBLIC_CONTENT_URL;
+    expect(() => getPublicContentUrl()).toThrow("PUBLIC_CONTENT_URL");
+    process.env.PUBLIC_CONTENT_URL = "http://localhost:3001/";
+    expect(getPublicContentUrl()).toBe("http://localhost:3001");
+    if (previous === undefined) delete process.env.PUBLIC_CONTENT_URL;
+    else process.env.PUBLIC_CONTENT_URL = previous;
   });
 });
 
@@ -140,6 +152,29 @@ describe("calendar recurrence", () => {
 });
 
 describe("tracked content", () => {
+  it("renders the configured page path and an invisible tracking pixel", () => {
+    const html = renderDeliveryHtml({
+      templateHtml: '<a href="{{URL}}">Continue</a>',
+      publicContentUrl: "http://localhost:3001",
+      pagePath: "account/login",
+      trackingPixel: true,
+      recipient: {
+        firstName: "A",
+        lastName: "User",
+        email: "a@example.test",
+        position: null,
+        trackingRef: "AbCdEf123456",
+      },
+    });
+    expect(html).toContain(
+      'href="http://localhost:3001/account/login?ref=AbCdEf123456"',
+    );
+    expect(html).toContain(
+      '<img src="http://localhost:3001/p.gif?ref=AbCdEf123456"',
+    );
+    expect(html).toContain('width="1" height="1" style="display:none"');
+  });
+
   it("maps destinations to immutable short server-side identifiers", () => {
     const result = rewriteTrackedLinks(
       '<a href="https://example.org/path?q=1">Open</a>',

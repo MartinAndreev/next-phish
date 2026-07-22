@@ -442,6 +442,7 @@ model EmailTemplate {
 model Page {
   id               String             @id @default(cuid())
   name             String
+  path             String?
   type             PageType           @default(LANDING)
   html             String             @default("")
   design           Json?

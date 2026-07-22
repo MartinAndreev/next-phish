@@ -79,6 +79,7 @@ export const pageRouter = router({
         organizationId: ctx.activeOrganizationId,
         data: {
           name: input.name,
+          path: input.path ?? null,
           type: input.type,
           html: input.html,
           design: input.design,

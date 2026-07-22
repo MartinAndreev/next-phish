@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { FieldInputProps } from "formik";
-import { Field } from "formik";
+import { ErrorMessage, Field } from "formik";
 import { AutoComplete } from "primereact/autocomplete";
 import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
@@ -33,6 +33,7 @@ const redirectTargetOptions = [
 interface PageSettingsFieldsProps {
   pageId?: string;
   values: {
+    path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
     captureData: boolean;
@@ -87,6 +88,33 @@ export function PageSettingsFields({
           onChange={(e) => setFieldValue("type", e.value)}
           disabled={Boolean(pageId)}
           className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="page-path"
+          className="block text-sm font-medium text-zinc-100"
+        >
+          {t("pages.path")}
+        </label>
+        <Field name="path">
+          {({ field }: { field: FieldInputProps<string | null> }) => (
+            <InputText
+              id="page-path"
+              size="small"
+              {...field}
+              value={field.value ?? ""}
+              placeholder={t("pages.pathPlaceholder")}
+              className={inputClassName}
+            />
+          )}
+        </Field>
+        <p className="text-xs leading-5 text-zinc-500">{t("pages.pathHint")}</p>
+        <ErrorMessage
+          name="path"
+          component="p"
+          className="text-xs text-red-400"
         />
       </div>
 

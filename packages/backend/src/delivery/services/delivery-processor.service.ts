@@ -3,6 +3,7 @@ import { MailDispatcherService } from "../../mail-sending";
 import { DeliveryRepository } from "../repositories/delivery.repository";
 import { calculateRetryAt } from "./delivery-policy.service";
 import { DistributedRateLimiterService } from "./distributed-rate-limiter.service";
+import { getPublicContentUrl } from "./execution-identity.service";
 import {
   CampaignEventType,
   CampaignStatus,
@@ -14,6 +15,35 @@ function render(html: string, values: Record<string, string>): string {
   return html.replace(/\{\{\s*([a-zA-Z]+)\s*\}\}/g, (match, key: string) =>
     Object.hasOwn(values, key) ? values[key]! : match,
   );
+}
+
+export function renderDeliveryHtml(input: {
+  templateHtml: string;
+  publicContentUrl: string;
+  pagePath: string | null;
+  trackingPixel: boolean;
+  recipient: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    position: string | null;
+    trackingRef: string;
+  };
+}): string {
+  const landingPath = input.pagePath ?? "c";
+  const landingUrl = `${input.publicContentUrl}/${landingPath}?ref=${encodeURIComponent(input.recipient.trackingRef)}`;
+  let html = render(input.templateHtml, {
+    firstName: input.recipient.firstName,
+    lastName: input.recipient.lastName,
+    email: input.recipient.email,
+    position: input.recipient.position ?? "",
+    trackingRef: input.recipient.trackingRef,
+    url: landingUrl,
+    URL: landingUrl,
+  });
+  if (input.trackingPixel)
+    html += `<img src="${input.publicContentUrl}/p.gif?ref=${encodeURIComponent(input.recipient.trackingRef)}" alt="" width="1" height="1" style="display:none" />`;
+  return html;
 }
 
 function sanitizeError(value: string | undefined): string | undefined {
@@ -128,21 +158,14 @@ export class DeliveryProcessorService {
       deduplicationKey: `attempt:${attempt.id}:started`,
     });
 
-    const publicHost = (
-      process.env.PUBLIC_CONTENT_URL ?? "https://content.example.com"
-    ).replace(/\/$/, "");
-    let html = render(recipient.campaign.emailTemplate.html, {
-      firstName: recipient.firstName,
-      lastName: recipient.lastName,
-      email: recipient.email,
-      position: recipient.position ?? "",
-      trackingRef: recipient.trackingRef,
-      url: `${publicHost}/c?ref=${encodeURIComponent(recipient.trackingRef)}`,
-      URL: `${publicHost}/c?ref=${encodeURIComponent(recipient.trackingRef)}`,
+    const publicHost = getPublicContentUrl();
+    const html = renderDeliveryHtml({
+      templateHtml: recipient.campaign.emailTemplate.html,
+      publicContentUrl: publicHost,
+      pagePath: recipient.campaign.page?.path ?? null,
+      trackingPixel: recipient.campaign.emailTemplate.trackingPixel,
+      recipient,
     });
-    if (recipient.campaign.emailTemplate.trackingPixel) {
-      html += `<img src="${publicHost}/p.gif?ref=${encodeURIComponent(recipient.trackingRef)}" alt="" width="1" height="1" style="display:none" />`;
-    }
 
     let result;
     try {

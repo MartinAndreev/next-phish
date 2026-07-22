@@ -45,6 +45,13 @@ export default function PagesPage() {
       sortable: true,
     },
     {
+      field: "path",
+      header: t("pages.path"),
+      body: (page) => (
+        <code className="text-xs text-zinc-300">/{page.path ?? "c"}</code>
+      ),
+    },
+    {
       field: "type",
       header: t("pages.type"),
       sortable: true,

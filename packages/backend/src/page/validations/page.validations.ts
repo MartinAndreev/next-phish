@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { pageTypeSchema, pageStatusSchema } from "@next-phish/shared";
+import {
+  pagePathSchema,
+  pageTypeSchema,
+  pageStatusSchema,
+} from "@next-phish/shared";
 
 const sortFieldSchema = z.enum([
   "name",
@@ -32,6 +36,7 @@ export const GetPagesSchema = z.object({
 
 const pageBaseSchema = z.object({
   name: z.string().trim().min(1, "Page name is required"),
+  path: pagePathSchema.default(null),
   type: pageTypeSchema.default("LANDING"),
   html: z.string().default(""),
   design: z.unknown().default({}),

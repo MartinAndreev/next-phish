@@ -17,6 +17,7 @@ import type { FormStatus } from "@/src/hooks/use-form-status";
 
 interface PageFormValues {
   name: string;
+  path: string | null;
   type: "LANDING" | "REDIRECT";
   status: "DRAFT" | "ACTIVE";
   captureData: boolean;
@@ -105,6 +106,7 @@ export function PageForm({
         validate={toFormikValidation(
           createPageSchema.pick({
             name: true,
+            path: true,
             type: true,
             status: true,
             captureData: true,

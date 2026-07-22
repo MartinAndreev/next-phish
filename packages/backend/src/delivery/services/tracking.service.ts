@@ -16,6 +16,7 @@ export class TrackingService {
 
   async resolveLandingPage(
     trackingRef: string,
+    requestedPath?: string,
   ): Promise<{ html: string; contentType: string } | null> {
     const recipient =
       await this.deliveryRepository.findByTrackingRef(trackingRef);
@@ -30,9 +31,14 @@ export class TrackingService {
         organizationId: recipient.organizationId,
         visibility: "SHADOW",
       },
-      select: { html: true, contentType: true },
+      select: { html: true, contentType: true, path: true },
     });
     if (!page) return null;
+    if (
+      requestedPath !== undefined &&
+      (page.path ?? "c") !== requestedPath.toLowerCase()
+    )
+      return null;
     const action = `/s?ref=${encodeURIComponent(trackingRef)}`;
     const html = page.html.replace(
       /<form\b([^>]*)>/gi,

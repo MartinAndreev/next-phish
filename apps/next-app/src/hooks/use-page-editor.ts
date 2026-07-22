@@ -56,6 +56,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
 
   async function handleSubmit(values: {
     name: string;
+    path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
     captureData: boolean;
@@ -66,6 +67,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
 
     const payload = {
       name: values.name.trim(),
+      path: values.path,
       type: values.type,
       html: editorHtmlRef.current,
       design: editorDesignRef.current,
@@ -100,6 +102,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
   const initialValues = data
     ? {
         name: data.name,
+        path: data.path,
         type: data.type,
         status: data.status,
         captureData: data.captureData,
@@ -108,6 +111,7 @@ export function usePageEditor({ pageId }: UsePageEditorOptions = {}) {
       }
     : {
         name: "",
+        path: null as string | null,
         type: "LANDING" as const,
         status: "DRAFT" as const,
         captureData: false,

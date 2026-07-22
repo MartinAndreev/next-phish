@@ -11,9 +11,25 @@ export function assertNeutralDomain(domain: string): string {
     ) ||
     BLOCKED_MARKERS.some((marker) => normalized.includes(marker))
   ) {
-    throw new Error("A valid neutral domain is required");
+    throw new Error(
+      `A valid neutral domain is required. Domain: ${domain} is invalid.`,
+    );
   }
   return normalized;
+}
+
+export function getPublicContentUrl(): string {
+  const configured = process.env.PUBLIC_CONTENT_URL?.trim();
+  if (!configured)
+    throw new Error(
+      "PUBLIC_CONTENT_URL must point to the public content server",
+    );
+  const url = new URL(configured);
+  if (url.protocol !== "http:" && url.protocol !== "https:")
+    throw new Error("PUBLIC_CONTENT_URL must use HTTP or HTTPS");
+  if (url.hostname !== "localhost" || process.env.NODE_ENV === "production")
+    assertNeutralDomain(url.hostname);
+  return url.toString().replace(/\/$/, "");
 }
 
 export function generateTrackingRef(): string {

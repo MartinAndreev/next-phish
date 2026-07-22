@@ -56,6 +56,7 @@ export const mcpUpdateEmailTemplateSchema = z.object({
 export const mcpCreatePageSchema = z.object({
   organizationId,
   name: createPageSchema.shape.name,
+  path: createPageSchema.shape.path.optional(),
   type: pageTypeSchema.optional(),
   html: z.string().optional(),
   status: pageStatusSchema.optional(),
@@ -67,6 +68,7 @@ export const mcpUpdatePageSchema = z.object({
   id: z.string(),
   organizationId,
   name: z.string().optional(),
+  path: createPageSchema.shape.path.optional(),
   type: pageTypeSchema.optional(),
   html: z.string().optional(),
   status: pageStatusSchema.optional(),

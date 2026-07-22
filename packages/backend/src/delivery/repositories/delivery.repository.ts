@@ -622,6 +622,7 @@ export class DeliveryRepository {
         campaign: {
           include: {
             emailTemplate: true,
+            page: { select: { path: true } },
             mailSendingProfile: true,
             organization: { select: { deliveryEnabled: true } },
           },

@@ -2,6 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 import { CampaignRepository } from "../../src/campaign/repositories";
 import { DeliveryRepository } from "../../src/delivery/repositories/delivery.repository";
+import { TrackingService } from "../../src/delivery/services/tracking.service";
 import { EmailTemplateRepository } from "../../src/email-template/repositories/email-template.repository";
 import { PageRepository } from "../../src/page/repositories/page.repository";
 import { getFactories, getPrisma } from "../setup";
@@ -201,6 +202,11 @@ describe("CampaignRepository", () => {
   });
 
   it("materializes relational shadows and shares immutable attachment objects", async () => {
+    process.env.PUBLIC_CONTENT_URL = "https://content.example.com";
+    await db.page.update({
+      where: { id: refs.pageId },
+      data: { path: "account/login" },
+    });
     const source = await repo.createCampaign(organizationId, userId, {
       name: "Template",
       tags: ["awareness"],
@@ -274,6 +280,7 @@ describe("CampaignRepository", () => {
     expect(run.tags).toEqual(["awareness"]);
     expect(run.emailTemplate?.visibility).toBe("SHADOW");
     expect(run.targetGroup?.visibility).toBe("SHADOW");
+    expect(run.page?.path).toBe("account/login");
     expect(run.materializedAt).toBeInstanceOf(Date);
     expect(run.expectedRecipientCount).toBe(6);
     expect(
@@ -292,6 +299,13 @@ describe("CampaignRepository", () => {
     const recipient = await db.campaignRecipient.findFirstOrThrow({
       where: { campaignId: run.id },
     });
+    const tracking = new TrackingService(db, new DeliveryRepository(db));
+    expect(
+      await tracking.resolveLandingPage(recipient.trackingRef, "account/login"),
+    ).not.toBeNull();
+    expect(
+      await tracking.resolveLandingPage(recipient.trackingRef, "different"),
+    ).toBeNull();
     await db.campaign.update({
       where: { id: run.id },
       data: { status: "PENDING_START" },

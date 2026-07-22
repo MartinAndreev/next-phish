@@ -12,6 +12,7 @@ export interface PageAuthorView {
 export interface PageListItemView {
   id: string;
   name: string;
+  path: string | null;
   type: PageType;
   status: PageStatus;
   organizationId: string;
@@ -35,6 +36,7 @@ export interface PageView extends PageListItemView {
 
 export interface CreatePageData {
   name: string;
+  path: string | null;
   type: PageType;
   html: string;
   design: unknown;
@@ -48,6 +50,7 @@ export interface CreatePageData {
 
 export interface UpdatePageData {
   name: string;
+  path: string | null;
   type: PageType;
   html: string;
   design: unknown;

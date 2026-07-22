@@ -12,6 +12,7 @@ import {
   ScheduleExecutionRepository,
   stableJobId,
   assertNeutralDomain,
+  getPublicContentUrl,
 } from "@next-phish/backend";
 import {
   deliverRecipientPayloadSchema,
@@ -193,10 +194,7 @@ const workers: Worker[] = [
 
 async function bootstrap() {
   assertNeutralDomain(process.env.MESSAGE_ID_DOMAIN ?? "mail.example.com");
-  assertNeutralDomain(
-    new URL(process.env.PUBLIC_CONTENT_URL ?? "https://content.example.com")
-      .hostname,
-  );
+  getPublicContentUrl();
   await queues.schedule.upsertJobScheduler(
     "schedule-poller",
     { every: Number(process.env.SCHEDULE_POLL_INTERVAL_MS ?? 10_000) },

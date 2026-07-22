@@ -1,16 +1,13 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { assertNeutralDomain } from "@next-phish/backend";
+import { getPublicContentUrl } from "@next-phish/backend";
 import "./container";
 import { health } from "./routes/health";
 import { imports } from "./routes/imports";
 import { pages } from "./routes/pages";
 import { activity } from "./routes/activity";
 
-assertNeutralDomain(
-  new URL(process.env.PUBLIC_CONTENT_URL ?? "https://content.example.com")
-    .hostname,
-);
+getPublicContentUrl();
 
 const app = new Hono();
 

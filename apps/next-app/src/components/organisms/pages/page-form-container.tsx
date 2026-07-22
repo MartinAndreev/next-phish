@@ -27,6 +27,7 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
 
   const formInitialValues = {
     name: initialValues.name,
+    path: initialValues.path,
     type: initialValues.type,
     status: initialValues.status,
     captureData: initialValues.captureData,
@@ -53,6 +54,7 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
 
   async function handleFormSubmit(values: {
     name: string;
+    path: string | null;
     type: "LANDING" | "REDIRECT";
     status: "DRAFT" | "ACTIVE";
     captureData: boolean;
@@ -62,6 +64,7 @@ export function PageFormContainer({ pageId }: PageFormContainerProps) {
   }) {
     await handleSubmit({
       name: values.name,
+      path: values.path,
       type: values.type,
       status: values.status,
       captureData: values.captureData,

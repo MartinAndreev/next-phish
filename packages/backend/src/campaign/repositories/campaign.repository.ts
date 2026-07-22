@@ -6,6 +6,7 @@ import {
   createDeliveryIdempotencyKey,
   generateLogicalMessageId,
   generateTrackingRef,
+  getPublicContentUrl,
   rewriteTrackedLinks,
   type DeliveryPacing,
 } from "../../delivery";
@@ -39,6 +40,7 @@ const campaignInclude = {
     select: {
       id: true,
       name: true,
+      path: true,
       type: true,
       visibility: true,
       status: true,
@@ -749,7 +751,7 @@ export class CampaignRepository {
       });
       const trackedContent = rewriteTrackedLinks(
         shadowEmail.html,
-        process.env.PUBLIC_CONTENT_URL ?? "https://content.example.com",
+        getPublicContentUrl(),
       );
       if (trackedContent.links.length) {
         await tx.campaignTrackingLink.createMany({
@@ -1048,6 +1050,7 @@ export class CampaignRepository {
     const clone = await tx.page.create({
       data: {
         name: source.name,
+        path: source.path,
         type: source.type,
         html: source.html,
         design: source.design ?? undefined,

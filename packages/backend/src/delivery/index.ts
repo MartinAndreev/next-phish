@@ -13,7 +13,10 @@ export { DeliveryRepository } from "./repositories/delivery.repository";
 export { OutboxRepository } from "./repositories/outbox.repository";
 export { ScheduleExecutionRepository } from "./repositories/schedule-execution.repository";
 export { TrackingService } from "./services/tracking.service";
-export { DeliveryProcessorService } from "./services/delivery-processor.service";
+export {
+  DeliveryProcessorService,
+  renderDeliveryHtml,
+} from "./services/delivery-processor.service";
 export { DistributedRateLimiterService } from "./services/distributed-rate-limiter.service";
 export { ProviderWebhookService } from "./services/provider-webhook.service";
 export {
@@ -22,6 +25,7 @@ export {
 } from "./services/webhook-security.service";
 export {
   generateTrackingRef,
+  getPublicContentUrl,
   generateLogicalMessageId,
   createDeliveryIdempotencyKey,
   stableJobId,

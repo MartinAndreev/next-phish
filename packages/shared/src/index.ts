@@ -38,6 +38,7 @@ export type {
 export {
   pageTypeSchema,
   pageStatusSchema,
+  pagePathSchema,
   createPageSchema,
   updatePageSchema,
 } from "./schemas";

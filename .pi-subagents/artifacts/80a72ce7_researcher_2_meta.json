@@ -1,0 +1,104 @@
+{
+  "runId": "80a72ce7",
+  "agent": "researcher",
+  "task": "Research authoritative best practices for BullMQ idempotent job processing under load, repeatable/delayed scheduling, retries, deduplication, queue rate limiting/concurrency, transactional outbox patterns with PostgreSQL, email exactly-once limitations, RFC Message-ID generation, and phishing-simulation recipient event modeling. Prefer BullMQ official docs, PostgreSQL/Prisma-relevant patterns, and email RFCs. Return concise recommendations with source URLs. Do not edit repository.\n\n---\n**Output:**\nWrite your findings to exactly this path: /home/marto/Projects/next-phish/.pi-subagents/artifacts/outputs/80a72ce7/.pi-subagents/plan-research.md\nThis path is authoritative for this run.\nIgnore any other output filename or output path mentioned elsewhere, including output destinations in the base agent prompt, system prompt, or task instructions.",
+  "exitCode": 1,
+  "usage": {
+    "input": 5426,
+    "output": 3106,
+    "cacheRead": 2048,
+    "cacheWrite": 0,
+    "cost": 0.060667,
+    "turns": 2
+  },
+  "model": "openai-codex/gpt-5.6-terra:medium",
+  "attemptedModels": ["openai-codex/gpt-5.6-terra:medium"],
+  "modelAttempts": [
+    {
+      "model": "openai-codex/gpt-5.6-terra:medium",
+      "success": false,
+      "exitCode": 1,
+      "error": "Agent 'researcher' requested unavailable child tools: web_search, fetch_content, get_search_content.\nThe `tools` field is a strict allowlist; it does not load extension code.\nFor extension tools, add the provider path to `subagentOnlyExtensions` (child-only), `extensions`, or as a path-like entry in `tools`, while keeping each registered tool name in `tools`.\nFor MCP tools, verify the MCP adapter configuration and selected tool names. For builtin tools, verify the name against the installed Pi version.",
+      "usage": {
+        "input": 5426,
+        "output": 3106,
+        "cacheRead": 2048,
+        "cacheWrite": 0,
+        "cost": 0.060667,
+        "turns": 2
+      }
+    }
+  ],
+  "durationMs": 63067,
+  "toolCount": 1,
+  "error": "Agent 'researcher' requested unavailable child tools: web_search, fetch_content, get_search_content.\nThe `tools` field is a strict allowlist; it does not load extension code.\nFor extension tools, add the provider path to `subagentOnlyExtensions` (child-only), `extensions`, or as a path-like entry in `tools`, while keeping each registered tool name in `tools`.\nFor MCP tools, verify the MCP adapter configuration and selected tool names. For builtin tools, verify the name against the installed Pi version.",
+  "acceptance": {
+    "status": "attested",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": ["read-only/reviewer-style agent"],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return concrete findings with file paths and severity when applicable",
+          "evidence": ["review-findings", "residual-risks"],
+          "severity": "required"
+        }
+      ],
+      "evidence": ["review-findings", "residual-risks"],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": ["read-only/reviewer-style agent"],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return concrete findings with file paths and severity when applicable",
+        "evidence": ["review-findings", "residual-risks"],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [],
+    "verifyRuns": [],
+    "childReport": {
+      "criteriaSatisfied": [
+        {
+          "id": "criterion-1",
+          "status": "satisfied",
+          "evidence": "Concrete, severity-labelled findings and implementation recommendations are recorded in .pi-subagents/artifacts/outputs/80a72ce7/.pi-subagents/plan-research.md with authoritative source URLs."
+        }
+      ],
+      "changedFiles": [
+        ".pi-subagents/artifacts/outputs/80a72ce7/.pi-subagents/plan-research.md"
+      ],
+      "testsAddedOrUpdated": [],
+      "commandsRun": [
+        {
+          "command": "web_search/fetch_content",
+          "result": "not-run",
+          "summary": "Unavailable in configured child-agent tool allowlist; no live source retrieval was claimed."
+        }
+      ],
+      "validationOutput": [
+        "Artifact written to the required authoritative path."
+      ],
+      "residualRisks": [
+        "Live verification of linked documentation was not possible because web_search and fetch tools are unavailable.",
+        "Provider-specific exactly-once/idempotency and webhook reconciliation semantics remain to be selected and verified.",
+        "BullMQ API details must be checked against the installed package version."
+      ],
+      "noStagedFiles": true,
+      "diffSummary": "Added the requested research artifact only; no repository source files were edited.",
+      "reviewFindings": [
+        "blocker: queue/email architecture - Do not claim exactly-once email delivery; implement idempotent local state plus provider reconciliation.",
+        "high: direct database-then-enqueue flow - Use a PostgreSQL transactional outbox to close the commit/enqueue failure window.",
+        "high: delayed/repeatable execution - Persist run/action identity because scheduler cadence and retries can produce late or duplicate attempts."
+      ],
+      "manualNotes": "Research tooling configuration error: requested web_search/fetch_content tools are not registered for this child run. The brief uses authoritative source URLs but flags that they were not live-checked."
+    }
+  },
+  "transcriptPath": "/home/marto/Projects/next-phish/.pi-subagents/artifacts/80a72ce7_researcher_2_transcript.jsonl",
+  "timestamp": 1784666568262
+}

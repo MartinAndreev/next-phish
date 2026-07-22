@@ -1,0 +1,74 @@
+{
+  "runId": "54e111a3",
+  "agent": "reviewer",
+  "task": "Review the current git diff for the /schedule PrimeReact DataTable and 3-month Chart.js/PrimeReact timeline implementation. Focus on correctness, date-range semantics, tRPC/backend integration, TypeScript/React concerns, and user-request compliance. Do not edit files. Return prioritized findings only.",
+  "exitCode": 1,
+  "usage": {
+    "input": 58284,
+    "output": 1760,
+    "cacheRead": 46592,
+    "cacheWrite": 0,
+    "cost": 0.18375800000000003,
+    "turns": 4
+  },
+  "model": "openai-codex/gpt-5.6-terra:high",
+  "attemptedModels": ["openai-codex/gpt-5.6-terra:high"],
+  "modelAttempts": [
+    {
+      "model": "openai-codex/gpt-5.6-terra:high",
+      "success": false,
+      "exitCode": 1,
+      "error": "Subagent timed out after 120000ms.",
+      "usage": {
+        "input": 58284,
+        "output": 1760,
+        "cacheRead": 46592,
+        "cacheWrite": 0,
+        "cost": 0.18375800000000003,
+        "turns": 4
+      }
+    }
+  ],
+  "durationMs": 120028,
+  "toolCount": 15,
+  "error": "Subagent timed out after 120000ms.",
+  "acceptance": {
+    "status": "rejected",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": ["read-only/reviewer-style agent"],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return concrete findings with file paths and severity when applicable",
+          "evidence": ["review-findings", "residual-risks"],
+          "severity": "required"
+        }
+      ],
+      "evidence": ["review-findings", "residual-risks"],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": ["read-only/reviewer-style agent"],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return concrete findings with file paths and severity when applicable",
+        "evidence": ["review-findings", "residual-risks"],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [
+      {
+        "id": "timeout",
+        "status": "failed",
+        "message": "Acceptance was not evaluated because the subagent timed out."
+      }
+    ],
+    "verifyRuns": []
+  },
+  "transcriptPath": "/home/marto/Projects/next-phish/.pi-subagents/artifacts/54e111a3_reviewer_0_transcript.jsonl",
+  "timestamp": 1784666076420
+}

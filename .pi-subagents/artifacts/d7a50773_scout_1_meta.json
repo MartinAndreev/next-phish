@@ -1,0 +1,74 @@
+{
+  "runId": "d7a50773",
+  "agent": "scout",
+  "task": "Inspect project testing conventions and campaign scheduling date/status semantics. Recommend timeline date ranges for schedules vs active/pending campaigns, edge cases, and minimal tests. Do not edit files.\n\n---\n**Output:**\nWrite your findings to exactly this path: /home/marto/Projects/next-phish/.pi-subagents/artifacts/outputs/d7a50773/.pi-subagents/timeline-semantics.md\nThis path is authoritative for this run.\nIgnore any other output filename or output path mentioned elsewhere, including output destinations in the base agent prompt, system prompt, or task instructions.",
+  "exitCode": 1,
+  "usage": {
+    "input": 34412,
+    "output": 1449,
+    "cacheRead": 75776,
+    "cacheWrite": 0,
+    "cost": 0.126709,
+    "turns": 7
+  },
+  "model": "openai-codex/gpt-5.6-terra:low",
+  "attemptedModels": ["openai-codex/gpt-5.6-terra:low"],
+  "modelAttempts": [
+    {
+      "model": "openai-codex/gpt-5.6-terra:low",
+      "success": false,
+      "exitCode": 1,
+      "error": "Subagent timed out after 120000ms.",
+      "usage": {
+        "input": 34412,
+        "output": 1449,
+        "cacheRead": 75776,
+        "cacheWrite": 0,
+        "cost": 0.126709,
+        "turns": 7
+      }
+    }
+  ],
+  "durationMs": 119996,
+  "toolCount": 34,
+  "error": "Subagent timed out after 120000ms.",
+  "acceptance": {
+    "status": "rejected",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": ["read-only/reviewer-style agent"],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return concrete findings with file paths and severity when applicable",
+          "evidence": ["review-findings", "residual-risks"],
+          "severity": "required"
+        }
+      ],
+      "evidence": ["review-findings", "residual-risks"],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": ["read-only/reviewer-style agent"],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return concrete findings with file paths and severity when applicable",
+        "evidence": ["review-findings", "residual-risks"],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [
+      {
+        "id": "timeout",
+        "status": "failed",
+        "message": "Acceptance was not evaluated because the subagent timed out."
+      }
+    ],
+    "verifyRuns": []
+  },
+  "transcriptPath": "/home/marto/Projects/next-phish/.pi-subagents/artifacts/d7a50773_scout_1_transcript.jsonl",
+  "timestamp": 1784665625155
+}

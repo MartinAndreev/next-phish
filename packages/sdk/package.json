@@ -1,0 +1,48 @@
+{
+  "name": "@next-phish/sdk",
+  "version": "0.1.0",
+  "description": "Typed Node.js client for Next Phish personal access token APIs",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MartinAndreev/next-phish.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "node scripts/generate-router.mjs && tsc -p tsconfig.json",
+    "typecheck": "pnpm build && tsc -p tsconfig.test.json",
+    "lint": "eslint src/index.ts src/client.ts scripts tests",
+    "test": "pnpm typecheck && node --test tests/*.test.mjs",
+    "test:package": "node scripts/verify-package.mjs",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "@trpc/client": "11.13.0",
+    "@trpc/server": "11.13.0",
+    "superjson": "^2.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "^6"
+  }
+}

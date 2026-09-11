@@ -1,0 +1,48 @@
+name: Publish SDK to npm
+
+on:
+  push:
+    tags: ["sdk-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-sdk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - name: Verify release tag matches package version
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync } from 'node:fs';
+          const { version } = JSON.parse(readFileSync('packages/sdk/package.json', 'utf8'));
+          if (process.env.GITHUB_REF_NAME !== `sdk-v${version}` || !/^\d+\.\d+\.\d+$/.test(version)) {
+            throw new Error('Tag must match the stable SDK version: sdk-vX.Y.Z');
+          }
+          EOF
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm --filter @next-phish/sdk lint
+      - run: pnpm --filter @next-phish/sdk test
+      - run: pnpm --filter @next-phish/sdk test:package
+      - name: Pack SDK
+        working-directory: packages/sdk
+        run: npm pack --ignore-scripts
+      - name: Publish with npm trusted publishing
+        working-directory: packages/sdk
+        run: npm publish next-phish-sdk-*.tgz --access public

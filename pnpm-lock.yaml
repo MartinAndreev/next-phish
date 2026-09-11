@@ -310,6 +310,25 @@ importers:
         specifier: ^6
         version: 6.0.3
 
+  packages/sdk:
+    dependencies:
+      "@trpc/client":
+        specifier: 11.13.0
+        version: 11.13.0(@trpc/server@11.13.0(typescript@6.0.3))(typescript@6.0.3)
+      "@trpc/server":
+        specifier: 11.13.0
+        version: 11.13.0(typescript@6.0.3)
+      superjson:
+        specifier: ^2.2.6
+        version: 2.2.6
+    devDependencies:
+      "@types/node":
+        specifier: ^24
+        version: 24.13.2
+      typescript:
+        specifier: ^6
+        version: 6.0.3
+
   packages/shared:
     dependencies:
       zod:

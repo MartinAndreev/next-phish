@@ -126,6 +126,12 @@ next-phish/
 
 No circular dependencies between packages.
 
+### Node.js SDK
+
+`packages/sdk` is the publishable `@next-phish/sdk` ESM client for PAT-scoped tRPC queries and mutations. It uses `x-api-key` authentication and SuperJSON. Callers pass an explicit `organizationId` for scoped operations. See [SDK usage and publishing](../packages/sdk/README.md).
+
+The SDK's build reads the app router's types to generate a standalone wire contract. This is a build-time exception to the app boundary: it does not import or execute application code at runtime. The npm package contains no private workspace dependencies. SDK contract tests check generated inputs and outputs against the app router, and SDK Turbo tasks include server/package source files as cache inputs because this dependency is not represented by a workspace runtime dependency.
+
 ### Root scripts
 
 All common operations run from the project root via `turbo`. Examples:

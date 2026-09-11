@@ -66,6 +66,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Verify SDK npm package
+        run: pnpm --filter @next-phish/sdk test:package
+
   test:
     runs-on: ubuntu-latest
     name: "Tests"

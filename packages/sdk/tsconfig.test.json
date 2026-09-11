@@ -1,0 +1,12 @@
+{
+  "extends": "../../apps/next-app/tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "paths": { "@/*": ["../../apps/next-app/*"] }
+  },
+  "include": [],
+  "files": [
+    "tests/types.ts",
+    "../../apps/next-app/node_modules/next/types/global.d.ts"
+  ]
+}

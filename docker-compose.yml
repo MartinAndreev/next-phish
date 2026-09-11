@@ -101,10 +101,10 @@ services:
         condition: service_started
 
   fakesmtp:
-    image: haravich/fake-smtp-server
+    image: axllent/mailpit:latest
     ports:
       - "1025:1025"
-      - "1080:1080"
+      - "1080:8025"
 
 volumes:
   postgres-data:

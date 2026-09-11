@@ -2,6 +2,25 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
   "tasks": {
+    "@next-phish/sdk#build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/next-app/src/server/**",
+        "$TURBO_ROOT$/apps/next-app/tsconfig.json",
+        "$TURBO_ROOT$/packages/backend/src/**",
+        "$TURBO_ROOT$/packages/shared/src/**",
+        "$TURBO_ROOT$/packages/database/**"
+      ],
+      "outputs": ["dist/**", "src/router.generated.ts"]
+    },
+    "@next-phish/sdk#test": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "@next-phish/sdk#typecheck": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
